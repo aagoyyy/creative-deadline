@@ -18,7 +18,6 @@ const columns = [
   { status: 'START', title: 'In Progress', color: 'blue' },
   { status: 'APPROVAL 1', title: 'Approval 1', color: 'cyan' },
   { status: 'APPROVAL 2', title: 'Approval 2', color: 'purple' },
-  { status: 'UPLOAD', title: 'Upload', color: 'orange' },
   { status: 'DONE', title: 'Completed', color: 'green' },
 ]
 
@@ -64,7 +63,7 @@ function getDeadlineDate(task) {
   }
 
   if (typeof value === 'number') {
-    // Mendukung format deadline angka dari data lama.
+    // Supports legacy numeric deadline values.
     const date = new Date()
     date.setDate(1)
     date.setDate(value)
@@ -126,7 +125,9 @@ function sortTasksByPriority(tasks) {
       return 1
     }
 
-    return String(a.title || '').localeCompare(String(b.title || ''))
+    return String(a.title || '').localeCompare(
+      String(b.title || '')
+    )
   })
 }
 
@@ -150,29 +151,39 @@ export default function Board({
   const visibleTasks = useMemo(
     () =>
       tasks.filter(
-        (task) => String(task.workflowState || '').toUpperCase() !== 'DRAFT'
+        (task) =>
+          String(task.workflowState || '').toUpperCase() !== 'DRAFT'
       ),
     [tasks]
   )
 
   const projects = useMemo(
     () =>
-      [...new Set(visibleTasks.map((task) => task.project).filter(Boolean))]
-        .sort(),
+      [
+        ...new Set(
+          visibleTasks.map((task) => task.project).filter(Boolean)
+        ),
+      ].sort(),
     [visibleTasks]
   )
 
   const pics = useMemo(
     () =>
-      [...new Set(visibleTasks.map((task) => task.pic).filter(Boolean))]
-        .sort(),
+      [
+        ...new Set(
+          visibleTasks.map((task) => task.pic).filter(Boolean)
+        ),
+      ].sort(),
     [visibleTasks]
   )
 
   const types = useMemo(
     () =>
-      [...new Set(visibleTasks.map((task) => task.type).filter(Boolean))]
-        .sort(),
+      [
+        ...new Set(
+          visibleTasks.map((task) => task.type).filter(Boolean)
+        ),
+      ].sort(),
     [visibleTasks]
   )
 
@@ -286,34 +297,13 @@ export default function Board({
 
   return (
     <section className="page-content board-page">
-      <section className="welcome-row">
-        <div>
-          <div className="eyebrow">WORKSPACE / BOARD</div>
-          <h1>
-            Creative Board<span className="heading-period">.</span>
-          </h1>
-          <p className="page-subtitle">
-            Drag and drop task untuk memperbarui workflow kreatif.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          className="primary-button"
-          onClick={onAddTask}
-        >
-          <Plus size={16} />
-          New task
-        </button>
-      </section>
-
       <div className="board-summary">
         <div className="board-summary-icon">
           <ClipboardList size={19} />
         </div>
 
         <div>
-          <strong>{filteredTasks.length} tasks ditampilkan</strong>
+          <strong>{filteredTasks.length} tasks displayed</strong>
           <span>{visibleTasks.length} total tasks</span>
         </div>
 
@@ -326,8 +316,8 @@ export default function Board({
       <section className="board-filters">
         <div className="board-filters-heading">
           <div>
-            <h3>Filter board</h3>
-            <p>Atur task yang ingin lu lihat.</p>
+            <h3>Board Filters</h3>
+            <p>Choose which tasks you want to see.</p>
           </div>
 
           <button
@@ -336,7 +326,7 @@ export default function Board({
             onClick={() => setHideDone((value) => !value)}
           >
             {hideDone ? <Eye size={14} /> : <EyeOff size={14} />}
-            {hideDone ? 'Tampilkan DONE' : 'Sembunyikan DONE'}
+            {hideDone ? 'Show Completed' : 'Hide Completed'}
           </button>
         </div>
 
@@ -347,7 +337,7 @@ export default function Board({
               value={projectFilter}
               onChange={(event) => setProjectFilter(event.target.value)}
             >
-              <option value="ALL">Semua project</option>
+              <option value="ALL">All Projects</option>
               {projects.map((project) => (
                 <option key={project} value={project}>
                   {project}
@@ -357,12 +347,12 @@ export default function Board({
           </label>
 
           <label>
-            <span>PIC Creative</span>
+            <span>Creative Assignee</span>
             <select
               value={picFilter}
               onChange={(event) => setPicFilter(event.target.value)}
             >
-              <option value="ALL">Semua PIC</option>
+              <option value="ALL">All Creatives</option>
               {pics.map((pic) => (
                 <option key={pic} value={pic}>
                   {pic}
@@ -372,12 +362,12 @@ export default function Board({
           </label>
 
           <label>
-            <span>Tipe konten</span>
+            <span>Content Type</span>
             <select
               value={typeFilter}
               onChange={(event) => setTypeFilter(event.target.value)}
             >
-              <option value="ALL">Semua tipe</option>
+              <option value="ALL">All Content Types</option>
               {types.map((type) => (
                 <option key={type} value={type}>
                   {type}
@@ -392,22 +382,22 @@ export default function Board({
               value={deadlineFilter}
               onChange={(event) => setDeadlineFilter(event.target.value)}
             >
-              <option value="ALL">Semua deadline</option>
-              <option value="OVERDUE">Terlambat</option>
-              <option value="TODAY">Hari ini</option>
-              <option value="THIS_WEEK">7 hari ke depan</option>
-              <option value="UPCOMING">Lebih dari 7 hari</option>
-              <option value="NO_DATE">Belum ada deadline</option>
+              <option value="ALL">All Deadlines</option>
+              <option value="OVERDUE">Overdue</option>
+              <option value="TODAY">Due Today</option>
+              <option value="THIS_WEEK">Within 7 Days</option>
+              <option value="UPCOMING">More Than 7 Days Away</option>
+              <option value="NO_DATE">No Deadline</option>
             </select>
           </label>
 
           <label>
-            <span>Prioritas</span>
+            <span>Priority</span>
             <select
               value={priorityFilter}
               onChange={(event) => setPriorityFilter(event.target.value)}
             >
-              <option value="ALL">Semua prioritas</option>
+              <option value="ALL">All Priorities</option>
               {PRIORITIES.map((priority) => (
                 <option key={priority.value} value={priority.value}>
                   {priority.label}
@@ -420,7 +410,7 @@ export default function Board({
         <div className="board-filter-footer">
           <span>
             <SlidersHorizontal size={14} />
-            {filteredTasks.length} task ditemukan
+            {filteredTasks.length} tasks found
           </span>
 
           <button
@@ -429,7 +419,7 @@ export default function Board({
             disabled={!hasActiveFilters}
           >
             <RotateCcw size={13} />
-            Reset filter
+            Reset Filters
           </button>
         </div>
       </section>
@@ -437,12 +427,9 @@ export default function Board({
       <div className="kanban-board">
         {columns.map((column) => {
           const columnTasks = sortTasksByPriority(
-            filteredTasks.filter((task) => {
-              const normalizedStatus =
-                task.status === 'REVISION' ? 'APPROVAL 2' : task.status
-
-              return normalizedStatus === column.status
-            })
+            filteredTasks.filter(
+              (task) => task.status === column.status
+            )
           )
 
           const isOver = dragOverStatus === column.status
@@ -524,7 +511,7 @@ export default function Board({
                         </span>
                       </div>
 
-                      <h4>{task.title}</h4>
+                      <h4>{task.title || 'Untitled Task'}</h4>
 
                       <div className="kanban-card-code">
                         {task.code}

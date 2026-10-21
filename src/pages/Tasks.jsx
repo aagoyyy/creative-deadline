@@ -7,8 +7,14 @@ import {
   ListTodo,
   CalendarDays,
   Flag,
+  Download,
+  FileSpreadsheet,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react'
+
 import TaskCard from '../components/TaskCard'
+import { exportTasksToExcel } from '../utils/taskArchive'
 
 const STATUS_OPTIONS = [
   'NOT STARTED',
@@ -35,18 +41,18 @@ const PRIORITY_ORDER = {
 }
 
 const MONTHS = [
-  'Januari',
-  'Februari',
-  'Maret',
+  'January',
+  'February',
+  'March',
   'April',
-  'Mei',
-  'Juni',
-  'Juli',
-  'Agustus',
+  'May',
+  'June',
+  'July',
+  'August',
   'September',
-  'Oktober',
+  'October',
   'November',
-  'Desember',
+  'December',
 ]
 
 function normalizePriority(priority) {
@@ -77,6 +83,17 @@ function getDeadlineDate(task) {
   }
 
   if (typeof value === 'string') {
+    // Menangani tanggal kalender YYYY-MM-DD tanpa pergeseran timezone.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [year, month, day] = value.split('-').map(Number)
+      const date = new Date(year, month - 1, day)
+
+      if (Number.isNaN(date.getTime())) return null
+
+      date.setHours(0, 0, 0, 0)
+      return date
+    }
+
     const date = new Date(value)
 
     if (Number.isNaN(date.getTime())) return null
@@ -137,8 +154,45 @@ function sortTasksByPriority(tasks) {
       return 1
     }
 
-    return String(a.title || '').localeCompare(String(b.title || ''))
+    return String(a.title || '').localeCompare(
+      String(b.title || '')
+    )
   })
+}
+
+function getTaskCreatedMonth(task) {
+  const value = task.createdAt
+
+  if (!value) return ''
+
+  let date = value
+
+  if (typeof value?.toDate === 'function') {
+    date = value.toDate()
+  } else if (
+    typeof value === 'object' &&
+    typeof value.seconds === 'number'
+  ) {
+    date = new Date(value.seconds * 1000)
+  } else if (typeof value === 'string') {
+    date = new Date(value)
+  }
+
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return ''
+  }
+
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+
+  return `${year}-${month}`
+}
+
+function formatMonthLabel(monthKey) {
+  const [year, month] = monthKey.split('-')
+  const monthName = MONTHS[Number(month) - 1]
+
+  return `${monthName} ${year}`
 }
 
 export default function Tasks({
@@ -147,6 +201,7 @@ export default function Tasks({
   onSelectTask,
   search = '',
   onSearchChange,
+  userRole = '',
 }) {
   const [projectFilter, setProjectFilter] = useState('ALL')
   const [picFilter, setPicFilter] = useState('ALL')
@@ -157,13 +212,35 @@ export default function Tasks({
   const [yearFilter, setYearFilter] = useState('ALL')
   const [priorityFilter, setPriorityFilter] = useState('ALL')
 
+  const [exportMonth, setExportMonth] = useState('ALL')
+  const [exportError, setExportError] = useState('')
+  const [exportSuccess, setExportSuccess] = useState('')
+  const [isExporting, setIsExporting] = useState(false)
+
+  const isAdmin = String(userRole).trim().toLowerCase() === 'admin'
+
+  // Daftar task yang ditampilkan tidak menyertakan draft.
   const activeTasks = useMemo(
     () =>
       tasks.filter(
-        (task) => String(task.workflowState || '').toUpperCase() !== 'DRAFT'
+        (task) =>
+          String(task.workflowState || '').toUpperCase() !== 'DRAFT'
       ),
     [tasks]
   )
+
+  // Daftar bulan export diambil dari SEMUA task, termasuk draft.
+  const availableExportMonths = useMemo(() => {
+    const monthSet = new Set()
+
+    tasks.forEach((task) => {
+      const month = getTaskCreatedMonth(task)
+
+      if (month) monthSet.add(month)
+    })
+
+    return [...monthSet].sort().reverse()
+  }, [tasks])
 
   const projects = useMemo(
     () =>
@@ -188,6 +265,7 @@ export default function Tasks({
 
   const years = useMemo(() => {
     const currentYear = new Date().getFullYear()
+
     const availableYears = new Set(
       Array.from({ length: 5 }, (_, index) =>
         String(currentYear - 2 + index)
@@ -207,6 +285,19 @@ export default function Tasks({
 
   const filteredTasks = useMemo(() => {
     const result = activeTasks.filter((task) => {
+      const matchesSearch =
+        !search ||
+        [
+          task.title,
+          task.code,
+          task.project,
+          task.pic,
+        ].some((value) =>
+          String(value || '')
+            .toLowerCase()
+            .includes(search.toLowerCase())
+        )
+
       const matchesProject =
         projectFilter === 'ALL' || task.project === projectFilter
 
@@ -231,15 +322,20 @@ export default function Tasks({
 
       const matchesMonth =
         monthFilter === 'ALL' ||
-        (deadlineDate &&
-          String(deadlineDate.getMonth() + 1) === monthFilter)
+        (
+          deadlineDate &&
+          String(deadlineDate.getMonth() + 1) === monthFilter
+        )
 
       const matchesYear =
         yearFilter === 'ALL' ||
-        (deadlineDate &&
-          String(deadlineDate.getFullYear()) === yearFilter)
+        (
+          deadlineDate &&
+          String(deadlineDate.getFullYear()) === yearFilter
+        )
 
       return (
+        matchesSearch &&
         matchesProject &&
         matchesPic &&
         matchesStatus &&
@@ -254,6 +350,7 @@ export default function Tasks({
     return sortTasksByPriority(result)
   }, [
     activeTasks,
+    search,
     projectFilter,
     picFilter,
     statusFilter,
@@ -287,45 +384,138 @@ export default function Tasks({
     onSearchChange?.('')
   }
 
+  function handleExportExcel() {
+    setExportError('')
+    setExportSuccess('')
+
+    if (!isAdmin) {
+      setExportError('Hanya Admin yang dapat mengekspor data.')
+      return
+    }
+
+    setIsExporting(true)
+
+    try {
+      // Menggunakan semua tasks, bukan filteredTasks atau activeTasks.
+      // Proses ini hanya menghasilkan file lokal, tidak mengubah Firestore.
+      const result = exportTasksToExcel(tasks, exportMonth)
+
+      setExportSuccess(
+        `File ${result.fileName} disiapkan dengan ${result.exportedCount} task. Data Firestore tidak dihapus atau diubah.`
+      )
+    } catch (error) {
+      setExportError(
+        error?.message || 'Gagal mengekspor data task.'
+      )
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
   return (
     <section className="page-content">
-      <section className="welcome-row">
-        <div>
-          <div className="eyebrow">WORKSPACE / TASK MANAGEMENT</div>
-          <h1>
-            All Tasks<span className="heading-period">.</span>
-          </h1>
-          <p className="page-subtitle">
-            Kelola dan pantau semua pekerjaan tim berdasarkan prioritas.
-          </p>
-        </div>
-
-        <div className="task-page-count">
-          <ListTodo size={17} />
-          {filteredTasks.length} / {activeTasks.length} tasks
-        </div>
-      </section>
-
       <section className="dashboard-panel all-tasks-panel">
+
+        {/* EXPORT EXCEL KHUSUS ADMIN */}
+        {isAdmin && (
+          <section className="task-export-panel">
+            <div className="task-export-heading">
+              <div className="task-export-icon">
+                <FileSpreadsheet size={21} />
+              </div>
+
+              <div className="task-export-copy">
+                <h3>Export Task ke Excel</h3>
+                <p>
+                  Unduh salinan data task untuk backup atau arsip.
+                  Data di dashboard tidak akan dihapus.
+                </p>
+              </div>
+            </div>
+
+            <div className="task-export-controls">
+              <label className="task-export-select">
+                <span>Periode data dibuat</span>
+
+                <select
+                  value={exportMonth}
+                  onChange={(event) => {
+                    setExportMonth(event.target.value)
+                    setExportError('')
+                    setExportSuccess('')
+                  }}
+                >
+                  <option value="ALL">Semua Task</option>
+
+                  {availableExportMonths.map((month) => (
+                    <option key={month} value={month}>
+                      {formatMonthLabel(month)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <button
+                type="button"
+                className="task-export-button"
+                onClick={handleExportExcel}
+                disabled={isExporting || tasks.length === 0}
+              >
+                <Download size={16} />
+                {isExporting ? 'Menyiapkan...' : 'Export Excel'}
+              </button>
+            </div>
+
+            <div className="task-export-note">
+              <span>
+                {tasks.length} task tersedia untuk export,
+                termasuk draft.
+              </span>
+
+              {exportError && (
+                <p className="task-export-message error">
+                  <AlertCircle size={15} />
+                  {exportError}
+                </p>
+              )}
+
+              {exportSuccess && (
+                <p className="task-export-message success">
+                  <CheckCircle2 size={15} />
+                  {exportSuccess}
+                </p>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* FILTER TASK */}
         <div className="all-tasks-filters">
           <label className="all-tasks-search">
             <Search size={16} />
+
             <input
               type="search"
-              placeholder="Cari judul, kode, project, atau PIC..."
+              placeholder="Search by title, code, project, or PIC..."
               value={search}
-              onChange={(event) => onSearchChange?.(event.target.value)}
+              onChange={(event) =>
+                onSearchChange?.(event.target.value)
+              }
             />
           </label>
 
           <div className="all-tasks-filter-grid">
             <label>
               <span>Project</span>
+
               <select
                 value={projectFilter}
-                onChange={(event) => setProjectFilter(event.target.value)}
+                onChange={(event) =>
+                  setProjectFilter(event.target.value)
+                }
               >
-                <option value="ALL">Semua project</option>
+                <option value="ALL">All Projects</option>
+
                 {projects.map((project) => (
                   <option key={project} value={project}>
                     {project}
@@ -335,12 +525,16 @@ export default function Tasks({
             </label>
 
             <label>
-              <span>PIC Creative</span>
+              <span>Creative PIC</span>
+
               <select
                 value={picFilter}
-                onChange={(event) => setPicFilter(event.target.value)}
+                onChange={(event) =>
+                  setPicFilter(event.target.value)
+                }
               >
-                <option value="ALL">Semua PIC</option>
+                <option value="ALL">All PICs</option>
+
                 {pics.map((pic) => (
                   <option key={pic} value={pic}>
                     {pic}
@@ -351,11 +545,15 @@ export default function Tasks({
 
             <label>
               <span>Status</span>
+
               <select
                 value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value)}
+                onChange={(event) =>
+                  setStatusFilter(event.target.value)
+                }
               >
-                <option value="ALL">Semua status</option>
+                <option value="ALL">All Statuses</option>
+
                 {STATUS_OPTIONS.map((status) => (
                   <option key={status} value={status}>
                     {status}
@@ -365,12 +563,16 @@ export default function Tasks({
             </label>
 
             <label>
-              <span>Tipe konten</span>
+              <span>Content Type</span>
+
               <select
                 value={typeFilter}
-                onChange={(event) => setTypeFilter(event.target.value)}
+                onChange={(event) =>
+                  setTypeFilter(event.target.value)
+                }
               >
-                <option value="ALL">Semua tipe</option>
+                <option value="ALL">All Content Types</option>
+
                 {types.map((type) => (
                   <option key={type} value={type}>
                     {type}
@@ -381,15 +583,23 @@ export default function Tasks({
 
             <label>
               <span>
-                <Flag size={13} /> Prioritas
+                <Flag size={13} />
+                Priority
               </span>
+
               <select
                 value={priorityFilter}
-                onChange={(event) => setPriorityFilter(event.target.value)}
+                onChange={(event) =>
+                  setPriorityFilter(event.target.value)
+                }
               >
-                <option value="ALL">Semua prioritas</option>
+                <option value="ALL">All Priorities</option>
+
                 {PRIORITIES.map((priority) => (
-                  <option key={priority.value} value={priority.value}>
+                  <option
+                    key={priority.value}
+                    value={priority.value}
+                  >
                     {priority.label}
                   </option>
                 ))}
@@ -398,15 +608,23 @@ export default function Tasks({
 
             <label>
               <span>
-                <CalendarDays size={13} /> Bulan deadline
+                <CalendarDays size={13} />
+                Deadline Month
               </span>
+
               <select
                 value={monthFilter}
-                onChange={(event) => setMonthFilter(event.target.value)}
+                onChange={(event) =>
+                  setMonthFilter(event.target.value)
+                }
               >
-                <option value="ALL">Semua bulan</option>
+                <option value="ALL">All Months</option>
+
                 {MONTHS.map((month, index) => (
-                  <option key={month} value={String(index + 1)}>
+                  <option
+                    key={month}
+                    value={String(index + 1)}
+                  >
                     {month}
                   </option>
                 ))}
@@ -414,12 +632,16 @@ export default function Tasks({
             </label>
 
             <label>
-              <span>Tahun deadline</span>
+              <span>Deadline Year</span>
+
               <select
                 value={yearFilter}
-                onChange={(event) => setYearFilter(event.target.value)}
+                onChange={(event) =>
+                  setYearFilter(event.target.value)
+                }
               >
-                <option value="ALL">Semua tahun</option>
+                <option value="ALL">All Years</option>
+
                 {years.map((year) => (
                   <option key={year} value={year}>
                     {year}
@@ -429,17 +651,20 @@ export default function Tasks({
             </label>
 
             <label>
-              <span>Kondisi deadline</span>
+              <span>Deadline Status</span>
+
               <select
                 value={deadlineFilter}
-                onChange={(event) => setDeadlineFilter(event.target.value)}
+                onChange={(event) =>
+                  setDeadlineFilter(event.target.value)
+                }
               >
-                <option value="ALL">Semua deadline</option>
-                <option value="OVERDUE">Terlambat</option>
-                <option value="TODAY">Hari ini</option>
-                <option value="THIS_WEEK">7 hari ke depan</option>
-                <option value="UPCOMING">Lebih dari 7 hari</option>
-                <option value="NO_DATE">Belum ada deadline</option>
+                <option value="ALL">All Deadlines</option>
+                <option value="OVERDUE">Overdue</option>
+                <option value="TODAY">Due Today</option>
+                <option value="THIS_WEEK">Within 7 Days</option>
+                <option value="UPCOMING">More Than 7 Days Away</option>
+                <option value="NO_DATE">No Deadline</option>
               </select>
             </label>
           </div>
@@ -447,7 +672,7 @@ export default function Tasks({
           <div className="all-tasks-filter-footer">
             <span>
               <SlidersHorizontal size={14} />
-              {filteredTasks.length} task ditemukan
+              {filteredTasks.length} tasks found
             </span>
 
             <button
@@ -456,11 +681,12 @@ export default function Tasks({
               disabled={!hasActiveFilters}
             >
               <RotateCcw size={13} />
-              Reset filter
+              Reset Filters
             </button>
           </div>
         </div>
 
+        {/* TASK LIST */}
         <div className="dashboard-task-list">
           {filteredTasks.length > 0 ? (
             filteredTasks.map((task) => (
@@ -470,17 +696,25 @@ export default function Tasks({
                   ...task,
                   priority: normalizePriority(task.priority),
                 }}
-                selected={String(selectedTaskId) === String(task.id)}
+                selected={
+                  String(selectedTaskId) === String(task.id)
+                }
                 onClick={() => onSelectTask?.(task)}
               />
             ))
           ) : (
             <div className="all-tasks-empty">
               <ListTodo size={28} />
-              <h3>Task tidak ditemukan</h3>
-              <p>Coba ubah filter atau reset semua filter.</p>
-              <button type="button" onClick={resetFilters}>
-                Reset filter
+              <h3>No Tasks Found</h3>
+              <p>
+                Try changing your filters or resetting all filters.
+              </p>
+
+              <button
+                type="button"
+                onClick={resetFilters}
+              >
+                Reset Filters
               </button>
             </div>
           )}

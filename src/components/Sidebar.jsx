@@ -174,32 +174,6 @@ export default function Sidebar({
 
           {!isMinimized && <span>Team</span>}
         </button>
-
-        <div className="profile">
-          <div
-            className="profile-avatar"
-            title={displayName}
-          >
-            {displayName.charAt(0).toUpperCase()}
-          </div>
-
-          {!isMinimized && (
-            <div className="profile-copy">
-              <strong>{displayName}</strong>
-              <span>{role}</span>
-            </div>
-          )}
-
-          <button
-            type="button"
-            className="profile-logout"
-            onClick={onLogout}
-            title="Logout"
-            aria-label="Logout"
-          >
-            <LogOut size={18} />
-          </button>
-        </div>
       </div>
     </aside>
   )

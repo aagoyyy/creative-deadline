@@ -33,7 +33,7 @@ import {
 import { auth, db } from '../firebase'
 import './Team.css'
 
-export default function Team({ currentUser }) {
+export default function Team({ currentUser, onRequestConfirm }) {
   const [members, setMembers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -53,7 +53,7 @@ export default function Team({ currentUser }) {
     role: 'creative',
   })
 
-  const isAdmin = currentUser?.role === 'admin' 
+  const isAdmin = currentUser?.role === 'admin'
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -69,8 +69,8 @@ export default function Team({ currentUser }) {
         setLoading(false)
       },
       (err) => {
-        console.error('Gagal mengambil data tim:', err)
-        setError('Gagal memuat anggota. Periksa Firestore Rules.')
+        console.error('Failed to fetch team members:', err)
+        setError('Failed to load team members. Check your Firestore Rules.')
         setLoading(false)
       }
     )
@@ -124,12 +124,12 @@ export default function Team({ currentUser }) {
     const password = form.password
 
     if (!name || !email || !password) {
-      setFormError('Semua kolom wajib diisi.')
+      setFormError('All fields are required.')
       return
     }
 
     if (password.length < 6) {
-      setFormError('Password minimal 6 karakter.')
+      setFormError('Password must be at least 6 characters long.')
       return
     }
 
@@ -142,7 +142,7 @@ export default function Team({ currentUser }) {
     let newUser
 
     try {
-      // Buat Firebase app terpisah agar sesi admin tidak terganti.
+      // Create a separate Firebase app so the admin session remains active.
       const secondaryName = `TeamCreation-${Date.now()}`
       secondaryApp = initializeApp(
         auth.app.options,
@@ -161,7 +161,7 @@ export default function Team({ currentUser }) {
 
       await updateProfile(newUser, { displayName: name })
 
-      // Firestore menggunakan sesi admin dari app utama.
+      // Firestore uses the admin session from the primary app.
       await setDoc(doc(db, 'users', newUser.uid), {
         name,
         email,
@@ -171,7 +171,7 @@ export default function Team({ currentUser }) {
         createdBy: currentUser.uid,
       })
 
-      setNotice(`Anggota ${name} berhasil ditambahkan.`)
+      setNotice(`${name} has been added successfully.`)
       setShowModal(false)
       setForm({
         name: '',
@@ -180,16 +180,16 @@ export default function Team({ currentUser }) {
         role: 'creative',
       })
     } catch (err) {
-      console.error('Gagal menambahkan anggota:', err)
+      console.error('Failed to add team member:', err)
 
-      // Jika Auth berhasil tetapi profil gagal dibuat,
-      // coba hapus akun baru yang baru saja dibuat.
+      // If authentication succeeds but profile creation fails,
+      // try to delete the newly created account.
       if (newUser && secondaryAuth?.currentUser) {
         try {
           await deleteUser(secondaryAuth.currentUser)
         } catch (cleanupError) {
           console.error(
-            'Pembersihan akun baru gagal:',
+            'Failed to clean up the new account:',
             cleanupError
           )
         }
@@ -197,21 +197,21 @@ export default function Team({ currentUser }) {
 
       const messages = {
         'auth/email-already-in-use':
-          'Email ini sudah terdaftar di Firebase Authentication.',
+          'This email is already registered in Firebase Authentication.',
         'auth/invalid-email':
-          'Format email tidak valid.',
+          'Invalid email format.',
         'auth/weak-password':
-          'Password terlalu lemah. Gunakan minimal 6 karakter.',
+          'Password is too weak. Use at least 6 characters.',
         'auth/operation-not-allowed':
-          'Metode Email/Password belum aktif di Firebase Authentication.',
+          'Email/Password sign-in is not enabled in Firebase Authentication.',
         'permission-denied':
-          'Firestore menolak penyimpanan profil. Periksa Rules dan pastikan akun lu admin aktif.',
+          'Firestore rejected the profile creation. Check your Rules and make sure your account is an active admin.',
       }
 
       setFormError(
         messages[err.code] ||
           err.message ||
-          'Gagal menambahkan anggota.'
+          'Failed to add team member.'
       )
     } finally {
       if (secondaryAuth) {
@@ -219,16 +219,16 @@ export default function Team({ currentUser }) {
           await signOut(secondaryAuth)
         } catch (signOutError) {
           console.error(
-            'Gagal menutup sesi sekunder:',
+            'Failed to sign out from the secondary session:',
             signOutError
           )
         }
 
         try {
-            await deleteApp(secondaryApp)
+          await deleteApp(secondaryApp)
         } catch (deleteAppError) {
           console.error(
-            'Gagal menutup Firebase app sekunder:',
+            'Failed to close the secondary Firebase app:',
             deleteAppError
           )
         }
@@ -242,54 +242,51 @@ export default function Team({ currentUser }) {
     if (!isAdmin || processingUid) return
 
     if (member.uid === currentUser?.uid) {
-      setNotice('Lu tidak bisa menonaktifkan akun sendiri.')
+      setNotice('You cannot deactivate your own account.')
       return
     }
 
     const currentlyActive = member.active === true
     const nextActive = !currentlyActive
 
-    const confirmed = window.confirm(
-      `Yakin ingin ${
-        nextActive ? 'mengaktifkan' : 'menonaktifkan'
-      } ${member.name || member.email || 'anggota ini'}?`
-    )
+    onRequestConfirm?.({
+      title: nextActive
+        ? 'Activate Team Member?'
+        : 'Deactivate Team Member?',
+      message: `Are you sure you want to ${
+        nextActive ? 'activate' : 'deactivate'
+      } ${member.name || member.email || 'this team member'}?`,
+      confirmText: nextActive ? 'Yes, Activate' : 'Yes, Deactivate',
+      onConfirm: async () => {
+        setProcessingUid(member.uid)
+        setNotice('')
+        setError('')
 
-    if (!confirmed) return
+        try {
+          await updateDoc(doc(db, 'users', member.uid), {
+            active: nextActive,
+          })
 
-    setProcessingUid(member.uid)
-    setNotice('')
-    setError('')
-
-    try {
-      await updateDoc(doc(db, 'users', member.uid), {
-        active: nextActive,
-      })
-
-      setNotice(
-        `${member.name || 'Anggota'} berhasil ${
-          nextActive ? 'diaktifkan' : 'dinonaktifkan'
-        }.`
-      )
-    } catch (err) {
-      console.error('Gagal mengubah status anggota:', err)
-      setError(
-        'Gagal mengubah status. Pastikan Firestore Rules sudah dipublikasikan dan akun lu admin aktif.'
-      )
-    } finally {
-      setProcessingUid('')
-    }
+          setNotice(
+            `${member.name || 'Team member'} has been ${
+              nextActive ? 'activated' : 'deactivated'
+            } successfully.`
+          )
+        } catch (err) {
+          console.error('Failed to update team member status:', err)
+          setError(
+            'Failed to update status. Make sure your Firestore Rules are published and your account is an active admin.'
+          )
+        } finally {
+          setProcessingUid('')
+        }
+      },
+    })
   }
 
   return (
     <section className="team-page">
       <header className="team-header">
-        <div>
-          <span className="team-eyebrow">WORKSPACE SETTINGS</span>
-          <h1>Team Management</h1>
-          <p>Kelola anggota dan akses tim kreatif.</p>
-        </div>
-
         {isAdmin && (
           <button
             type="button"
@@ -301,7 +298,7 @@ export default function Team({ currentUser }) {
             }}
           >
             <UserPlus size={17} />
-            Tambah Anggota
+            Add Team Member
           </button>
         )}
       </header>
@@ -318,7 +315,7 @@ export default function Team({ currentUser }) {
             <UsersRound size={21} />
           </div>
           <div>
-            <span>Total Anggota</span>
+            <span>Total Members</span>
             <strong>{members.length}</strong>
           </div>
         </article>
@@ -328,7 +325,7 @@ export default function Team({ currentUser }) {
             <ShieldCheck size={21} />
           </div>
           <div>
-            <span>Anggota Aktif</span>
+            <span>Active Members</span>
             <strong>{activeCount}</strong>
           </div>
         </article>
@@ -337,8 +334,8 @@ export default function Team({ currentUser }) {
       <section className="team-panel">
         <div className="team-panel-header">
           <div>
-            <h2>Daftar Anggota</h2>
-            <p>Data anggota yang terdaftar di sistem.</p>
+            <h2>Team Members</h2>
+            <p>All members registered in the system.</p>
           </div>
 
           <label className="team-search">
@@ -347,7 +344,7 @@ export default function Team({ currentUser }) {
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Cari anggota..."
+              placeholder="Search team members..."
             />
           </label>
         </div>
@@ -355,25 +352,25 @@ export default function Team({ currentUser }) {
         {loading ? (
           <div className="team-empty">
             <LoaderCircle className="team-spinner" size={25} />
-            <span>Memuat anggota...</span>
+            <span>Loading team members...</span>
           </div>
         ) : error ? (
           <div className="team-empty team-error">{error}</div>
         ) : filteredMembers.length === 0 ? (
           <div className="team-empty">
             {search
-              ? 'Anggota tidak ditemukan.'
-              : 'Belum ada profil anggota di Firestore.'}
+              ? 'No team members found.'
+              : 'No team member profiles found in Firestore.'}
           </div>
         ) : (
           <div className="team-table-scroll">
             <table className="team-table">
               <thead>
                 <tr>
-                  <th>Anggota</th>
+                  <th>Member</th>
                   <th>Role</th>
                   <th>Status</th>
-                  {isAdmin && <th>Aksi</th>}
+                  {isAdmin && <th>Actions</th>}
                 </tr>
               </thead>
 
@@ -398,11 +395,11 @@ export default function Team({ currentUser }) {
 
                           <div className="team-member-copy">
                             <strong>
-                              {member.name || 'Tanpa nama'}
+                              {member.name || 'Unnamed Member'}
                             </strong>
                             <span>
                               <Mail size={13} />
-                              {member.email || 'Email belum tersedia'}
+                              {member.email || 'Email unavailable'}
                             </span>
                           </div>
                         </div>
@@ -423,7 +420,7 @@ export default function Team({ currentUser }) {
                           }`}
                         >
                           <i />
-                          {active ? 'Aktif' : 'Nonaktif'}
+                          {active ? 'Active' : 'Inactive'}
                         </span>
                       </td>
 
@@ -439,10 +436,10 @@ export default function Team({ currentUser }) {
                             }
                             title={
                               member.uid === currentUser?.uid
-                                ? 'Tidak bisa mengubah status akun sendiri'
+                                ? 'You cannot change your own account status'
                                 : active
-                                  ? 'Nonaktifkan anggota'
-                                  : 'Aktifkan anggota'
+                                  ? 'Deactivate team member'
+                                  : 'Activate team member'
                             }
                           >
                             {processingUid === member.uid ? (
@@ -458,10 +455,10 @@ export default function Team({ currentUser }) {
 
                             <span>
                               {processingUid === member.uid
-                                ? 'Memproses...'
+                                ? 'Processing...'
                                 : active
-                                  ? 'Nonaktifkan'
-                                  : 'Aktifkan'}
+                                  ? 'Deactivate'
+                                  : 'Activate'}
                             </span>
                           </button>
                         </td>
@@ -476,9 +473,9 @@ export default function Team({ currentUser }) {
       </section>
 
       <p className="team-footnote">
-        Penonaktifan mengubah akses aplikasi melalui profil Firestore.
-        Penghapusan akun Firebase Authentication tetap dilakukan
-        melalui Firebase Console.
+        Deactivation changes application access through the Firestore
+        profile. Firebase Authentication accounts must still be deleted
+        through the Firebase Console.
       </p>
 
       {showModal && (
@@ -497,8 +494,8 @@ export default function Team({ currentUser }) {
             <header className="team-modal-header">
               <div>
                 <span className="team-eyebrow">TEAM MANAGEMENT</span>
-                <h2 id="team-modal-title">Tambah Anggota</h2>
-                <p>Buat akun baru untuk tim kreatif.</p>
+                <h2 id="team-modal-title">Add Team Member</h2>
+                <p>Create a new account for your team.</p>
               </div>
 
               <button
@@ -506,7 +503,7 @@ export default function Team({ currentUser }) {
                 className="team-modal-close"
                 onClick={closeModal}
                 disabled={saving}
-                aria-label="Tutup form"
+                aria-label="Close form"
               >
                 <X size={20} />
               </button>
@@ -514,39 +511,39 @@ export default function Team({ currentUser }) {
 
             <form className="team-form" onSubmit={handleAddMember}>
               <label>
-                Nama lengkap
+                Full Name
                 <input
                   name="name"
                   value={form.name}
                   onChange={updateForm}
-                  placeholder="Contoh: Budi Santoso"
+                  placeholder="e.g. John Smith"
                   autoComplete="name"
                   required
                 />
               </label>
 
               <label>
-                Email
+                Email Address
                 <input
                   name="email"
                   type="email"
                   value={form.email}
                   onChange={updateForm}
-                  placeholder="nama@perusahaan.com"
+                  placeholder="name@company.com"
                   autoComplete="email"
                   required
                 />
               </label>
 
               <label>
-                Password awal
+                Initial Password
                 <div className="team-password-field">
                   <input
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     value={form.password}
                     onChange={updateForm}
-                    placeholder="Minimal 6 karakter"
+                    placeholder="At least 6 characters"
                     autoComplete="new-password"
                     minLength={6}
                     required
@@ -556,7 +553,7 @@ export default function Team({ currentUser }) {
                     type="button"
                     onClick={() => setShowPassword((value) => !value)}
                     aria-label={
-                      showPassword ? 'Sembunyikan password' : 'Lihat password'
+                      showPassword ? 'Hide password' : 'Show password'
                     }
                   >
                     {showPassword ? (
@@ -569,7 +566,7 @@ export default function Team({ currentUser }) {
               </label>
 
               <label>
-                Role anggota
+                Member Role
                 <select
                   name="role"
                   value={form.role}
@@ -590,9 +587,9 @@ export default function Team({ currentUser }) {
               )}
 
               <div className="team-form-note">
-                Akun baru akan langsung aktif. Simpan password awal
-                dengan aman dan sampaikan kepada anggota tersebut
-                melalui jalur pribadi.
+                The new account will be activated immediately. Store the
+                initial password securely and share it with the team member
+                privately.
               </div>
 
               <footer className="team-form-actions">
@@ -602,7 +599,7 @@ export default function Team({ currentUser }) {
                   onClick={closeModal}
                   disabled={saving}
                 >
-                  Batal
+                  Cancel
                 </button>
 
                 <button
@@ -616,12 +613,12 @@ export default function Team({ currentUser }) {
                         size={17}
                         className="team-spinner"
                       />
-                      Membuat akun...
+                      Creating Account...
                     </>
                   ) : (
                     <>
                       <UserPlus size={17} />
-                      Simpan Anggota
+                      Save Member
                     </>
                   )}
                 </button>

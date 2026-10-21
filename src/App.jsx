@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   CalendarDays,
   Check,
@@ -11,6 +11,8 @@ import {
 
 import './App.css'
 import './index.css'
+import './pages/Dashboard.css'
+import './components/StatCard.css'
 
 import Sidebar from './components/Sidebar'
 import Header from './components/Header'
@@ -24,6 +26,7 @@ import MyTasks from './pages/MyTasks'
 import Team from './pages/Team'
 import MyBrief from './pages/MyBrief'
 
+import ConfirmModal from './components/ConfirmModal'
 import { useTasks } from './hooks/useTasks'
 import { formatDate } from './utils/dateUtils'
 import { useNotifications } from './hooks/useNotifications'
@@ -38,6 +41,7 @@ import {
 
 import { auth, db } from './firebase'
 import Login from './components/Login'
+import Toast from './components/Toast'
 
 const NAV_ITEMS = [
   'Overview',
@@ -54,8 +58,6 @@ const STATUS_OPTIONS = [
   'START',
   'APPROVAL 1',
   'APPROVAL 2',
-  'REVISION',
-  'UPLOAD',
   'DONE',
 ]
 
@@ -86,12 +88,11 @@ function normalizePriority(priority) {
 
 function sortTasksByPriority(tasks) {
   return [...tasks].sort((a, b) => {
-    const priorityA = PRIORITY_ORDER[
-      normalizePriority(a.priority)
-    ]
-    const priorityB = PRIORITY_ORDER[
-      normalizePriority(b.priority)
-    ]
+    const priorityA =
+      PRIORITY_ORDER[normalizePriority(a.priority)]
+
+    const priorityB =
+      PRIORITY_ORDER[normalizePriority(b.priority)]
 
     if (priorityA !== priorityB) {
       return priorityA - priorityB
@@ -117,12 +118,8 @@ function getStatusClass(status) {
     case 'APPROVAL 1':
     case 'APPROVAL 2':
       return 'approval'
-    case 'UPLOAD':
-      return 'upload'
     case 'DONE':
       return 'done'
-    case 'REVISION':
-      return 'revision'
     default:
       return 'not-started'
   }
@@ -138,7 +135,7 @@ function formatDeadline(deadline, monthDate) {
   }
 
   if (typeof deadline === 'number') {
-    return `${monthDate.toLocaleDateString('id-ID', {
+    return `${monthDate.toLocaleDateString('en-US', {
       month: 'short',
     })} ${deadline}`
   }
@@ -168,9 +165,28 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [authError, setAuthError] = useState('')
 
+  const [toast, setToast] = useState({
+    message: '',
+    type: 'error',
+  })
+
+  const showToast = useCallback((message, type = 'error') => {
+    setToast({ message, type })
+  }, [])
+
+  const closeToast = useCallback(() => {
+    setToast({ message: '', type: 'error' })
+  }, [])
+
   const [creatives, setCreatives] = useState([])
   const [creativesLoading, setCreativesLoading] = useState(true)
   const [creativesError, setCreativesError] = useState('')
+
+  const [resultLinkInput, setResultLinkInput] = useState('')
+  const [savingResultLink, setSavingResultLink] = useState(false)
+
+  const [confirmModal, setConfirmModal] = useState(null)
+  const [confirmLoading, setConfirmLoading] = useState(false)
 
   const {
     tasks,
@@ -196,6 +212,7 @@ function App() {
   const [activeNav, setActiveNav] = useState('Calendar')
   const [selectedTaskId, setSelectedTaskId] = useState(null)
   const [search, setSearch] = useState('')
+
   const [showNewTask, setShowNewTask] = useState(false)
   const [showEditTask, setShowEditTask] = useState(false)
   const [showDetail, setShowDetail] = useState(false)
@@ -204,7 +221,7 @@ function App() {
     () => new Date(2026, 9, 1)
   )
 
-  // Ambil PIC aktif dari Firestore.
+  // Fetch active creative team members from Firestore.
   useEffect(() => {
     if (!currentUser) {
       setCreatives([])
@@ -245,12 +262,12 @@ function App() {
       },
       (error) => {
         console.error(
-          'Gagal mengambil daftar creative:',
+          'Failed to fetch creative team members:',
           error
         )
 
         setCreativesError(
-          'Daftar PIC gagal dimuat. Periksa koneksi dan Firestore Rules.'
+          'Failed to load assignees. Check your connection and Firestore Rules.'
         )
 
         setCreativesLoading(false)
@@ -260,7 +277,7 @@ function App() {
     return () => unsubscribe()
   }, [currentUser])
 
-  // Autentikasi dan profil user.
+  // Authenticate the user and load their profile.
   useEffect(() => {
     let active = true
 
@@ -291,7 +308,7 @@ function App() {
 
           if (!userSnapshot.exists()) {
             setAuthError(
-              'Profil akun belum terdaftar di Firestore. Hubungi admin.'
+              'User profile is not registered in Firestore. Please contact an administrator.'
             )
             setAuthLoading(false)
             return
@@ -304,7 +321,7 @@ function App() {
 
             if (active) {
               setAuthError(
-                'Akun ini sedang dinonaktifkan.'
+                'This account has been deactivated.'
               )
               setAuthLoading(false)
             }
@@ -325,7 +342,7 @@ function App() {
             ].includes(userRole)
           ) {
             setAuthError(
-              'Role akun tidak valid. Periksa profil Firestore.'
+              'Invalid account role. Please check the Firestore profile.'
             )
             setAuthLoading(false)
             return
@@ -347,13 +364,13 @@ function App() {
           setAuthLoading(false)
         } catch (error) {
           console.error(
-            'Gagal mengambil profil:',
+            'Failed to load user profile:',
             error
           )
 
           if (active) {
             setAuthError(
-              'Gagal mengambil profil dari Firestore. Periksa koneksi dan aturan database.'
+              'Failed to load user profile from Firestore. Check your connection and database rules.'
             )
             setAuthLoading(false)
           }
@@ -390,8 +407,8 @@ function App() {
       setShowEditTask(false)
       setSelectedTaskId(null)
     } catch (error) {
-      console.error('Logout gagal:', error)
-      window.alert('Logout gagal. Silakan coba lagi.')
+      console.error('Logout failed:', error)
+      showToast('Logout failed. Please try again.', 'error')
     }
   }
 
@@ -401,13 +418,17 @@ function App() {
         String(task.id) === String(selectedTaskId)
     ) || null
 
-  // Draft tidak boleh masuk ke halaman task aktif.
-  // Task lama tanpa workflowState tetap dianggap aktif.
+  useEffect(() => {
+    setResultLinkInput(selectedTask?.resultLink || '')
+  }, [selectedTask?.id, selectedTask?.resultLink])
+
+  // Drafts must not appear on active task pages.
+  // Legacy tasks without workflowState are still considered active.
   const activeTasks = tasks.filter(
     (task) => task.workflowState !== 'DRAFT'
   )
 
-  // Draft hanya terlihat oleh Strategic pembuatnya.
+  // Drafts are only visible to the Strategic user who created them.
   const myDrafts = tasks.filter(
     (task) =>
       role === 'strategic' &&
@@ -417,8 +438,7 @@ function App() {
 
   const normalizedSearch = search.trim().toLowerCase()
 
-  // Semua halaman task aktif menerima daftar yang sama:
-  // prioritas tertinggi dahulu, lalu deadline terdekat.
+  // Sort active tasks by priority, then by the nearest deadline.
   const filteredTasks = sortTasksByPriority(
     activeTasks.filter((task) => {
       const searchableText = [
@@ -436,15 +456,6 @@ function App() {
 
       const matchesSearch =
         searchableText.includes(normalizedSearch)
-
-      if (role === 'creative') {
-        const matchesAssignee =
-          task.picUid === currentUser?.uid ||
-          String(task.pic || '').toLowerCase() ===
-            String(currentUser?.name || '').toLowerCase()
-
-        return matchesSearch && matchesAssignee
-      }
 
       return matchesSearch
     })
@@ -512,13 +523,13 @@ function App() {
       await notifyActiveMembers(payload)
     } catch (error) {
       console.error(
-        'Task berhasil diproses, tetapi notifikasi gagal dikirim:',
+        'Task processed successfully, but the notification failed to send:',
         error
       )
     }
   }
 
-  // Membuat task yang langsung masuk workflow aktif.
+  // Create a task that immediately enters the active workflow.
   async function handleCreateTask(taskData) {
     if (!CAN_MANAGE_TASKS) return
 
@@ -534,17 +545,20 @@ function App() {
         taskId: newTask.id,
         taskTitle: newTask.title,
         type: 'task_created',
-        message: `${currentUser.name} membuat task baru`,
+        message: `${currentUser.name} created a new task`,
       })
 
       setSelectedTaskId(newTask.id)
       setShowNewTask(false)
       setShowDetail(true)
-    } catch (error) {
-      console.error('Gagal membuat task:', error)
 
-      window.alert(
-        error.message || 'Gagal membuat task.'
+      showToast('Task created successfully!', 'success')
+    } catch (error) {
+      console.error('Failed to create task:', error)
+
+      showToast(
+        error.message || 'Failed to create task.',
+        'error'
       )
     }
   }
@@ -570,26 +584,29 @@ function App() {
         taskId,
         taskTitle: changes.title || task.title || 'Task',
         type: 'task_updated',
-        message: `${currentUser.name} mengedit detail task`,
+        message: `${currentUser.name} updated the task details`,
       })
 
       setSelectedTaskId(taskId)
       setShowEditTask(false)
       setShowDetail(true)
-    } catch (error) {
-      console.error('Gagal mengedit task:', error)
 
-      window.alert(
-        error.message || 'Gagal mengedit task.'
+      showToast('Task updated successfully!', 'success')
+    } catch (error) {
+      console.error('Failed to update task:', error)
+
+      showToast(
+        error.message || 'Failed to update task.',
+        'error'
       )
     }
   }
 
-  // Simpan draft baru khusus Strategic.
+  // Save a new draft. This action is restricted to Strategic users.
   async function handleSaveDraft(draftData) {
     if (!canUseMyBrief || !currentUser?.uid) {
       throw new Error(
-        'Hanya Strategic yang dapat membuat brief.'
+        'Only Strategic users can create briefs.'
       )
     }
 
@@ -601,16 +618,16 @@ function App() {
         createdByUid: currentUser.uid,
       })
     } catch (error) {
-      console.error('Gagal menyimpan draft:', error)
+      console.error('Failed to save draft:', error)
       throw error
     }
   }
 
-  // Edit hanya draft milik Strategic yang sedang login.
+  // Edit only drafts owned by the currently signed-in Strategic user.
   async function handleUpdateDraft(draftId, changes) {
     if (!canUseMyBrief || !currentUser?.uid) {
       throw new Error(
-        'Kamu tidak memiliki akses untuk mengedit draft.'
+        "You don't have permission to edit this draft."
       )
     }
 
@@ -623,7 +640,7 @@ function App() {
 
     if (!draft) {
       throw new Error(
-        'Draft tidak ditemukan atau bukan milik akunmu.'
+        "Draft not found or you don't have permission to access it."
       )
     }
 
@@ -637,16 +654,16 @@ function App() {
         createdByUid: currentUser.uid,
       })
     } catch (error) {
-      console.error('Gagal mengedit draft:', error)
+      console.error('Failed to update draft:', error)
       throw error
     }
   }
 
-  // Publish draft menjadi task aktif.
+  // Publish a draft as an active task.
   async function handleAssignDraft(draftId, taskData) {
     if (!canUseMyBrief || !currentUser?.uid) {
       throw new Error(
-        'Hanya Strategic yang dapat melakukan assign.'
+        'Only Strategic users can assign tasks.'
       )
     }
 
@@ -659,7 +676,7 @@ function App() {
 
     if (!draft) {
       throw new Error(
-        'Draft tidak ditemukan atau bukan milik akunmu.'
+        "Draft not found or you don't have permission to access it."
       )
     }
 
@@ -683,26 +700,56 @@ function App() {
         taskTitle:
           assignmentData.title || draft.title || 'Task',
         type: 'task_created',
-        message: `${currentUser.name} meng-assign task baru`,
+        message: `${currentUser.name} assigned a new task`,
       })
 
       setSelectedTaskId(draftId)
       setActiveNav('Calendar')
       setShowDetail(true)
-    } catch (error) {
-      console.error('Gagal assign draft:', error)
 
-      window.alert(
-        error.message || 'Gagal assign task.'
+      showToast(
+        'Draft successfully assigned as a task!',
+        'success'
+      )
+    } catch (error) {
+      console.error('Failed to assign draft:', error)
+
+      showToast(
+        error.message || 'Failed to assign task.',
+        'error'
       )
     }
   }
 
-  // Hapus draft milik pembuatnya saja.
+  async function handleConfirmAction() {
+    if (!confirmModal || confirmLoading) return
+
+    setConfirmLoading(true)
+
+    try {
+      await confirmModal.onConfirm()
+    } catch (error) {
+      console.error(
+        'Failed to execute confirmation action:',
+        error
+      )
+
+      showToast(
+        error.message || 'The action failed. Please try again.',
+        'error'
+      )
+    } finally {
+      setConfirmLoading(false)
+      setConfirmModal(null)
+    }
+  }
+
+  // Delete only drafts owned by the current creator.
   async function handleDeleteDraft(draftId) {
     if (!canUseMyBrief || !currentUser?.uid) {
-      window.alert(
-        'Kamu tidak memiliki akses untuk menghapus draft.'
+      showToast(
+        "You don't have permission to delete this draft.",
+        'error'
       )
       return
     }
@@ -715,27 +762,36 @@ function App() {
     )
 
     if (!draft) {
-      window.alert(
-        'Draft tidak ditemukan atau bukan milik akunmu.'
+      showToast(
+        "Draft not found or you don't have permission to access it.",
+        'error'
       )
       return
     }
 
-    const confirmed = window.confirm(
-      `Hapus draft "${draft.title}"?`
-    )
+    setConfirmModal({
+      title: 'Delete draft?',
+      message: `Draft "${draft.title}" will be permanently deleted. This action cannot be undone.`,
+      confirmText: 'Delete Draft',
 
-    if (!confirmed) return
+      onConfirm: async () => {
+        try {
+          await removeTask(draftId)
 
-    try {
-      await removeTask(draftId)
-    } catch (error) {
-      console.error('Gagal menghapus draft:', error)
+          showToast(
+            'Draft deleted successfully!',
+            'success'
+          )
+        } catch (error) {
+          console.error('Failed to delete draft:', error)
 
-      window.alert(
-        error.message || 'Gagal menghapus draft.'
-      )
-    }
+          showToast(
+            error.message || 'Failed to delete draft.',
+            'error'
+          )
+        }
+      },
+    })
   }
 
   async function handleStatusChange(taskId, status) {
@@ -767,19 +823,95 @@ function App() {
         taskId,
         taskTitle: task.title,
         type: 'status_changed',
-        message: `${currentUser.name} mengubah status menjadi ${status}`,
+        message: `${currentUser.name} changed the status to ${status}`,
       })
 
       setSelectedTaskId(taskId)
+
+      showToast(
+        `Status successfully changed to ${status}.`,
+        'success'
+      )
     } catch (error) {
       console.error(
-        'Gagal mengubah status task:',
+        'Failed to update task status:',
         error
       )
 
-      window.alert(
-        error.message || 'Gagal mengubah status task.'
+      showToast(
+        error.message || 'Failed to update task status.',
+        'error'
       )
+    }
+  }
+
+  async function handleSaveResultLink() {
+    if (!selectedTask || savingResultLink) return
+
+    const isAssignedToUser =
+      String(selectedTask.picUid || '') ===
+        String(currentUser?.uid || '') ||
+      (
+        !selectedTask.picUid &&
+        String(selectedTask.pic || '').trim().toLowerCase() ===
+          String(currentUser?.name || '').trim().toLowerCase()
+      )
+
+    if (
+      !CAN_MANAGE_TASKS &&
+      !(role === 'creative' && isAssignedToUser)
+    ) {
+      showToast(
+        'You can only add a result link to tasks assigned to you.',
+        'error'
+      )
+      return
+    }
+
+    let resultLink = resultLinkInput.trim()
+
+    if (resultLink) {
+      // Automatically add the protocol if it is missing.
+      if (!/^https?:\/\//i.test(resultLink)) {
+        resultLink = `https://${resultLink}`
+      }
+
+      try {
+        const parsedUrl = new URL(resultLink)
+
+        if (
+          !['http:', 'https:'].includes(parsedUrl.protocol) ||
+          !parsedUrl.hostname.includes('.')
+        ) {
+          throw new Error('Invalid URL')
+        }
+      } catch {
+        showToast(
+          'Invalid link. Example: drive.google.com/file/d/....',
+          'error'
+        )
+        return
+      }
+    }
+
+    setSavingResultLink(true)
+
+    try {
+      await editTask(selectedTask.id, { resultLink })
+
+      showToast(
+        'Result link saved successfully.',
+        'success'
+      )
+    } catch (error) {
+      console.error('Failed to save result link:', error)
+
+      showToast(
+        error.message || 'Failed to save result link.',
+        'error'
+      )
+    } finally {
+      setSavingResultLink(false)
     }
   }
 
@@ -799,16 +931,16 @@ function App() {
         taskId,
         taskTitle: task.title,
         type: 'deadline_changed',
-        message: `${currentUser.name} mengubah deadline menjadi ${deadline}`,
+        message: `${currentUser.name} changed the deadline to ${deadline}`,
       })
-    } catch (error) {
-      console.error(
-        'Gagal mengubah deadline:',
-        error
-      )
 
-      window.alert(
-        error.message || 'Gagal mengubah deadline.'
+      showToast('Deadline updated successfully!', 'success')
+    } catch (error) {
+      console.error('Failed to update deadline:', error)
+
+      showToast(
+        error.message || 'Failed to update deadline.',
+        'error'
       )
     }
   }
@@ -822,38 +954,41 @@ function App() {
 
     if (!task) return
 
-    const confirmed = window.confirm(
-      `Hapus task "${task.title}"?`
-    )
+    setConfirmModal({
+      title: 'Delete task?',
+      message: `Task "${task.title}" will be permanently deleted. This action cannot be undone.`,
+      confirmText: 'Delete Task',
 
-    if (!confirmed) return
+      onConfirm: async () => {
+        try {
+          await removeTask(taskId)
 
-    try {
-      await removeTask(taskId)
+          await sendNotificationSafely({
+            taskId,
+            taskTitle: task.title,
+            type: 'task_deleted',
+            message: `${currentUser.name} deleted a task`,
+          })
 
-      await sendNotificationSafely({
-        taskId,
-        taskTitle: task.title,
-        type: 'task_deleted',
-        message: `${currentUser.name} menghapus task`,
-      })
+          showToast('Task deleted successfully!', 'success')
 
-      setShowDetail(false)
-      setShowEditTask(false)
-      setSelectedTaskId(null)
-    } catch (error) {
-      console.error('Gagal menghapus task:', error)
+          setShowDetail(false)
+          setShowEditTask(false)
+          setSelectedTaskId(null)
+        } catch (error) {
+          console.error('Failed to delete task:', error)
 
-      window.alert(
-        error.message || 'Gagal menghapus task.'
-      )
-    }
+          showToast(
+            error.message || 'Failed to delete task.',
+            'error'
+          )
+        }
+      },
+    })
   }
 
   if (authLoading) {
-    return (
-      <LoadingScreen message="Memeriksa akun..." />
-    )
+    return <LoadingScreen message="Checking account..." />
   }
 
   if (!auth.currentUser) {
@@ -864,7 +999,7 @@ function App() {
     return (
       <LoadingScreen
         message={
-          authError || 'Profil akun belum tersedia.'
+          authError || 'User profile is unavailable.'
         }
       />
     )
@@ -885,6 +1020,8 @@ function App() {
           activeNav={activeNav}
           search={search}
           onSearchChange={setSearch}
+          currentUser={currentUser}
+          onLogout={handleLogout}
           notifications={notifications}
           unreadCount={unreadCount}
           notificationsLoading={notificationsLoading}
@@ -894,8 +1031,7 @@ function App() {
           onOpenNotification={(notification) => {
             const task = activeTasks.find(
               (item) =>
-                String(item.id) ===
-                String(notification.taskId)
+                String(item.id) === String(notification.taskId)
             )
 
             if (task) {
@@ -955,13 +1091,15 @@ function App() {
 
             {activeNav === 'All Tasks' && (
               <Tasks
-                tasks={filteredTasks}
+                tasks={tasks}
                 selectedTaskId={selectedTaskId}
                 onSelectTask={handleSelectTask}
                 search={search}
                 onSearchChange={setSearch}
+                userRole={currentUser.role}
               />
             )}
+
 
             {activeNav === 'My Tasks' && (
               <MyTasks
@@ -985,11 +1123,20 @@ function App() {
                   onAssignDraft={handleAssignDraft}
                   onDeleteDraft={handleDeleteDraft}
                   onSelectTask={handleSelectBrief}
+                  showToast={showToast}
+                  onRequestConfirm={(config) =>
+                    setConfirmModal(config)
+                  }
                 />
               )}
 
             {activeNav === 'Team' && (
-              <Team currentUser={currentUser} />
+              <Team
+                currentUser={currentUser}
+                onRequestConfirm={(config) =>
+                  setConfirmModal(config)
+                }
+              />
             )}
 
             <footer className="page-footer">
@@ -1119,38 +1266,52 @@ function App() {
                     Update status
                   </label>
 
-                  <div className="detail-status-options">
-                    {STATUS_OPTIONS.map((status) => (
-                      <button
-                        type="button"
-                        key={status}
-                        className={
-                          selectedTask.status === status
-                            ? 'detail-status-active'
-                            : ''
-                        }
-                        disabled={
-                          role === 'creative' &&
-                          !(
-                            selectedTask.picUid === currentUser.uid ||
-                            String(selectedTask.pic || '').toLowerCase() ===
-                              currentUser.name.toLowerCase()
+                  {(CAN_MANAGE_TASKS || role === 'creative') && (
+                    <div className="detail-status-options">
+                      {STATUS_OPTIONS.map((status) => {
+                        const isAssignedToUser =
+                          String(selectedTask.picUid || '') ===
+                            String(currentUser.uid) ||
+                          (
+                            !selectedTask.picUid &&
+                            String(selectedTask.pic || '')
+                              .trim()
+                              .toLowerCase() ===
+                              String(currentUser.name || '')
+                                .trim()
+                                .toLowerCase()
                           )
-                        }
-                        onClick={() =>
-                          handleStatusChange(
-                            selectedTask.id,
-                            status
-                          )
-                        }
-                      >
-                        {selectedTask.status === status && (
-                          <Check size={13} />
-                        )}
-                        {status}
-                      </button>
-                    ))}
-                  </div>
+
+                        const canChangeStatus =
+                          CAN_MANAGE_TASKS ||
+                          (role === 'creative' && isAssignedToUser)
+
+                        return (
+                          <button
+                            type="button"
+                            key={status}
+                            className={
+                              selectedTask.status === status
+                                ? 'detail-status-active'
+                                : ''
+                            }
+                            disabled={!canChangeStatus}
+                            onClick={() =>
+                              handleStatusChange(
+                                selectedTask.id,
+                                status
+                              )
+                            }
+                          >
+                            {selectedTask.status === status && (
+                              <Check size={13} />
+                            )}
+                            {status}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
 
                   {selectedTask.link && (
                     <div className="detail-link-section">
@@ -1195,6 +1356,96 @@ function App() {
                     </div>
                   )}
 
+                  <div className="detail-link-section">
+                    <span className="detail-field-label">
+                      RESULT LINK
+                    </span>
+
+                    {selectedTask.resultLink && (
+                      <a
+                        className="detail-link-card"
+                        href={selectedTask.resultLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="detail-link-icon">
+                          <ExternalLink size={18} />
+                        </span>
+
+                        <span className="detail-link-content">
+                          <strong>Open completed work</strong>
+                          <small>
+                            View the final creative output
+                          </small>
+                        </span>
+
+                        <ExternalLink
+                          className="detail-link-arrow"
+                          size={15}
+                        />
+                      </a>
+                    )}
+
+                    {(
+                      CAN_MANAGE_TASKS ||
+                      (
+                        role === 'creative' &&
+                        (
+                          String(selectedTask.picUid || '') ===
+                            String(currentUser.uid) ||
+                          (
+                            !selectedTask.picUid &&
+                            String(selectedTask.pic || '')
+                              .trim()
+                              .toLowerCase() ===
+                              String(currentUser.name || '')
+                                .trim()
+                                .toLowerCase()
+                          )
+                        )
+                      )
+                    ) && (
+                      <form
+                        onSubmit={(event) => {
+                          event.preventDefault()
+                          handleSaveResultLink()
+                        }}
+                        style={{
+                          display: 'grid',
+                          gap: '10px',
+                          marginTop: '12px',
+                        }}
+                      >
+                        <input
+                          type="text"
+                          value={resultLinkInput}
+                          onChange={(event) =>
+                            setResultLinkInput(event.target.value)
+                          }
+                          placeholder="https://drive.google.com/..."
+                          aria-label="Result Link"
+                          style={{ width: '100%' }}
+                        />
+
+                        <button
+                          type="submit"
+                          className="primary-button"
+                          disabled={savingResultLink}
+                        >
+                          {savingResultLink
+                            ? 'Saving...'
+                            : 'Save Result Link'}
+                        </button>
+                      </form>
+                    )}
+
+                    {!selectedTask.resultLink && (
+                      <p className="detail-description">
+                        No work result has been linked yet.
+                      </p>
+                    )}
+                  </div>
+
                   <div className="detail-actions">
                     {CAN_MANAGE_TASKS && (
                       <button
@@ -1233,6 +1484,7 @@ function App() {
           creatives={creatives}
           creativesLoading={creativesLoading}
           creativesError={creativesError}
+          showToast={showToast}
         />
       )}
 
@@ -1250,6 +1502,26 @@ function App() {
             creativesError={creativesError}
           />
         )}
+
+      <ConfirmModal
+        open={Boolean(confirmModal)}
+        title={confirmModal?.title}
+        message={confirmModal?.message}
+        confirmText={confirmModal?.confirmText}
+        loading={confirmLoading}
+        onConfirm={handleConfirmAction}
+        onCancel={() => {
+          if (!confirmLoading) {
+            setConfirmModal(null)
+          }
+        }}
+      />
+
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        onClose={closeToast}
+      />
     </div>
   )
 }

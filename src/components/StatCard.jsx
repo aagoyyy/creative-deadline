@@ -1,47 +1,34 @@
 
-import {
-    Activity,
-    AlertTriangle,
-    ArrowUpRight,
-  } from 'lucide-react'
-  
-  export default function StatCard({
-    title,
-    value,
-    note,
-    icon: Icon,
-    color = 'purple',
-    trend,
-  }) {
-    const TrendIcon =
-      color === 'orange'
-        ? AlertTriangle
-        : color === 'cyan'
-          ? Activity
-          : ArrowUpRight
-  
-    return (
-      <div className="stat-card">
-        <div className="stat-top">
-          <div className={`stat-icon ${color}`}>
-            {Icon && <Icon size={18} />}
-          </div>
-  
-          <span className={`stat-trend ${color}`}>
-            <TrendIcon size={12} />
-            {trend}
-          </span>
+import './statcard.css'
+
+export default function StatCard({
+  label,
+  value,
+  icon: Icon,
+  trend,
+  color = 'purple',
+}) {
+  return (
+    <article className={`stat-card ${color}`}>
+      <div className="stat-card-top">
+        <div className="stat-card-heading">
+          <span className="stat-card-label">{label}</span>
+          <span className="stat-card-trend">{trend}</span>
         </div>
-  
-        <div className="stat-value">
-          {String(value ?? 0).padStart(2, '0')}
+
+        <div className="stat-card-icon">
+          {Icon && <Icon size={20} strokeWidth={1.8} />}
         </div>
-  
-        <div className="stat-title">{title}</div>
-        <div className="stat-note">{note}</div>
-  
-        <div className={`stat-accent ${color}`} />
       </div>
-    )
-  }
-  
+
+      <div className="stat-card-value">{value ?? 0}</div>
+
+      <div className="stat-card-bottom">
+        <span className="stat-card-status-dot" />
+        <span className="stat-card-caption">{label}</span>
+      </div>
+
+      <div className="stat-card-accent" />
+    </article>
+  )
+}

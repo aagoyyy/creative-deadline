@@ -8,8 +8,25 @@ import {
   doc,
   onSnapshot,
   serverTimestamp,
+  arrayUnion,
 } from 'firebase/firestore'
 import { db } from '../firebase'
+
+export const TASK_STATUSES = [
+  'NOT STARTED',
+  'START',
+  'APPROVAL 1',
+  'APPROVAL 2',
+  'DONE',
+]
+
+export const TASK_PROGRESS_BY_STATUS = {
+  'NOT STARTED': 0,
+  START: 20,
+  'APPROVAL 1': 40,
+  'APPROVAL 2': 60,
+  DONE: 100,
+}
 
 const DEFAULT_PRIORITY = 'MEDIUM'
 
@@ -26,6 +43,14 @@ function normalizePriority(value) {
   return PRIORITY_OPTIONS.includes(priority)
     ? priority
     : DEFAULT_PRIORITY
+}
+
+function normalizeStatus(value) {
+  const status = String(value || 'NOT STARTED').toUpperCase()
+
+  return TASK_STATUSES.includes(status)
+    ? status
+    : 'NOT STARTED'
 }
 
 function getTodayDate() {
@@ -45,17 +70,39 @@ function normalizeDate(value, fallback) {
   return value
 }
 
-const progressByStatus = {
-  'NOT STARTED': 0,
-  START: 20,
-  'APPROVAL 1': 40,
-  'APPROVAL 2': 60,
-  REVISION: 60,
-  UPLOAD: 90,
-  DONE: 100,
+function getActor(currentUser) {
+  if (!currentUser) {
+    return {
+      changedByUid: '',
+      changedByName: 'Unknown user',
+      changedByEmail: '',
+    }
+  }
+
+  return {
+    changedByUid: String(
+      currentUser.uid || currentUser.id || ''
+    ),
+    changedByName: String(
+      currentUser.name ||
+      currentUser.displayName ||
+      currentUser.email ||
+      'Unknown user'
+    ),
+    changedByEmail: String(currentUser.email || ''),
+  }
 }
 
-export function useTasks() {
+function createStatusHistory(previousStatus, nextStatus, currentUser) {
+  return {
+    from: previousStatus || '',
+    to: nextStatus,
+    ...getActor(currentUser),
+    changedAt: new Date(),
+  }
+}
+
+export function useTasks(currentUser = null) {
   const [tasks, setTasks] = useState([])
   const [tasksLoading, setTasksLoading] = useState(true)
   const [tasksError, setTasksError] = useState('')
@@ -73,6 +120,7 @@ export function useTasks() {
             ...data,
             id: item.id,
             priority: normalizePriority(data.priority),
+            resultLink: String(data.resultLink || ''),
           }
         })
 
@@ -90,6 +138,7 @@ export function useTasks() {
     return unsubscribe
   }, [])
 
+  // Simpan draft baru
   const saveDraft = useCallback(async (taskData) => {
     const title = String(taskData.title || '').trim()
 
@@ -114,8 +163,9 @@ export function useTasks() {
       progress: 0,
       status: 'NOT STARTED',
       workflowState: 'DRAFT',
-      createdByUid: taskData.createdByUid,
+      createdByUid: taskData.createdByUid || '',
       link: String(taskData.link || '').trim(),
+      resultLink: String(taskData.resultLink || '').trim(),
       notes: String(taskData.notes || '').trim(),
       updatedAt: serverTimestamp(),
       createdAt: serverTimestamp(),
@@ -126,6 +176,7 @@ export function useTasks() {
     return { ...draftData, id: docRef.id }
   }, [])
 
+  // Assign draft kepada PIC
   const assignDraft = useCallback(async (taskId, taskData) => {
     const title = String(taskData.title || '').trim()
     const pic = String(taskData.pic || '').trim()
@@ -139,19 +190,37 @@ export function useTasks() {
       throw new Error('Pilih PIC sebelum assign task.')
     }
 
-    await updateDoc(doc(db, 'tasks', String(taskId)), {
+    const status = normalizeStatus(taskData.status)
+
+    const updateData = {
       ...taskData,
       title,
       pic,
       picUid,
       priority: normalizePriority(taskData.priority),
+      status,
+      progress: TASK_PROGRESS_BY_STATUS[status],
+      resultLink: String(taskData.resultLink || '').trim(),
       workflowState: 'ASSIGNED',
-      status: taskData.status || 'NOT STARTED',
-      progress: taskData.progress ?? 0,
       updatedAt: serverTimestamp(),
-    })
-  }, [])
+    }
 
+    // Catat waktu selesai jika task belum pernah selesai.
+    const existingTask = tasks.find(
+      (item) => String(item.id) === String(taskId)
+    )
+
+    if (status === 'DONE' && !existingTask?.completedAt) {
+      updateData.completedAt = serverTimestamp()
+    }
+
+    await updateDoc(
+      doc(db, 'tasks', String(taskId)),
+      updateData
+    )
+  }, [tasks])
+
+  // Tambah task baru
   const addTask = useCallback(async (taskData) => {
     const today = getTodayDate()
 
@@ -166,6 +235,8 @@ export function useTasks() {
     if (!pic || !picUid) {
       throw new Error('PIC creative wajib dipilih.')
     }
+
+    const status = normalizeStatus(taskData.status)
 
     const newTask = {
       title,
@@ -183,12 +254,18 @@ export function useTasks() {
         today
       ),
       deadline: normalizeDate(taskData.deadline, today),
-      progress: 0,
-      status: 'NOT STARTED',
+      status,
+      progress: TASK_PROGRESS_BY_STATUS[status],
       link: String(taskData.link || '').trim(),
+      resultLink: String(taskData.resultLink || '').trim(),
       notes: String(taskData.notes || '').trim(),
       updatedAt: serverTimestamp(),
       createdAt: serverTimestamp(),
+    }
+
+    // Jika task langsung dibuat dengan status DONE, catat waktunya.
+    if (status === 'DONE') {
+      newTask.completedAt = serverTimestamp()
     }
 
     const docRef = await addDoc(collection(db, 'tasks'), newTask)
@@ -199,12 +276,21 @@ export function useTasks() {
     }
   }, [])
 
+  // Edit task
   const editTask = useCallback(async (taskId, changes) => {
     const {
       id,
       createdAt,
       ...safeChanges
     } = changes
+
+    const task = tasks.find(
+      (item) => String(item.id) === String(taskId)
+    )
+
+    if (!task) {
+      throw new Error('Task tidak ditemukan. Coba muat ulang data.')
+    }
 
     if (safeChanges.picUid !== undefined) {
       if (
@@ -219,24 +305,111 @@ export function useTasks() {
       safeChanges.priority = normalizePriority(safeChanges.priority)
     }
 
-    await updateDoc(doc(db, 'tasks', String(taskId)), {
+    if (safeChanges.link !== undefined) {
+      safeChanges.link = String(safeChanges.link || '').trim()
+    }
+
+    if (safeChanges.resultLink !== undefined) {
+      safeChanges.resultLink = String(
+        safeChanges.resultLink || ''
+      ).trim()
+    }
+
+    const previousStatus = normalizeStatus(task.status)
+    const requestedStatus = safeChanges.status
+    const statusChanged =
+      requestedStatus !== undefined &&
+      normalizeStatus(requestedStatus) !== previousStatus
+
+    if (requestedStatus !== undefined) {
+      const normalizedRequestedStatus = normalizeStatus(requestedStatus)
+
+      if (!TASK_STATUSES.includes(normalizedRequestedStatus)) {
+        throw new Error(
+          `Status "${requestedStatus}" tidak valid.`
+        )
+      }
+
+      safeChanges.status = normalizedRequestedStatus
+      safeChanges.progress =
+        TASK_PROGRESS_BY_STATUS[normalizedRequestedStatus]
+    }
+
+    const updateData = {
       ...safeChanges,
       updatedAt: serverTimestamp(),
-    })
-  }, [])
+    }
 
+    if (
+      statusChanged &&
+      TASK_STATUSES.includes(safeChanges.status)
+    ) {
+      updateData.statusHistory = arrayUnion(
+        createStatusHistory(
+          previousStatus,
+          safeChanges.status,
+          currentUser
+        )
+      )
+
+      // Simpan waktu pertama kali task diselesaikan.
+      if (
+        safeChanges.status === 'DONE' &&
+        !task.completedAt
+      ) {
+        updateData.completedAt = serverTimestamp()
+      }
+    }
+
+    await updateDoc(
+      doc(db, 'tasks', String(taskId)),
+      updateData
+    )
+  }, [tasks, currentUser])
+
+  // Ubah status task
   const changeTaskStatus = useCallback(async (taskId, status) => {
+    const nextStatus = normalizeStatus(status)
+
+    if (!TASK_STATUSES.includes(nextStatus)) {
+      throw new Error(`Status tidak valid: ${status}.`)
+    }
+
     const task = tasks.find(
       (item) => String(item.id) === String(taskId)
     )
 
-    await updateDoc(doc(db, 'tasks', String(taskId)), {
-      status,
-      progress: progressByStatus[status] ?? task?.progress ?? 0,
-      updatedAt: serverTimestamp(),
-    })
-  }, [tasks])
+    if (!task) {
+      throw new Error('Task tidak ditemukan. Coba muat ulang data.')
+    }
 
+    const previousStatus = normalizeStatus(task.status)
+
+    if (previousStatus === nextStatus) {
+      return
+    }
+
+    const updateData = {
+      status: nextStatus,
+      progress: TASK_PROGRESS_BY_STATUS[nextStatus],
+      statusHistory: arrayUnion(
+        createStatusHistory(previousStatus, nextStatus, currentUser)
+      ),
+      updatedAt: serverTimestamp(),
+    }
+
+    // Simpan tanggal selesai pertama kali, jangan timpa jika sudah ada.
+    if (nextStatus === 'DONE' && !task.completedAt) {
+      updateData.completedAt = serverTimestamp()
+    }
+
+    await updateDoc(
+      doc(db, 'tasks', String(taskId)),
+      updateData
+    )
+  }, [tasks, currentUser])
+
+  // Pindahkan deadline
   const moveTaskDeadline = useCallback(async (taskId, deadline) => {
     await updateDoc(doc(db, 'tasks', String(taskId)), {
       deadline,
@@ -244,11 +417,12 @@ export function useTasks() {
     })
   }, [])
 
+  // Hapus task
   const removeTask = useCallback(async (taskId) => {
     await deleteDoc(doc(db, 'tasks', String(taskId)))
   }, [])
 
-  // Tidak menghapus task dari Firestore.
+  // Reset task dinonaktifkan agar data Firebase aman.
   const resetTasks = useCallback(() => {
     console.warn(
       'Reset task dinonaktifkan agar data Firestore tidak terhapus.'

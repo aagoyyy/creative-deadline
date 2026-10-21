@@ -7,8 +7,6 @@ const STATUS_OPTIONS = [
   'START',
   'APPROVAL 1',
   'APPROVAL 2',
-  'REVISION',
-  'UPLOAD',
   'DONE',
 ]
 
@@ -30,7 +28,6 @@ function getTodayDate() {
 
 function toDateInput(value) {
   if (!value) return getTodayDate()
-
   if (typeof value === 'number') return ''
 
   const text = String(value)
@@ -60,6 +57,12 @@ function normalizePriority(value) {
     : 'MEDIUM'
 }
 
+function normalizeStatus(value) {
+  const status = String(value || 'NOT STARTED').toUpperCase()
+
+  return STATUS_OPTIONS.includes(status) ? status : 'NOT STARTED'
+}
+
 export default function TaskModal({
   open,
   onClose,
@@ -69,6 +72,7 @@ export default function TaskModal({
   creatives = [],
   creativesLoading = false,
   creativesError = '',
+  showToast,
 }) {
   const isEditing = Boolean(task)
 
@@ -89,7 +93,7 @@ export default function TaskModal({
 
     setTitle(task?.title || '')
 
-    // Utamakan UID. Untuk task lama, coba cocokkan berdasarkan nama.
+    // Utamakan UID; task lama dicocokkan berdasarkan nama.
     const existingCreative = creatives.find(
       (creative) => creative.uid === task?.picUid
     ) || creatives.find(
@@ -104,7 +108,7 @@ export default function TaskModal({
     setProject(task?.project || 'Organic')
     setType(task?.type || 'Video')
     setPriority(normalizePriority(task?.priority))
-    setStatus(task?.status || 'NOT STARTED')
+    setStatus(normalizeStatus(task?.status))
     setLink(task?.link || '')
     setNotes(task?.notes || '')
     setSubmitting(false)
@@ -121,10 +125,33 @@ export default function TaskModal({
 
     if (submitting) return
 
-    if (!title.trim() || !start || !deadline) return
+    if (!title.trim()) {
+      showToast?.('Nama task wajib diisi.', 'error')
+      return
+    }
+
+    if (!start || !deadline) {
+      showToast?.('Start date dan deadline wajib diisi.', 'error')
+      return
+    }
+
+    if (deadline < start) {
+      showToast?.('Deadline tidak boleh sebelum start date.', 'error')
+      return
+    }
+
+    if (creativesLoading) {
+      showToast?.('Tunggu sampai daftar creative selesai dimuat.', 'error')
+      return
+    }
+
+    if (creativesError) {
+      showToast?.('Daftar creative gagal dimuat. Coba lagi.', 'error')
+      return
+    }
 
     if (!selectedCreative) {
-      window.alert('Pilih PIC creative yang aktif terlebih dahulu.')
+      showToast?.('Pilih PIC creative yang aktif terlebih dahulu.', 'error')
       return
     }
 
@@ -156,10 +183,17 @@ export default function TaskModal({
       }
 
       onClose()
+    } catch (error) {
+      console.error('Gagal menyimpan task:', error)
+      showToast?.(
+        error.message || 'Gagal menyimpan task.',
+        'error'
+      )
     } finally {
       setSubmitting(false)
     }
   }
+
 
   return (
     <div className="modal-backdrop" onClick={onClose}>

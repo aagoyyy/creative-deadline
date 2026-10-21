@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   Video,
   Flag,
+  ExternalLink,
 } from 'lucide-react'
 import { getStatusClass } from '../utils/taskUtils'
 
@@ -28,7 +29,6 @@ const PRIORITY_CONFIG = {
 
 function getPriority(priority) {
   const normalized = String(priority || 'MEDIUM').toUpperCase()
-
   return PRIORITY_CONFIG[normalized] || PRIORITY_CONFIG.MEDIUM
 }
 
@@ -40,9 +40,16 @@ export default function TaskCard({
 }) {
   const priority = getPriority(task.priority)
 
+  // Sesuaikan dengan nama field result link yang sudah tersimpan.
+  const resultLink =
+    task.resultLink ||
+    task.resultUrl ||
+    task.resultURL ||
+    task.result ||
+    ''
+
   return (
-    <button
-      type="button"
+    <div
       className={[
         'list-task',
         selected ? 'list-task-selected' : '',
@@ -51,6 +58,14 @@ export default function TaskCard({
         .filter(Boolean)
         .join(' ')}
       onClick={() => onClick?.(task)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onClick?.(task)
+        }
+      }}
+      role="button"
+      tabIndex={0}
     >
       <span className={`list-task-icon ${task.color || 'purple'}`}>
         {task.status === 'DONE' ? (
@@ -62,7 +77,6 @@ export default function TaskCard({
 
       <span className="list-task-main">
         <strong>{task.title}</strong>
-
         <small>
           {task.code} · {task.project} · PIC {task.pic || 'Unassigned'}
         </small>
@@ -99,6 +113,24 @@ export default function TaskCard({
           }}
         />
       </span>
-    </button>
+
+      <span className="list-task-result">
+        {resultLink ? (
+          <a
+            href={resultLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="result-link-button"
+            onClick={(event) => event.stopPropagation()}
+            title="Buka hasil task"
+          >
+            <ExternalLink size={13} />
+            Result
+          </a>
+        ) : (
+          <span className="result-link-empty">—</span>
+        )}
+      </span>
+    </div>
   )
 }

@@ -24,8 +24,6 @@ const STATUS_OPTIONS = [
   'START',
   'APPROVAL 1',
   'APPROVAL 2',
-  'REVISION',
-  'UPLOAD',
   'DONE',
 ]
 
@@ -45,11 +43,9 @@ const PRIORITY_ORDER = {
 
 const STATUS_PROGRESS = {
   'NOT STARTED': 0,
-  START: 20,
-  'APPROVAL 1': 40,
-  'APPROVAL 2': 60,
-  REVISION: 70,
-  UPLOAD: 90,
+  START: 25,
+  'APPROVAL 1': 50,
+  'APPROVAL 2': 75,
   DONE: 100,
 }
 
@@ -141,7 +137,7 @@ function formatDate(value) {
   const date = parseDate(value)
   if (!date) return '-'
 
-  return date.toLocaleDateString('id-ID', {
+  return date.toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'short',
   })
@@ -166,16 +162,14 @@ function getProgress(task) {
 
 function getStatusLabel(status) {
   const labels = {
-    'NOT STARTED': 'BELUM MULAI',
-    START: 'START',
-    'APPROVAL 1': 'APPROVAL 1',
-    'APPROVAL 2': 'APPROVAL 2',
-    REVISION: 'REVISION',
-    UPLOAD: 'UPLOAD',
-    DONE: 'SELESAI',
+    'NOT STARTED': 'Not Started',
+    START: 'In Progress',
+    'APPROVAL 1': 'Approval 1',
+    'APPROVAL 2': 'Approval 2',
+    DONE: 'Completed',
   }
 
-  return labels[status] || status || 'BELUM MULAI'
+  return labels[status] || status || 'Not Started'
 }
 
 function getProjectLabel(project) {
@@ -217,7 +211,7 @@ function getPicColor(pic, pics) {
 }
 
 function getTypeLabel(type) {
-  if (!type) return 'TIPE -'
+  if (!type) return 'TYPE -'
 
   const value = String(type).trim().toUpperCase()
 
@@ -249,7 +243,6 @@ export default function Calendar({
   const [dragTaskId, setDragTaskId] = useState(null)
   const [dragOverDay, setDragOverDay] = useState(null)
 
-  // Simpan tanggal yang sedang dibuka secara terpisah.
   const [expandedDays, setExpandedDays] = useState(() => new Set())
 
   const cells = useMemo(
@@ -266,47 +259,66 @@ export default function Calendar({
 
   const projects = useMemo(
     () =>
-      [...new Set(
-        tasks
-          .filter((task) => String(task.workflowState || '').toUpperCase() !== 'DRAFT')
-          .map((task) => task.project)
-          .filter(Boolean)
-      )].sort(),
+      [
+        ...new Set(
+          tasks
+            .filter(
+              (task) =>
+                String(task.workflowState || '').toUpperCase() !==
+                'DRAFT'
+            )
+            .map((task) => task.project)
+            .filter(Boolean)
+        ),
+      ].sort(),
     [tasks]
   )
 
   const pics = useMemo(
     () =>
-      [...new Set(
-        tasks
-          .filter((task) => String(task.workflowState || '').toUpperCase() !== 'DRAFT')
-          .map((task) => task.pic)
-          .filter(Boolean)
-      )].sort(),
+      [
+        ...new Set(
+          tasks
+            .filter(
+              (task) =>
+                String(task.workflowState || '').toUpperCase() !==
+                'DRAFT'
+            )
+            .map((task) => task.pic)
+            .filter(Boolean)
+        ),
+      ].sort(),
     [tasks]
   )
 
   const types = useMemo(
     () =>
-      [...new Set(
-        tasks
-          .filter((task) => String(task.workflowState || '').toUpperCase() !== 'DRAFT')
-          .map((task) => task.type)
-          .filter(Boolean)
-      )].sort(),
+      [
+        ...new Set(
+          tasks
+            .filter(
+              (task) =>
+                String(task.workflowState || '').toUpperCase() !==
+                'DRAFT'
+            )
+            .map((task) => task.type)
+            .filter(Boolean)
+        ),
+      ].sort(),
     [tasks]
   )
 
   const filteredTasks = useMemo(() => {
-    const filtered = tasks.filter((task) => (
-      String(task.workflowState || '').toUpperCase() !== 'DRAFT' &&
-      (projectFilter === 'ALL' || task.project === projectFilter) &&
-      (picFilter === 'ALL' || task.pic === picFilter) &&
-      (typeFilter === 'ALL' || task.type === typeFilter) &&
-      (statusFilter === 'ALL' || task.status === statusFilter) &&
-      (priorityFilter === 'ALL' ||
-        normalizePriority(task.priority) === priorityFilter)
-    ))
+    const filtered = tasks.filter(
+      (task) =>
+        String(task.workflowState || '').toUpperCase() !== 'DRAFT' &&
+        (projectFilter === 'ALL' || task.project === projectFilter) &&
+        (picFilter === 'ALL' || task.pic === picFilter) &&
+        (typeFilter === 'ALL' || task.type === typeFilter) &&
+        (statusFilter === 'ALL' || task.status === statusFilter) &&
+        (priorityFilter === 'ALL' ||
+          normalizePriority(task.priority) === priorityFilter)
+    )
 
     return sortTasksByPriority(filtered)
   }, [
@@ -474,8 +486,8 @@ export default function Calendar({
       <div className="calendar-filters">
         <div className="calendar-filters-heading">
           <div>
-            <h3>Filter kalender</h3>
-            <p>Tampilkan task sesuai kebutuhan lu.</p>
+            <h3>Calendar Filters</h3>
+            <p>Filter tasks based on your needs.</p>
           </div>
         </div>
 
@@ -486,35 +498,41 @@ export default function Calendar({
               value={projectFilter}
               onChange={(event) => setProjectFilter(event.target.value)}
             >
-              <option value="ALL">Semua project</option>
+              <option value="ALL">All Projects</option>
               {projects.map((project) => (
-                <option key={project} value={project}>{project}</option>
+                <option key={project} value={project}>
+                  {project}
+                </option>
               ))}
             </select>
           </label>
 
           <label>
-            <span>PIC Creative</span>
+            <span>Creative Assignee</span>
             <select
               value={picFilter}
               onChange={(event) => setPicFilter(event.target.value)}
             >
-              <option value="ALL">Semua PIC</option>
+              <option value="ALL">All Creatives</option>
               {pics.map((pic) => (
-                <option key={pic} value={pic}>{pic}</option>
+                <option key={pic} value={pic}>
+                  {pic}
+                </option>
               ))}
             </select>
           </label>
 
           <label>
-            <span>Tipe konten</span>
+            <span>Content Type</span>
             <select
               value={typeFilter}
               onChange={(event) => setTypeFilter(event.target.value)}
             >
-              <option value="ALL">Semua tipe</option>
+              <option value="ALL">All Content Types</option>
               {types.map((type) => (
-                <option key={type} value={type}>{type}</option>
+                <option key={type} value={type}>
+                  {type}
+                </option>
               ))}
             </select>
           </label>
@@ -525,35 +543,39 @@ export default function Calendar({
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
             >
-              <option value="ALL">Semua status</option>
+              <option value="ALL">All Statuses</option>
               {STATUS_OPTIONS.map((status) => (
-                <option key={status} value={status}>{status}</option>
+                <option key={status} value={status}>
+                  {getStatusLabel(status)}
+                </option>
               ))}
             </select>
           </label>
 
           <label>
-            <span>Prioritas</span>
+            <span>Priority</span>
             <select
               value={priorityFilter}
               onChange={(event) => setPriorityFilter(event.target.value)}
             >
-              <option value="ALL">Semua prioritas</option>
+              <option value="ALL">All Priorities</option>
               {PRIORITY_OPTIONS.map((priority) => (
-                <option key={priority} value={priority}>{priority}</option>
+                <option key={priority} value={priority}>
+                  {priority}
+                </option>
               ))}
             </select>
           </label>
 
           <label>
-            <span>Jenis tanggal</span>
+            <span>Date Type</span>
             <select
               value={dateFilter}
               onChange={(event) => setDateFilter(event.target.value)}
             >
-              <option value="ALL">Mulai dan deadline</option>
-              <option value="START">Tanggal mulai saja</option>
-              <option value="DEADLINE">Deadline saja</option>
+              <option value="ALL">Start Date & Deadline</option>
+              <option value="START">Start Date Only</option>
+              <option value="DEADLINE">Deadline Only</option>
             </select>
           </label>
         </div>
@@ -561,7 +583,7 @@ export default function Calendar({
         <div className="calendar-filter-footer">
           <span>
             <SlidersHorizontal size={14} />
-            {filteredTasks.length} task sesuai filter
+            {filteredTasks.length} tasks match the filters
           </span>
 
           <button
@@ -570,20 +592,23 @@ export default function Calendar({
             disabled={!hasActiveFilters}
           >
             <RotateCcw size={13} />
-            Reset filter
+            Reset Filters
           </button>
         </div>
       </div>
 
       <div className="calendar-grid">
         {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((day) => (
-          <div className="weekday" key={day}>{day}</div>
+          <div className="weekday" key={day}>
+            {day}
+          </div>
         ))}
 
         {cells.map((day, index) => {
           const dayTasks = getTasksForDay(day)
           const dayKey = day ? getDayKey(day) : ''
           const isExpanded = day ? expandedDays.has(dayKey) : false
+
           const visibleDayTasks = isExpanded
             ? dayTasks
             : dayTasks.slice(0, 3)
@@ -602,7 +627,9 @@ export default function Calendar({
                 isToday ? 'today-cell' : '',
                 day && dragOverDay === day ? 'drag-over' : '',
                 isExpanded ? 'day-cell-expanded' : '',
-              ].filter(Boolean).join(' ')}
+              ]
+                .filter(Boolean)
+                .join(' ')}
               onDragOver={(event) => handleDragOver(event, day)}
               onDragLeave={() => {
                 if (dragOverDay === day) setDragOverDay(null)
@@ -617,7 +644,9 @@ export default function Calendar({
                     </span>
 
                     {dayTasks.length > 0 && (
-                      <span className="day-task-count">{dayTasks.length}</span>
+                      <span className="day-task-count">
+                        {dayTasks.length}
+                      </span>
                     )}
                   </div>
 
@@ -627,8 +656,21 @@ export default function Calendar({
                         String(selectedTaskId) === String(task.id)
 
                       const start = task.startDate || task.start
-                      const isStart = matchesCalendarDate(start, day, year, month)
-                      const isDeadline = matchesCalendarDate(task.deadline, day, year, month)
+
+                      const isStart = matchesCalendarDate(
+                        start,
+                        day,
+                        year,
+                        month
+                      )
+
+                      const isDeadline = matchesCalendarDate(
+                        task.deadline,
+                        day,
+                        year,
+                        month
+                      )
+
                       const isDragging = dragTaskId === String(task.id)
                       const progress = getProgress(task)
                       const statusLabel = getStatusLabel(task.status)
@@ -645,7 +687,9 @@ export default function Calendar({
                             isDeadline &&
                             dateFilter !== 'START'
                           }
-                          onDragStart={(event) => handleDragStart(event, task)}
+                          onDragStart={(event) =>
+                            handleDragStart(event, task)
+                          }
                           onDragEnd={handleDragEnd}
                           onClick={() => onSelectTask?.(task)}
                           className={[
@@ -655,40 +699,67 @@ export default function Calendar({
                             task.status === 'DONE' ? 'task-done' : '',
                             isSelected ? 'task-selected' : '',
                             isDragging ? 'task-dragging' : '',
-                          ].filter(Boolean).join(' ')}
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
                           title={
                             onMoveDeadline && isDeadline
-                              ? `${task.title} — tarik ke tanggal lain untuk memindahkan deadline`
+                              ? `${task.title} — drag to another date to move the deadline`
                               : task.title
                           }
                         >
                           <span className="task-card-header">
-                            <span className="task-card-pic">{task.pic || 'NO PIC'}</span>
-                            <span className="task-card-title">{task.title || 'Untitled task'}</span>
+                            <span className="task-card-pic">
+                              {task.pic || 'UNASSIGNED'}
+                            </span>
+
+                            <span className="task-card-title">
+                              {task.title || 'Untitled Task'}
+                            </span>
                           </span>
 
                           <span className="task-card-tags">
-                            <span className="task-card-project">{projectLabel}</span>
-                            <span className="task-card-type">{typeLabel}</span>
+                            <span className="task-card-project">
+                              {projectLabel}
+                            </span>
+
+                            <span className="task-card-type">
+                              {typeLabel}
+                            </span>
                           </span>
 
                           <span className="task-card-priority-row">
-                            <span className={`priority-badge priority-${priority.toLowerCase()}`}>
+                            <span
+                              className={`priority-badge priority-${priority.toLowerCase()}`}
+                            >
                               <Flag size={11} />
                               {priority}
                             </span>
                           </span>
 
                           <span className="task-card-dates">
-                            {isStart && <span className="task-date-start">MULAI</span>}
-                            {isDeadline && <span className="task-date-deadline">DEADLINE</span>}
+                            {isStart && (
+                              <span className="task-date-start">
+                                START
+                              </span>
+                            )}
+
+                            {isDeadline && (
+                              <span className="task-date-deadline">
+                                DEADLINE
+                              </span>
+                            )}
+
                             <span className="task-card-deadline-date">
                               {isDeadline ? formatDate(task.deadline) : ''}
                             </span>
                           </span>
 
                           <span className="task-card-progress-info">
-                            <span className="task-card-status">{statusLabel}</span>
+                            <span className="task-card-status">
+                              {statusLabel}
+                            </span>
+
                             <strong>{progress}%</strong>
                           </span>
 
@@ -701,14 +772,14 @@ export default function Calendar({
 
                           <span className="task-card-footer">
                             {task.status === 'DONE'
-                              ? 'Selesai'
+                              ? 'Completed'
                               : isDeadline
-                                ? 'Hari deadline'
+                                ? 'Deadline Day'
                                 : isStart
-                                  ? 'Hari mulai'
+                                  ? 'Start Day'
                                   : task.deadline
-                                    ? `Deadline ${formatDate(task.deadline)}`
-                                    : 'Deadline belum diatur'}
+                                    ? `Due ${formatDate(task.deadline)}`
+                                    : 'No Deadline Set'}
                           </span>
                         </button>
                       )
@@ -731,7 +802,7 @@ export default function Calendar({
                           </>
                         ) : (
                           <>
-                            +{dayTasks.length - 3} lainnya
+                            +{dayTasks.length - 3} more
                             <ChevronDown size={13} />
                             See All
                           </>
@@ -749,14 +820,16 @@ export default function Calendar({
       <div className="calendar-footer">
         <div>
           <span className="legend-dot purple-dot" />
-          In progress
+          In Progress
+
           <span className="legend-dot green-dot" />
           Completed
+
           <span className="legend-dot orange-dot" />
-          Needs attention
+          Needs Attention
         </div>
 
-        <span>{filteredTasks.length} tasks sesuai filter</span>
+        <span>{filteredTasks.length} tasks match the filters</span>
       </div>
     </section>
   )

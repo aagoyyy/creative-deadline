@@ -148,6 +148,8 @@ export default function MyBrief({
   onAssignDraft,
   onDeleteDraft,
   onSelectTask,
+  showToast,
+  onRequestConfirm,
 }) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState(null)
@@ -343,27 +345,27 @@ export default function MyBrief({
 
   function buildTaskData(requirePIC = false) {
     const title = form.title.trim()
-
+  
     if (!title) {
-      window.alert('Nama task wajib diisi.')
+      showToast?.('Nama task wajib diisi.', 'error')
       return null
     }
-
+  
     if (!form.start || !form.deadline) {
-      window.alert('Start date dan deadline wajib diisi.')
+      showToast?.('Start date dan deadline wajib diisi.', 'error')
       return null
     }
-
+  
     if (form.deadline < form.start) {
-      window.alert('Deadline tidak boleh sebelum start date.')
+      showToast?.('Deadline tidak boleh sebelum start date.', 'error')
       return null
     }
-
+  
     if (requirePIC && !selectedCreative) {
-      window.alert('Pilih PIC sebelum assign task.')
+      showToast?.('Pilih PIC sebelum assign task.', 'error')
       return null
     }
-
+  
     return {
       title,
       project: form.project,
@@ -382,6 +384,7 @@ export default function MyBrief({
       createdByUid: currentUser?.uid || '',
     }
   }
+  
 
   async function handleSaveDraft(event) {
     event.preventDefault()
@@ -413,7 +416,7 @@ export default function MyBrief({
       setFormOpen(false)
       setEditingId(null)
     } catch (error) {
-      window.alert(error.message || 'Gagal menyimpan draft.')
+      showToast?.(error.message || 'Gagal menyimpan draft.', 'error')
     } finally {
       setSubmitting(false)
     }
@@ -421,7 +424,8 @@ export default function MyBrief({
 
   async function handleAssignDraft(task) {
     if (task.workflowState !== 'DRAFT') return
-
+    if (submitting || deletingId) return
+  
     const matchedCreative =
       creatives.find((item) => item.uid === task.picUid) ||
       creatives.find(
@@ -429,60 +433,63 @@ export default function MyBrief({
           String(item.name || '').trim().toLowerCase() ===
           String(task.pic || '').trim().toLowerCase()
       )
-
+  
     if (!matchedCreative) {
-      window.alert(
-        'Pilih dan simpan PIC aktif pada draft sebelum assign task.'
+      showToast?.(
+        'Pilih dan simpan PIC aktif pada draft sebelum assign task.',
+        'error'
       )
       openEditForm(task)
       return
     }
-
-    const confirmed = window.confirm(
-      `Assign "${task.title}" kepada ${matchedCreative.name}? Task akan masuk ke workflow aktif.`
-    )
-
-    if (!confirmed || submitting) return
-
-    setSubmitting(true)
-
-    try {
-      await onAssignDraft?.(task.id, {
-        ...task,
-        pic: matchedCreative.name,
-        picUid: matchedCreative.uid,
-        priority: normalizePriority(task.priority),
-        workflowState: 'ASSIGNED',
-        status: 'NOT STARTED',
-        progress: 0,
-      })
-    } catch (error) {
-      window.alert(error.message || 'Gagal assign task.')
-    } finally {
-      setSubmitting(false)
-    }
+  
+    onRequestConfirm?.({
+      title: 'Assign task?',
+      message: `Assign "${task.title}" kepada ${matchedCreative.name}? Task akan masuk ke workflow aktif.`,
+      confirmText: 'Assign Task',
+      onConfirm: async () => {
+        setSubmitting(true)
+  
+        try {
+          await onAssignDraft?.(task.id, {
+            ...task,
+            pic: matchedCreative.name,
+            picUid: matchedCreative.uid,
+            priority: normalizePriority(task.priority),
+            workflowState: 'ASSIGNED',
+            status: 'NOT STARTED',
+            progress: 0,
+          })
+  
+          showToast?.('Task berhasil di-assign!', 'success')
+        } catch (error) {
+          showToast?.(
+            error.message || 'Gagal assign task.',
+            'error'
+          )
+        } finally {
+          setSubmitting(false)
+        }
+      },
+    })
   }
+  
 
   async function handleDeleteDraft(task) {
     if (task.workflowState !== 'DRAFT') return
     if (deletingId || submitting) return
-
-    const confirmed = window.confirm(
-      `Hapus draft "${task.title}"? Tindakan ini tidak bisa dibatalkan.`
-    )
-
-    if (!confirmed) return
-
+  
     setDeletingId(task.id)
-
+  
     try {
       await onDeleteDraft?.(task.id)
     } catch (error) {
-      window.alert(error.message || 'Gagal menghapus draft.')
+      console.error('Gagal menghapus draft:', error)
     } finally {
       setDeletingId(null)
     }
   }
+  
 
   function handleOpenTask(task) {
     if (!task || task.workflowState === 'DRAFT') return

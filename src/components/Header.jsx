@@ -2,46 +2,91 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   Bell,
-  CircleHelp,
   Search,
   CheckCheck,
   Check,
   ClipboardList,
   Clock,
+  LogOut,
+  ChevronDown,
 } from 'lucide-react'
 
 function formatNotificationTime(timestamp) {
-  if (!timestamp) return 'Baru saja'
+  if (!timestamp) return 'Just now'
 
   const date = timestamp.toDate
     ? timestamp.toDate()
     : new Date(timestamp)
 
-  if (Number.isNaN(date.getTime())) return 'Baru saja'
+  if (Number.isNaN(date.getTime())) return 'Just now'
 
   const diff = Math.max(0, Date.now() - date.getTime())
   const minutes = Math.floor(diff / 60000)
 
-  if (minutes < 1) return 'Baru saja'
-  if (minutes < 60) return `${minutes} menit lalu`
+  if (minutes < 1) return 'Just now'
+  if (minutes < 60) return `${minutes}m ago`
 
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours} jam lalu`
+  if (hours < 24) return `${hours}h ago`
 
   const days = Math.floor(hours / 24)
-  if (days < 7) return `${days} hari lalu`
+  if (days < 7) return `${days}d ago`
 
-  return date.toLocaleDateString('id-ID', {
+  return date.toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   })
 }
 
+function formatRole(role) {
+  const roles = {
+    admin: 'Admin',
+    strategic: 'Strategic',
+    creative: 'Creative',
+    digital_marketing: 'Digital Marketing',
+  }
+
+  return roles[String(role || '').toLowerCase()] || role || 'Member'
+}
+
+const PAGE_INFO = {
+  Overview: {
+    title: 'Overview',
+    description: 'A summary of creative team activity and performance.',
+  },
+  Calendar: {
+    title: 'Creative Calendar',
+    description: 'Track production schedules and task deadlines.',
+  },
+  Board: {
+    title: 'Creative Board',
+    description: 'Track tasks across the creative workflow.',
+  },
+  'All Tasks': {
+    title: 'All Tasks',
+    description: 'Manage all tasks, assignees, statuses, and deadlines.',
+  },
+  'My Tasks': {
+    title: 'My Tasks',
+    description: 'Track tasks assigned to you.',
+  },
+  'My Brief': {
+    title: 'My Brief',
+    description: 'Manage briefs before they enter the creative workflow.',
+  },
+  Team: {
+    title: 'Team Management',
+    description: 'Manage team members and workspace access.',
+  },
+}
+
 export default function Header({
   activeNav,
   search,
   onSearchChange,
+  currentUser,
+  onLogout,
   notifications = [],
   unreadCount = 0,
   notificationsLoading = false,
@@ -51,7 +96,22 @@ export default function Header({
   onOpenNotification,
 }) {
   const [showNotifications, setShowNotifications] = useState(false)
+  const [showAccountMenu, setShowAccountMenu] = useState(false)
+
   const notificationRef = useRef(null)
+  const accountRef = useRef(null)
+
+  const displayName =
+    currentUser?.name || currentUser?.email || 'User'
+
+  const displayEmail = currentUser?.email || ''
+  const displayRole = formatRole(currentUser?.role)
+  const avatarLetter = displayName.trim().charAt(0).toUpperCase() || 'U'
+
+  const pageInfo = PAGE_INFO[activeNav] || {
+    title: activeNav || 'Creative Deadline',
+    description: 'Manage your creative team workflow and deadlines.',
+  }
 
   useEffect(() => {
     function handleOutsideClick(event) {
@@ -61,12 +121,28 @@ export default function Header({
       ) {
         setShowNotifications(false)
       }
+
+      if (
+        accountRef.current &&
+        !accountRef.current.contains(event.target)
+      ) {
+        setShowAccountMenu(false)
+      }
+    }
+
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        setShowNotifications(false)
+        setShowAccountMenu(false)
+      }
     }
 
     document.addEventListener('mousedown', handleOutsideClick)
+    document.addEventListener('keydown', handleEscape)
 
     return () => {
       document.removeEventListener('mousedown', handleOutsideClick)
+      document.removeEventListener('keydown', handleEscape)
     }
   }, [])
 
@@ -74,7 +150,7 @@ export default function Header({
     try {
       await onMarkAllAsRead?.()
     } catch (error) {
-      console.error('Gagal menandai notifikasi:', error)
+      console.error('Failed to mark notifications as read:', error)
     }
   }
 
@@ -87,16 +163,25 @@ export default function Header({
       setShowNotifications(false)
       onOpenNotification?.(notification)
     } catch (error) {
-      console.error('Gagal membuka notifikasi:', error)
+      console.error('Failed to open notification:', error)
     }
+  }
+
+  function toggleNotifications() {
+    setShowNotifications((visible) => !visible)
+    setShowAccountMenu(false)
+  }
+
+  function toggleAccountMenu() {
+    setShowAccountMenu((visible) => !visible)
+    setShowNotifications(false)
   }
 
   return (
     <header className="topbar">
-      <div className="breadcrumbs">
-        <span>Workspace</span>
-        <span className="crumb-slash">/</span>
-        <strong>{activeNav}</strong>
+      <div className="header-page-info">
+        <h1>{pageInfo.title}</h1>
+        <p>{pageInfo.description}</p>
       </div>
 
       <div className="top-actions">
@@ -106,23 +191,13 @@ export default function Header({
           <input
             type="text"
             value={search}
-            onChange={(event) =>
-              onSearchChange(event.target.value)
-            }
+            onChange={(event) => onSearchChange(event.target.value)}
             placeholder="Search tasks..."
+            aria-label="Search tasks"
           />
-
-          <kbd>⌘ K</kbd>
         </div>
 
-        <button
-          type="button"
-          className="icon-button"
-          aria-label="Help"
-        >
-          <CircleHelp size={18} />
-        </button>
-
+        {/* Notifications */}
         <div
           className="notification-wrapper"
           ref={notificationRef}
@@ -134,9 +209,7 @@ export default function Header({
             }`}
             aria-label={`Notifications, ${unreadCount} unread`}
             aria-expanded={showNotifications}
-            onClick={() =>
-              setShowNotifications((visible) => !visible)
-            }
+            onClick={toggleNotifications}
           >
             <Bell size={18} />
 
@@ -157,8 +230,8 @@ export default function Header({
                   <h3>Notifications</h3>
                   <p>
                     {unreadCount > 0
-                      ? `${unreadCount} belum dibaca`
-                      : 'Semua sudah dibaca'}
+                      ? `${unreadCount} unread`
+                      : 'All caught up'}
                   </p>
                 </div>
 
@@ -167,7 +240,7 @@ export default function Header({
                     type="button"
                     className="notification-mark-all"
                     onClick={handleMarkAll}
-                    title="Tandai semua sudah dibaca"
+                    title="Mark all as read"
                   >
                     <CheckCheck size={15} />
                     <span>Read all</span>
@@ -178,21 +251,21 @@ export default function Header({
               <div className="notification-list">
                 {notificationsLoading ? (
                   <div className="notification-empty">
-                    Memuat notifikasi...
+                    Loading notifications...
                   </div>
                 ) : notificationsError ? (
                   <div className="notification-empty notification-error">
-                    Notifikasi gagal dimuat. Periksa koneksi dan
-                    Firestore Rules.
+                    Failed to load notifications. Check your connection
+                    and Firestore Rules.
                   </div>
                 ) : notifications.length === 0 ? (
                   <div className="notification-empty">
                     <span className="notification-empty-icon">
                       <Bell size={22} />
                     </span>
-                    <strong>Belum ada notifikasi</strong>
+                    <strong>No notifications yet</strong>
                     <p>
-                      Aktivitas task terbaru akan muncul di sini.
+                      Recent task activity will appear here.
                     </p>
                   </div>
                 ) : (
@@ -218,7 +291,7 @@ export default function Header({
 
                         <span className="notification-message">
                           {notification.message ||
-                            'Ada aktivitas task terbaru.'}
+                            'There is new task activity.'}
                         </span>
 
                         <span className="notification-time">
@@ -249,7 +322,64 @@ export default function Header({
           )}
         </div>
 
-        <div className="top-avatar">Y</div>
+        {/* Account menu */}
+        <div className="account-wrapper" ref={accountRef}>
+          <button
+            type="button"
+            className={`account-trigger ${
+              showAccountMenu ? 'is-active' : ''
+            }`}
+            onClick={toggleAccountMenu}
+            aria-label="Account menu"
+            aria-expanded={showAccountMenu}
+          >
+            <span className="top-avatar">{avatarLetter}</span>
+
+            <span className="account-trigger-copy">
+              <strong>{displayName}</strong>
+              <span>{displayRole}</span>
+            </span>
+
+            <ChevronDown
+              size={15}
+              className={`account-chevron ${
+                showAccountMenu ? 'rotated' : ''
+              }`}
+            />
+          </button>
+
+          {showAccountMenu && (
+            <section className="account-menu">
+              <div className="account-menu-header">
+                <span className="account-menu-avatar">
+                  {avatarLetter}
+                </span>
+
+                <div className="account-menu-identity">
+                  <strong>{displayName}</strong>
+                  {displayEmail && <span>{displayEmail}</span>}
+                  <span className="account-role">
+                    {displayRole}
+                  </span>
+                </div>
+              </div>
+
+              <div className="account-menu-divider" />
+
+              <button
+                type="button"
+                className="account-menu-item"
+                onClick={() => {
+                  setShowAccountMenu(false)
+                  onLogout?.()
+                }}
+              >
+                <LogOut size={16} />
+                <span>Log out</span>
+              </button>
+            </section>
+          )}
+        </div>
       </div>
     </header>
   )

@@ -31,7 +31,7 @@ function getDeadlineCategory(task) {
   let deadline
 
   if (typeof value === 'number') {
-    // Deadline berbentuk angka dianggap tanggal pada bulan ini.
+    // Numeric deadlines are treated as dates in the current month.
     deadline = new Date()
     deadline.setHours(0, 0, 0, 0)
     deadline.setDate(value)
@@ -174,54 +174,93 @@ export default function MyTasks({
     hideDone
 
   return (
-    <section className="page-content">
-      <section className="welcome-row">
-        <div>
-          <div className="eyebrow">WORKSPACE / MY TASKS</div>
-          <h1>
-            My Tasks<span className="heading-period">.</span>
-          </h1>
-          <p className="page-subtitle">
-            Semua pekerjaan yang ditugaskan ke {currentUser}.
-          </p>
-        </div>
-      </section>
-
-      <section className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon purple">
-            <ListTodo size={18} />
+<section className="page-content">
+  <section className="stats-grid">
+    <div className="stat-card purple">
+      <div className="stat-card-top">
+        <div className="stat-card-heading">
+          <div className="stat-card-label">TOTAL TASKS</div>
+          <div className="stat-card-trend">
+            All tasks assigned to you
           </div>
-          <div className="stat-value">{myTasks.length}</div>
-          <div className="stat-title">Total tasks</div>
-          <div className="stat-note">Task yang ditugaskan ke lu</div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon cyan">
-            <Clock3 size={18} />
+        <div className="stat-card-icon">
+          <ListTodo size={18} />
+        </div>
+      </div>
+
+      <div className="stat-card-value">{myTasks.length}</div>
+
+      <div className="stat-card-bottom">
+        <span className="stat-card-status-dot" />
+        <span className="stat-card-caption">
+          Assigned tasks
+        </span>
+      </div>
+
+      <div className="stat-card-accent" />
+    </div>
+
+    <div className="stat-card blue">
+      <div className="stat-card-top">
+        <div className="stat-card-heading">
+          <div className="stat-card-label">IN PROGRESS</div>
+          <div className="stat-card-trend">
+            Including approval and upload
           </div>
-          <div className="stat-value">{inProgress}</div>
-          <div className="stat-title">In progress</div>
-          <div className="stat-note">Termasuk approval dan upload</div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon green">
-            <CheckCircle2 size={18} />
-          </div>
-          <div className="stat-value">{completed}</div>
-          <div className="stat-title">Completed</div>
-          <div className="stat-note">Task selesai</div>
+        <div className="stat-card-icon">
+          <Clock3 size={18} />
         </div>
-      </section>
+      </div>
+
+      <div className="stat-card-value">{inProgress}</div>
+
+      <div className="stat-card-bottom">
+        <span className="stat-card-status-dot" />
+        <span className="stat-card-caption">
+          Tasks in progress
+        </span>
+      </div>
+
+      <div className="stat-card-accent" />
+    </div>
+
+    <div className="stat-card green">
+      <div className="stat-card-top">
+        <div className="stat-card-heading">
+          <div className="stat-card-label">COMPLETED</div>
+          <div className="stat-card-trend">
+            Tasks completed
+          </div>
+        </div>
+
+        <div className="stat-card-icon">
+          <CheckCircle2 size={18} />
+        </div>
+      </div>
+
+      <div className="stat-card-value">{completed}</div>
+
+      <div className="stat-card-bottom">
+        <span className="stat-card-status-dot" />
+        <span className="stat-card-caption">
+          Completed tasks
+        </span>
+      </div>
+
+      <div className="stat-card-accent" />
+    </div>
+  </section>
 
       <section className="dashboard-panel my-tasks-panel">
         <div className="panel-heading">
           <div>
-            <h2>Assigned to me</h2>
+            <h2>Assigned to Me</h2>
             <p>
-              {pending} belum dimulai · {overdue} overdue
+              {pending} not started · {overdue} overdue
             </p>
           </div>
         </div>
@@ -230,11 +269,11 @@ export default function MyTasks({
           <div className="my-tasks-filter-heading">
             <div>
               <SlidersHorizontal size={15} />
-              <strong>Filter tasks</strong>
+              <strong>Filter Tasks</strong>
             </div>
 
             <span>
-              {filteredTasks.length} dari {myTasks.length} task
+              {filteredTasks.length} of {myTasks.length} tasks
             </span>
           </div>
 
@@ -245,7 +284,7 @@ export default function MyTasks({
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
-                <option value="ALL">Semua status</option>
+                <option value="ALL">All Statuses</option>
                 {STATUS_OPTIONS.map((status) => (
                   <option key={status} value={status}>
                     {status}
@@ -260,7 +299,7 @@ export default function MyTasks({
                 value={projectFilter}
                 onChange={(e) => setProjectFilter(e.target.value)}
               >
-                <option value="ALL">Semua project</option>
+                <option value="ALL">All Projects</option>
                 {projectOptions.map((project) => (
                   <option key={project} value={project}>
                     {project}
@@ -270,12 +309,12 @@ export default function MyTasks({
             </label>
 
             <label className="my-tasks-filter">
-              <span>Tipe konten</span>
+              <span>Content Type</span>
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
               >
-                <option value="ALL">Semua tipe</option>
+                <option value="ALL">All Content Types</option>
                 {typeOptions.map((type) => (
                   <option key={type} value={type}>
                     {type}
@@ -290,27 +329,25 @@ export default function MyTasks({
                 value={deadlineFilter}
                 onChange={(e) => setDeadlineFilter(e.target.value)}
               >
-                <option value="ALL">Semua deadline</option>
+                <option value="ALL">All Deadlines</option>
                 <option value="OVERDUE">Overdue</option>
-                <option value="TODAY">Hari ini</option>
-                <option value="THIS WEEK">Minggu ini</option>
+                <option value="TODAY">Due Today</option>
+                <option value="THIS WEEK">This Week</option>
                 <option value="UPCOMING">Upcoming</option>
-                <option value="NO DATE">Tanpa deadline</option>
+                <option value="NO DATE">No Deadline</option>
               </select>
             </label>
           </div>
 
           <div className="my-tasks-filter-footer">
-          
-<button
-  type="button"
-  className={`board-hide-done ${hideDone ? 'active' : ''}`}
-  onClick={() => setHideDone((value) => !value)}
->
-  {hideDone ? <Eye size={14} /> : <EyeOff size={14} />}
-  {hideDone ? 'Tampilkan DONE' : 'Sembunyikan DONE'}
-</button>
-
+            <button
+              type="button"
+              className={`board-hide-done ${hideDone ? 'active' : ''}`}
+              onClick={() => setHideDone((value) => !value)}
+            >
+              {hideDone ? <Eye size={14} /> : <EyeOff size={14} />}
+              {hideDone ? 'Show Completed' : 'Hide Completed'}
+            </button>
 
             {hasActiveFilters && (
               <button
@@ -319,7 +356,7 @@ export default function MyTasks({
                 onClick={resetFilters}
               >
                 <RotateCcw size={13} />
-                Reset filter
+                Reset Filters
               </button>
             )}
           </div>
@@ -342,17 +379,17 @@ export default function MyTasks({
               </div>
               <strong>
                 {myTasks.length === 0
-                  ? 'Belum ada task'
-                  : 'Task tidak ditemukan'}
+                  ? 'No Tasks Assigned Yet'
+                  : 'No Tasks Found'}
               </strong>
               <span>
                 {myTasks.length === 0
-                  ? `Task yang ditugaskan ke ${currentUser} akan muncul di sini.`
-                  : 'Coba ubah filter supaya task yang sesuai muncul.'}
+                  ? `Tasks assigned to ${currentUser} will appear here.`
+                  : 'Try adjusting your filters to find matching tasks.'}
               </span>
               {hasActiveFilters && (
                 <button type="button" onClick={resetFilters}>
-                  Reset semua filter
+                  Reset All Filters
                 </button>
               )}
             </div>
