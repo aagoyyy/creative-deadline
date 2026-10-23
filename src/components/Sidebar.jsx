@@ -2,7 +2,9 @@
 import { useState } from 'react'
 import {
   Activity,
+  Archive,
   CalendarDays,
+  CalendarRange,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -15,21 +17,28 @@ import {
   UsersRound,
   Zap,
 } from 'lucide-react'
-
 const BASE_NAV_ITEMS = [
   { name: 'Overview', icon: LayoutDashboard },
   { name: 'Calendar', icon: CalendarDays },
   { name: 'Board', icon: FolderKanban },
 ]
 
-
 function getNavItems(role) {
   const items = [...BASE_NAV_ITEMS]
+
+  // Organic Calendar hanya untuk Admin dan Strategic.
+  if (role === 'admin' || role === 'strategic') {
+    items.push({
+      name: 'Organic Calendar',
+      icon: CalendarRange,
+    })
+  }
 
   if (role === 'admin') {
     items.push(
       { name: 'All Tasks', icon: List },
       { name: 'My Tasks', icon: UserRoundCheck },
+      { name: 'Task Archive', icon: Archive },
     )
   }
 
@@ -41,16 +50,21 @@ function getNavItems(role) {
   }
 
   if (role === 'creative') {
-    items.push({ name: 'My Tasks', icon: UserRoundCheck })
+    items.push({
+      name: 'My Tasks',
+      icon: UserRoundCheck,
+    })
   }
 
   if (role === 'digital_marketing') {
-    items.push({ name: 'All Tasks', icon: List })
+    items.push({
+      name: 'All Tasks',
+      icon: List,
+    })
   }
 
   return items
 }
-
 
 export default function Sidebar({
   activeNav,

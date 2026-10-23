@@ -410,6 +410,237 @@ select:focus-visible {
     background: #0a101dd9;
   }
 
+/* =========================================
+   LOGOUT CONFIRMATION MODAL
+========================================= */
+
+.logout-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(5, 6, 12, 0.76);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: logoutOverlayIn 0.2s ease;
+}
+
+.logout-confirm-modal {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  padding: 32px;
+  overflow: hidden;
+  color: #f4f4f8;
+  background: #171820;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 22px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.48);
+  animation: logoutModalIn 0.25s ease;
+}
+
+.logout-confirm-modal::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  content: "";
+  background: linear-gradient(90deg, #8b7cff, #6c5ce7);
+}
+
+.logout-confirm-close {
+  position: absolute;
+  top: 17px;
+  right: 17px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  place-items: center;
+  color: #9293a5;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  transition: 0.2s ease;
+}
+
+.logout-confirm-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.logout-confirm-icon {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 22px;
+  place-items: center;
+  color: #a69bff;
+  background: rgba(139, 124, 255, 0.12);
+  border: 1px solid rgba(139, 124, 255, 0.22);
+  border-radius: 17px;
+}
+
+.logout-confirm-eyebrow {
+  display: block;
+  margin-bottom: 9px;
+  color: #a69bff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.7px;
+}
+
+.logout-confirm-modal h2 {
+  margin: 0 0 10px;
+  color: #f4f4f8;
+  font-size: 23px;
+  font-weight: 750;
+  letter-spacing: -0.7px;
+}
+
+.logout-confirm-modal > p {
+  margin: 0;
+  color: #a5a6b7;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.logout-confirm-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 23px;
+  padding: 13px 14px;
+  color: #b7b8c8;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.logout-confirm-note-dot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  margin-top: 5px;
+  background: #8b7cff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(139, 124, 255, 0.45);
+}
+
+.logout-confirm-actions {
+  display: flex;
+  gap: 11px;
+  margin-top: 27px;
+}
+
+.logout-cancel-button,
+.logout-submit-button {
+  display: inline-flex;
+  min-height: 44px;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 16px;
+  border-radius: 11px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.logout-cancel-button {
+  color: #d0d0dc;
+  background: #20212b;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.logout-cancel-button:hover {
+  background: #292a36;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.logout-submit-button {
+  color: #ffffff;
+  background: #6c5ce7;
+  border: 1px solid #7969f0;
+  box-shadow: 0 5px 18px rgba(108, 92, 231, 0.2);
+}
+
+.logout-submit-button:hover {
+  background: #7b6bed;
+  transform: translateY(-1px);
+}
+
+.logout-cancel-button:focus-visible,
+.logout-submit-button:focus-visible,
+.logout-confirm-close:focus-visible {
+  outline: 2px solid #a69bff;
+  outline-offset: 3px;
+}
+
+@keyframes logoutOverlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes logoutModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .logout-confirm-modal {
+    padding: 26px 22px;
+    border-radius: 18px;
+  }
+
+  .logout-confirm-modal h2 {
+    font-size: 21px;
+  }
+
+  .logout-confirm-actions {
+    gap: 9px;
+  }
+
+  .logout-cancel-button,
+  .logout-submit-button {
+    padding: 0 10px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logout-confirm-overlay,
+  .logout-confirm-modal {
+    animation: none;
+  }
+}
+
+
   /* Dynamic page title */
   .header-page-info {
     flex: 1;
@@ -1714,102 +1945,6 @@ h1 {
   .board-page .board-summary { flex-wrap: wrap; }
 }
 
-
-/* ==========================================================================
-   14. ALL TASKS FILTERS
-   ========================================================================== */
-
-.all-tasks-filters {
-  padding: 16px;
-  border-top: 1px solid #202c40;
-  border-bottom: 1px solid #202c40;
-  background: #0e1624;
-}
-
-.all-tasks-search {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 12px;
-  margin-bottom: 14px;
-  color: #8491aa;
-  background: #111b2b;
-  border: 1px solid #303c53;
-  border-radius: 8px;
-}
-.all-tasks-search:focus-within { border-color: #8b7cff; }
-.all-tasks-search input {
-  width: 100%;
-  min-width: 0;
-  color: #e7ebf7;
-  background: transparent;
-  border: 0;
-  outline: none;
-  font-size: 12px;
-}
-.all-tasks-search input::placeholder { color: #71809a; }
-
-.all-tasks-filter-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-.all-tasks-filter-grid label {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  min-width: 0;
-  color: #9aa7bd;
-  font-size: 11px;
-}
-.all-tasks-filter-grid select {
-  width: 100%;
-  min-width: 0;
-  padding: 10px;
-  color: #e7ebf7;
-  background: #151f30;
-  border: 1px solid #303c53;
-  border-radius: 7px;
-  font-size: 11px;
-  color-scheme: dark;
-}
-.all-tasks-filter-grid select:focus { outline: 1px solid #8b7cff; border-color: #8b7cff; }
-
-.all-tasks-filter-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-top: 14px;
-  color: #8491aa;
-  font-size: 11px;
-}
-.all-tasks-filter-footer span,
-.all-tasks-filter-footer button { display: inline-flex; align-items: center; gap: 7px; }
-.all-tasks-filter-footer button {
-  padding: 8px 10px;
-  color: #c5bdff;
-  background: #211f3b;
-  border: 1px solid #39345e;
-  border-radius: 6px;
-  font-size: 11px;
-  cursor: pointer;
-}
-.all-tasks-filter-footer button:hover:not(:disabled) { background: #302a50; border-color: #8b7cff; }
-.all-tasks-filter-footer button:disabled { opacity: .4; cursor: not-allowed; }
-
-@media (max-width: 900px) {
-  .all-tasks-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-@media (max-width: 520px) {
-  .all-tasks-filters { padding: 12px; }
-  .all-tasks-filter-grid { gap: 9px; }
-  .all-tasks-filter-grid select { padding: 9px 6px; font-size: 10px; }
-  .all-tasks-filter-footer { align-items: flex-start; flex-wrap: wrap; }
-}
-
-
 /* ==========================================================================
    15. TASK CARD READABLE
    Harus tetap di bawah section 7 & 11 (menimpa padding .task-chip).
@@ -2164,18 +2299,6 @@ h1 {
    TASK EXPORT PANEL
 ========================================= */
 
-.task-export-panel {
-  margin-bottom: 22px;
-  padding: 20px;
-  border: 1px solid rgba(139, 124, 255, 0.2);
-  border-radius: 16px;
-  background: linear-gradient(
-    135deg,
-    rgba(139, 124, 255, 0.075),
-    rgba(23, 24, 32, 0.96) 65%
-  );
-}
-
 .task-export-heading {
   display: flex;
   align-items: center;
@@ -2314,9 +2437,6 @@ h1 {
 }
 
 @media (max-width: 600px) {
-  .task-export-panel {
-    padding: 15px;
-  }
 
   .task-export-controls {
     align-items: stretch;

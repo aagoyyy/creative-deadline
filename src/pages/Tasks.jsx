@@ -7,14 +7,10 @@ import {
   ListTodo,
   CalendarDays,
   Flag,
-  Download,
-  FileSpreadsheet,
-  CheckCircle2,
-  AlertCircle,
 } from 'lucide-react'
 
 import TaskCard from '../components/TaskCard'
-import { exportTasksToExcel } from '../utils/taskArchive'
+import '../pages/Tasks.css'
 
 const STATUS_OPTIONS = [
   'NOT STARTED',
@@ -83,7 +79,6 @@ function getDeadlineDate(task) {
   }
 
   if (typeof value === 'string') {
-    // Menangani tanggal kalender YYYY-MM-DD tanpa pergeseran timezone.
     if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
       const [year, month, day] = value.split('-').map(Number)
       const date = new Date(year, month - 1, day)
@@ -103,9 +98,10 @@ function getDeadlineDate(task) {
   }
 
   if (typeof value === 'number') {
-    const date = new Date()
-    date.setDate(1)
-    date.setDate(value)
+    const date = new Date(value)
+
+    if (Number.isNaN(date.getTime())) return null
+
     date.setHours(0, 0, 0, 0)
     return date
   }
@@ -134,8 +130,11 @@ function getDeadlineCategory(task) {
 
 function sortTasksByPriority(tasks) {
   return [...tasks].sort((a, b) => {
-    const priorityA = PRIORITY_ORDER[normalizePriority(a.priority)]
-    const priorityB = PRIORITY_ORDER[normalizePriority(b.priority)]
+    const priorityA =
+      PRIORITY_ORDER[normalizePriority(a.priority)]
+
+    const priorityB =
+      PRIORITY_ORDER[normalizePriority(b.priority)]
 
     if (priorityA !== priorityB) {
       return priorityA - priorityB
@@ -160,48 +159,12 @@ function sortTasksByPriority(tasks) {
   })
 }
 
-function getTaskCreatedMonth(task) {
-  const value = task.createdAt
-
-  if (!value) return ''
-
-  let date = value
-
-  if (typeof value?.toDate === 'function') {
-    date = value.toDate()
-  } else if (
-    typeof value === 'object' &&
-    typeof value.seconds === 'number'
-  ) {
-    date = new Date(value.seconds * 1000)
-  } else if (typeof value === 'string') {
-    date = new Date(value)
-  }
-
-  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
-    return ''
-  }
-
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-
-  return `${year}-${month}`
-}
-
-function formatMonthLabel(monthKey) {
-  const [year, month] = monthKey.split('-')
-  const monthName = MONTHS[Number(month) - 1]
-
-  return `${monthName} ${year}`
-}
-
 export default function Tasks({
   tasks = [],
   selectedTaskId,
   onSelectTask,
   search = '',
   onSearchChange,
-  userRole = '',
 }) {
   const [projectFilter, setProjectFilter] = useState('ALL')
   const [picFilter, setPicFilter] = useState('ALL')
@@ -212,14 +175,7 @@ export default function Tasks({
   const [yearFilter, setYearFilter] = useState('ALL')
   const [priorityFilter, setPriorityFilter] = useState('ALL')
 
-  const [exportMonth, setExportMonth] = useState('ALL')
-  const [exportError, setExportError] = useState('')
-  const [exportSuccess, setExportSuccess] = useState('')
-  const [isExporting, setIsExporting] = useState(false)
-
-  const isAdmin = String(userRole).trim().toLowerCase() === 'admin'
-
-  // Daftar task yang ditampilkan tidak menyertakan draft.
+  // Draft tidak ditampilkan di daftar All Tasks.
   const activeTasks = useMemo(
     () =>
       tasks.filter(
@@ -229,37 +185,33 @@ export default function Tasks({
     [tasks]
   )
 
-  // Daftar bulan export diambil dari SEMUA task, termasuk draft.
-  const availableExportMonths = useMemo(() => {
-    const monthSet = new Set()
-
-    tasks.forEach((task) => {
-      const month = getTaskCreatedMonth(task)
-
-      if (month) monthSet.add(month)
-    })
-
-    return [...monthSet].sort().reverse()
-  }, [tasks])
-
   const projects = useMemo(
     () =>
-      [...new Set(activeTasks.map((task) => task.project).filter(Boolean))]
-        .sort(),
+      [
+        ...new Set(
+          activeTasks.map((task) => task.project).filter(Boolean)
+        ),
+      ].sort(),
     [activeTasks]
   )
 
   const pics = useMemo(
     () =>
-      [...new Set(activeTasks.map((task) => task.pic).filter(Boolean))]
-        .sort(),
+      [
+        ...new Set(
+          activeTasks.map((task) => task.pic).filter(Boolean)
+        ),
+      ].sort(),
     [activeTasks]
   )
 
   const types = useMemo(
     () =>
-      [...new Set(activeTasks.map((task) => task.type).filter(Boolean))]
-        .sort(),
+      [
+        ...new Set(
+          activeTasks.map((task) => task.type).filter(Boolean)
+        ),
+      ].sort(),
     [activeTasks]
   )
 
@@ -287,28 +239,28 @@ export default function Tasks({
     const result = activeTasks.filter((task) => {
       const matchesSearch =
         !search ||
-        [
-          task.title,
-          task.code,
-          task.project,
-          task.pic,
-        ].some((value) =>
-          String(value || '')
-            .toLowerCase()
-            .includes(search.toLowerCase())
+        [task.title, task.code, task.project, task.pic].some(
+          (value) =>
+            String(value || '')
+              .toLowerCase()
+              .includes(search.toLowerCase())
         )
 
       const matchesProject =
-        projectFilter === 'ALL' || task.project === projectFilter
+        projectFilter === 'ALL' ||
+        task.project === projectFilter
 
       const matchesPic =
-        picFilter === 'ALL' || task.pic === picFilter
+        picFilter === 'ALL' ||
+        task.pic === picFilter
 
       const matchesStatus =
-        statusFilter === 'ALL' || task.status === statusFilter
+        statusFilter === 'ALL' ||
+        task.status === statusFilter
 
       const matchesType =
-        typeFilter === 'ALL' || task.type === typeFilter
+        typeFilter === 'ALL' ||
+        task.type === typeFilter
 
       const matchesDeadline =
         deadlineFilter === 'ALL' ||
@@ -384,112 +336,10 @@ export default function Tasks({
     onSearchChange?.('')
   }
 
-  function handleExportExcel() {
-    setExportError('')
-    setExportSuccess('')
-
-    if (!isAdmin) {
-      setExportError('Hanya Admin yang dapat mengekspor data.')
-      return
-    }
-
-    setIsExporting(true)
-
-    try {
-      // Menggunakan semua tasks, bukan filteredTasks atau activeTasks.
-      // Proses ini hanya menghasilkan file lokal, tidak mengubah Firestore.
-      const result = exportTasksToExcel(tasks, exportMonth)
-
-      setExportSuccess(
-        `File ${result.fileName} disiapkan dengan ${result.exportedCount} task. Data Firestore tidak dihapus atau diubah.`
-      )
-    } catch (error) {
-      setExportError(
-        error?.message || 'Gagal mengekspor data task.'
-      )
-    } finally {
-      setIsExporting(false)
-    }
-  }
-
   return (
     <section className="page-content">
       <section className="dashboard-panel all-tasks-panel">
-
-        {/* EXPORT EXCEL KHUSUS ADMIN */}
-        {isAdmin && (
-          <section className="task-export-panel">
-            <div className="task-export-heading">
-              <div className="task-export-icon">
-                <FileSpreadsheet size={21} />
-              </div>
-
-              <div className="task-export-copy">
-                <h3>Export Task ke Excel</h3>
-                <p>
-                  Unduh salinan data task untuk backup atau arsip.
-                  Data di dashboard tidak akan dihapus.
-                </p>
-              </div>
-            </div>
-
-            <div className="task-export-controls">
-              <label className="task-export-select">
-                <span>Periode data dibuat</span>
-
-                <select
-                  value={exportMonth}
-                  onChange={(event) => {
-                    setExportMonth(event.target.value)
-                    setExportError('')
-                    setExportSuccess('')
-                  }}
-                >
-                  <option value="ALL">Semua Task</option>
-
-                  {availableExportMonths.map((month) => (
-                    <option key={month} value={month}>
-                      {formatMonthLabel(month)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <button
-                type="button"
-                className="task-export-button"
-                onClick={handleExportExcel}
-                disabled={isExporting || tasks.length === 0}
-              >
-                <Download size={16} />
-                {isExporting ? 'Menyiapkan...' : 'Export Excel'}
-              </button>
-            </div>
-
-            <div className="task-export-note">
-              <span>
-                {tasks.length} task tersedia untuk export,
-                termasuk draft.
-              </span>
-
-              {exportError && (
-                <p className="task-export-message error">
-                  <AlertCircle size={15} />
-                  {exportError}
-                </p>
-              )}
-
-              {exportSuccess && (
-                <p className="task-export-message success">
-                  <CheckCircle2 size={15} />
-                  {exportSuccess}
-                </p>
-              )}
-            </div>
-          </section>
-        )}
-
-        {/* FILTER TASK */}
+        {/* TASK FILTERS */}
         <div className="all-tasks-filters">
           <label className="all-tasks-search">
             <Search size={16} />
@@ -663,7 +513,9 @@ export default function Tasks({
                 <option value="OVERDUE">Overdue</option>
                 <option value="TODAY">Due Today</option>
                 <option value="THIS_WEEK">Within 7 Days</option>
-                <option value="UPCOMING">More Than 7 Days Away</option>
+                <option value="UPCOMING">
+                  More Than 7 Days Away
+                </option>
                 <option value="NO_DATE">No Deadline</option>
               </select>
             </label>

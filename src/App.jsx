@@ -13,7 +13,10 @@ import './App.css'
 import './index.css'
 import './pages/Dashboard.css'
 import './components/StatCard.css'
-
+import './pages/Tasks.css'
+import './pages/MyBrief.css'
+import OrganicCalendar from './pages/OrganicCalendar'
+import TaskArchive from './pages/TaskArchive'
 import Sidebar from './components/Sidebar'
 import Header from './components/Header'
 import TaskModal from './components/TaskModal'
@@ -46,10 +49,12 @@ import Toast from './components/Toast'
 const NAV_ITEMS = [
   'Overview',
   'Calendar',
+  'Organic Calendar',
   'Board',
   'All Tasks',
   'My Tasks',
   'My Brief',
+  'Task Archive',
   'Team',
 ]
 
@@ -463,11 +468,18 @@ function App() {
 
   function handleNavigate(page) {
     if (!NAV_ITEMS.includes(page)) return
-
+    if (page === 'Task Archive' && role !== 'admin') {
+      return
+    }
     if (page === 'My Brief' && !canUseMyBrief) {
       return
     }
-
+    if (
+      page === 'Organic Calendar' &&
+      !['admin', 'strategic'].includes(role)
+    ) {
+      return
+    }
     setActiveNav(page)
     setSearch('')
     setShowDetail(false)
@@ -1074,7 +1086,17 @@ function App() {
                 }
               />
             )}
-
+            {activeNav === 'Organic Calendar' && (
+              <OrganicCalendar
+                tasks={tasks}
+                selectedTaskId={selectedTaskId}
+                onSelectTask={handleSelectTask}
+                year={monthDate.getFullYear()}
+                month={monthDate.getMonth()}
+                onChangeMonth={handleChangeMonth}
+                onToday={handleToday}
+              />
+            )}
             {activeNav === 'Board' && (
               <Board
                 tasks={filteredTasks}
@@ -1100,6 +1122,12 @@ function App() {
               />
             )}
 
+            {activeNav === 'Task Archive' && role === 'admin' && (
+              <TaskArchive
+                tasks={tasks}
+                userRole={currentUser.role}
+              />
+            )}
 
             {activeNav === 'My Tasks' && (
               <MyTasks

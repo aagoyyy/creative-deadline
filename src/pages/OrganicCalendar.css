@@ -1,0 +1,858 @@
+
+/* =========================================
+   ORGANIC CALENDAR — THEME
+   Dark Navy + Purple
+========================================= */
+
+.organic-calendar-page {
+  --organic-bg: #0b1120;
+  --organic-card: #111b2d;
+  --organic-card-hover: #172337;
+  --organic-border: #26344b;
+  --organic-text: #e2e8f0;
+  --organic-muted: #8492aa;
+  --organic-purple: #8b7cff;
+
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  color: var(--organic-text);
+}
+
+.organic-calendar-page * {
+  box-sizing: border-box;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
+.organic-calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.organic-eyebrow {
+  margin-bottom: 9px;
+  color: var(--organic-purple);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+}
+
+.organic-calendar-header h1 {
+  margin: 0;
+  color: var(--organic-text);
+  font-size: clamp(27px, 3vw, 35px);
+  font-weight: 750;
+  letter-spacing: -1.3px;
+}
+
+.organic-calendar-header h1 span {
+  color: var(--organic-purple);
+}
+
+.organic-calendar-header p {
+  max-width: 650px;
+  margin: 9px 0 0;
+  color: var(--organic-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.organic-header-icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #b7aaff;
+  background: rgba(139, 124, 255, 0.12);
+  border: 1px solid rgba(139, 124, 255, 0.22);
+  border-radius: 15px;
+}
+
+/* =========================================
+   STAT CARDS
+========================================= */
+
+.organic-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.organic-stat-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  min-width: 0;
+  padding: 19px;
+  background: var(--organic-card);
+  border: 1px solid var(--organic-border);
+  border-radius: 15px;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.organic-stat-card:hover {
+  background: var(--organic-card-hover);
+  border-color: #35445e;
+  transform: translateY(-2px);
+}
+
+.organic-stat-icon {
+  display: grid;
+  width: 39px;
+  height: 39px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 11px;
+}
+
+.organic-stat-icon.purple {
+  color: #b7aaff;
+  background: rgba(139, 124, 255, 0.15);
+}
+
+.organic-stat-icon.blue {
+  color: #78b8ff;
+  background: rgba(74, 144, 226, 0.14);
+}
+
+.organic-stat-icon.green {
+  color: #5de0b0;
+  background: rgba(44, 190, 139, 0.14);
+}
+
+.organic-stat-icon.red {
+  color: #ff8e9b;
+  background: rgba(245, 91, 116, 0.14);
+}
+
+.organic-stat-card > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 5px;
+}
+
+.organic-stat-card > div > span {
+  color: #9aa8bd;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.organic-stat-card strong {
+  color: var(--organic-text);
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.organic-stat-card small {
+  color: #8492aa;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* =========================================
+   CALENDAR MAIN CARD
+========================================= */
+
+.organic-calendar-card {
+  min-width: 0;
+  overflow: hidden;
+  background: var(--organic-card);
+  border: 1px solid var(--organic-border);
+  border-radius: 16px;
+}
+
+/* =========================================
+   CALENDAR TOOLBAR
+========================================= */
+
+.organic-calendar-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 21px 22px;
+  background: var(--organic-card);
+  border-bottom: 1px solid var(--organic-border);
+}
+
+.organic-month-heading {
+  min-width: 0;
+}
+
+.organic-month-heading h2 {
+  margin: 0;
+  color: var(--organic-text);
+  font-size: 19px;
+  font-weight: 750;
+  letter-spacing: -0.4px;
+}
+
+.organic-month-heading > span {
+  display: block;
+  margin-top: 5px;
+  color: var(--organic-muted);
+  font-size: 11px;
+}
+
+.organic-calendar-controls {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.organic-calendar-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 35px;
+  color: #cbd5e1;
+  background: #172337;
+  border: 1px solid #2b3a52;
+  border-radius: 9px;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.organic-calendar-controls button:hover {
+  color: #ffffff;
+  background: #202d43;
+  border-color: rgba(139, 124, 255, 0.5);
+}
+
+.organic-calendar-controls .organic-today-button {
+  padding: 0 13px;
+  color: #c3baff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.organic-calendar-controls .organic-today-button:hover {
+  color: #ffffff;
+  background: rgba(139, 124, 255, 0.17);
+}
+
+.organic-arrow-button {
+  width: 35px;
+}
+
+/* =========================================
+   CALENDAR GRID
+========================================= */
+
+.organic-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  background: var(--organic-card);
+}
+
+.organic-weekday {
+  padding: 13px 6px;
+  color: #94a3b8;
+  background: #111b2d;
+  border-bottom: 1px solid var(--organic-border);
+  text-align: center;
+  font-size: 10px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.organic-day-cell {
+  min-width: 0;
+  min-height: 125px;
+  padding: 9px 7px;
+  background: transparent;
+  border-right: 1px solid var(--organic-border);
+  border-bottom: 1px solid var(--organic-border);
+  transition: background 0.18s ease;
+}
+
+.organic-day-cell:nth-child(7n) {
+  border-right: none;
+}
+
+/* Tanggal hari ini */
+.organic-day-cell.is-today {
+  background: rgba(139, 124, 255, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(139, 124, 255, 0.15);
+}
+
+.organic-day-number {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 8px;
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.organic-day-cell.is-today .organic-day-number > span:first-child {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #ffffff;
+  background: #7666e8;
+  border-radius: 50%;
+}
+
+.organic-day-count {
+  color: #8492aa;
+  font-size: 9px;
+}
+
+/* =========================================
+   TASK LIST INSIDE CALENDAR
+   Card task sengaja dipertahankan
+========================================= */
+
+.organic-day-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.organic-task-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+  padding: 7px;
+  color: #eae8ff;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    filter 0.18s ease;
+}
+
+.organic-task-chip:hover {
+  filter: brightness(1.15);
+}
+
+.organic-task-chip.is-selected {
+  border-color: #b0a5ff;
+}
+
+/* Draft — warna asli dipertahankan */
+.organic-task-draft {
+  color: #f0d7a0;
+  background: rgba(217, 164, 65, 0.12);
+  border: 1px solid rgba(217, 164, 65, 0.25);
+  border-left: 3px solid #c9a45c;
+}
+
+.organic-task-draft:hover {
+  background: rgba(217, 164, 65, 0.2);
+}
+
+/* Assigned — warna ungu dipertahankan */
+.organic-task-assigned {
+  color: #e1d9ff;
+  background: rgba(139, 124, 255, 0.15);
+  border: 1px solid rgba(139, 124, 255, 0.22);
+  border-left: 3px solid #9a86ff;
+}
+
+.organic-task-assigned:hover {
+  background: rgba(139, 124, 255, 0.25);
+}
+
+.organic-task-chip-title {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.organic-task-chip-state {
+  overflow: hidden;
+  color: #b7b1e9;
+  font-size: 8px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================================
+   CALENDAR LEGEND
+========================================= */
+
+.organic-calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 15px 21px;
+  color: var(--organic-muted);
+  background: var(--organic-card);
+  font-size: 10px;
+}
+
+.organic-calendar-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.organic-legend-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 3px;
+}
+
+.organic-legend-dot.draft {
+  background: #c9a45c;
+}
+
+.organic-legend-dot.assigned {
+  background: var(--organic-purple);
+}
+
+.organic-legend-dot.overdue {
+  background: #ff7288;
+}
+
+/* =========================================
+   UPCOMING DEADLINES
+========================================= */
+
+.organic-deadline-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.organic-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.organic-section-heading h2 {
+  margin: 0;
+  color: var(--organic-text);
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.4px;
+}
+
+.organic-section-heading p {
+  margin: 5px 0 0;
+  color: var(--organic-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.organic-section-heading > span {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  color: #c3bbff;
+  background: rgba(139, 124, 255, 0.1);
+  border: 1px solid rgba(139, 124, 255, 0.2);
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.organic-deadline-list {
+  overflow: hidden;
+  background: var(--organic-card);
+  border: 1px solid var(--organic-border);
+  border-radius: 15px;
+}
+
+.organic-deadline-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  padding: 15px 18px;
+  color: var(--organic-text);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--organic-border);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.organic-deadline-row:last-child {
+  border-bottom: none;
+}
+
+.organic-deadline-row:hover,
+.organic-deadline-row.is-selected {
+  background: var(--organic-card-hover);
+}
+
+.organic-deadline-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 49px;
+  height: 51px;
+  flex: 0 0 auto;
+  background: #172337;
+  border: 1px solid #2b3a52;
+  border-radius: 11px;
+}
+
+.organic-deadline-date strong {
+  color: var(--organic-text);
+  font-size: 19px;
+  line-height: 1.1;
+}
+
+.organic-deadline-date span {
+  margin-top: 4px;
+  color: #a7a0ec;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.organic-deadline-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.organic-deadline-info > strong {
+  overflow: hidden;
+  color: var(--organic-text);
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.organic-deadline-info > span {
+  color: var(--organic-muted);
+  font-size: 10px;
+}
+
+.organic-deadline-info > small {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #8492aa;
+  font-size: 10px;
+}
+
+/* =========================================
+   DEADLINE BADGES
+========================================= */
+
+.organic-deadline-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  max-width: 45%;
+}
+
+.organic-workflow-badge,
+.organic-status-badge,
+.organic-overdue-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.organic-workflow-badge.draft {
+  color: #f0d7a0;
+  background: rgba(217, 164, 65, 0.12);
+  border-color: rgba(217, 164, 65, 0.25);
+}
+
+.organic-workflow-badge.assigned {
+  color: #c4baff;
+  background: rgba(139, 124, 255, 0.12);
+  border-color: rgba(139, 124, 255, 0.2);
+}
+
+.organic-status-pending {
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.organic-status-start {
+  color: #8cc7ff;
+  background: rgba(74, 144, 226, 0.12);
+}
+
+.organic-status-approval {
+  color: #e2bcff;
+  background: rgba(184, 110, 255, 0.12);
+}
+
+.organic-status-done {
+  color: #73e2b4;
+  background: rgba(44, 190, 139, 0.12);
+}
+
+.organic-overdue-badge {
+  color: #ff8b9c;
+  background: rgba(245, 91, 116, 0.12);
+  border-color: rgba(245, 91, 116, 0.2);
+}
+
+/* =========================================
+   EMPTY STATE
+========================================= */
+
+.organic-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 45px 20px;
+  color: var(--organic-muted);
+  background: var(--organic-card);
+  border: 1px dashed #34435a;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.organic-empty-state > svg {
+  margin-bottom: 14px;
+  color: var(--organic-purple);
+}
+
+.organic-empty-state strong {
+  color: var(--organic-text);
+  font-size: 13px;
+}
+
+.organic-empty-state p {
+  max-width: 360px;
+  margin: 8px 0 0;
+  color: var(--organic-muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 1100px) {
+  .organic-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .organic-day-cell {
+    min-height: 105px;
+    padding: 7px 5px;
+  }
+
+  .organic-task-chip {
+    padding: 5px;
+  }
+
+  .organic-task-chip-title {
+    font-size: 9px;
+  }
+
+  .organic-task-chip-state {
+    font-size: 7px;
+  }
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 700px) {
+  .organic-calendar-page {
+    gap: 17px;
+  }
+
+  .organic-calendar-header {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .organic-calendar-header h1 {
+    font-size: 27px;
+  }
+
+  .organic-calendar-header p {
+    font-size: 12px;
+  }
+
+  .organic-header-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  .organic-stats-grid {
+    gap: 9px;
+  }
+
+  .organic-stat-card {
+    gap: 9px;
+    padding: 13px;
+  }
+
+  .organic-stat-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+  }
+
+  .organic-stat-card strong {
+    font-size: 22px;
+  }
+
+  .organic-stat-card > div > span {
+    font-size: 10px;
+  }
+
+  .organic-stat-card small {
+    font-size: 9px;
+  }
+
+  .organic-calendar-toolbar {
+    align-items: flex-start;
+    padding: 16px 12px;
+    gap: 10px;
+  }
+
+  .organic-month-heading h2 {
+    font-size: 16px;
+  }
+
+  .organic-month-heading > span {
+    font-size: 10px;
+  }
+
+  .organic-calendar-controls {
+    gap: 4px;
+  }
+
+  .organic-calendar-controls button {
+    height: 31px;
+  }
+
+  .organic-calendar-controls .organic-today-button {
+    padding: 0 8px;
+  }
+
+  .organic-arrow-button {
+    width: 31px;
+  }
+
+  .organic-calendar-grid {
+    min-width: 560px;
+  }
+
+  .organic-calendar-card {
+    overflow-x: auto;
+  }
+
+  .organic-calendar-legend {
+    gap: 12px;
+    padding: 13px;
+  }
+
+  .organic-deadline-row {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .organic-deadline-date {
+    width: 42px;
+    height: 46px;
+  }
+
+  .organic-deadline-info > strong {
+    white-space: normal;
+    line-height: 1.5;
+  }
+
+  .organic-deadline-badges {
+    max-width: 100px;
+  }
+
+  .organic-workflow-badge,
+  .organic-status-badge,
+  .organic-overdue-badge {
+    padding: 5px 6px;
+    font-size: 8px;
+  }
+}
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 420px) {
+  .organic-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .organic-stat-card {
+    align-items: center;
+  }
+
+  .organic-section-heading {
+    align-items: flex-start;
+  }
+
+  .organic-section-heading h2 {
+    font-size: 16px;
+  }
+
+  .organic-section-heading > span {
+    font-size: 9px;
+  }
+
+  .organic-deadline-row {
+    flex-wrap: wrap;
+  }
+
+  .organic-deadline-badges {
+    width: 100%;
+    max-width: none;
+    padding-left: 52px;
+    justify-content: flex-start;
+  }
+}

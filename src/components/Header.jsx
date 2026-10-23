@@ -11,6 +11,8 @@ import {
   ChevronDown,
 } from 'lucide-react'
 
+import ConfirmModal from './ConfirmModal'
+
 function formatNotificationTime(timestamp) {
   if (!timestamp) return 'Just now'
 
@@ -97,6 +99,7 @@ export default function Header({
 }) {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showAccountMenu, setShowAccountMenu] = useState(false)
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
   const notificationRef = useRef(null)
   const accountRef = useRef(null)
@@ -177,6 +180,20 @@ export default function Header({
     setShowNotifications(false)
   }
 
+  function handleLogoutRequest() {
+    setShowAccountMenu(false)
+    setShowLogoutConfirm(true)
+  }
+
+  function handleLogoutCancel() {
+    setShowLogoutConfirm(false)
+  }
+
+  function handleLogoutConfirm() {
+    setShowLogoutConfirm(false)
+    onLogout?.()
+  }
+
   return (
     <header className="topbar">
       <div className="header-page-info">
@@ -185,6 +202,7 @@ export default function Header({
       </div>
 
       <div className="top-actions">
+        {/* Search */}
         <div className="command-search">
           <Search size={16} />
 
@@ -263,7 +281,9 @@ export default function Header({
                     <span className="notification-empty-icon">
                       <Bell size={22} />
                     </span>
+
                     <strong>No notifications yet</strong>
+
                     <p>
                       Recent task activity will appear here.
                     </p>
@@ -322,7 +342,7 @@ export default function Header({
           )}
         </div>
 
-        {/* Account menu */}
+        {/* Account Menu */}
         <div className="account-wrapper" ref={accountRef}>
           <button
             type="button"
@@ -357,7 +377,9 @@ export default function Header({
 
                 <div className="account-menu-identity">
                   <strong>{displayName}</strong>
+
                   {displayEmail && <span>{displayEmail}</span>}
+
                   <span className="account-role">
                     {displayRole}
                   </span>
@@ -369,10 +391,7 @@ export default function Header({
               <button
                 type="button"
                 className="account-menu-item"
-                onClick={() => {
-                  setShowAccountMenu(false)
-                  onLogout?.()
-                }}
+                onClick={handleLogoutRequest}
               >
                 <LogOut size={16} />
                 <span>Log out</span>
@@ -381,6 +400,16 @@ export default function Header({
           )}
         </div>
       </div>
+
+      {/* Logout Confirmation */}
+      <ConfirmModal
+        open={showLogoutConfirm}
+        title="Confirm Logout"
+        message="Are you sure you want to log out from your account?"
+        confirmText="Yes, Log Out"
+        onCancel={handleLogoutCancel}
+        onConfirm={handleLogoutConfirm}
+      />
     </header>
   )
 }
