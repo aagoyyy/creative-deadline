@@ -169,7 +169,7 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState(null)
   const [authError, setAuthError] = useState('')
-
+  const [newBriefRequest, setNewBriefRequest] = useState(0)
   const [toast, setToast] = useState({
     message: '',
     type: 'error',
@@ -218,9 +218,12 @@ function App() {
   const [selectedTaskId, setSelectedTaskId] = useState(null)
   const [search, setSearch] = useState('')
 
+// Mobile sidebar drawer
+const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [showNewTask, setShowNewTask] = useState(false)
   const [showEditTask, setShowEditTask] = useState(false)
   const [showDetail, setShowDetail] = useState(false)
+  const [draftToEdit, setDraftToEdit] = useState(null)
 
   const [monthDate, setMonthDate] = useState(
     () => new Date(2026, 9, 1)
@@ -485,6 +488,7 @@ function App() {
     setShowDetail(false)
     setShowNewTask(false)
     setShowEditTask(false)
+    setDraftToEdit(null)
 
     if (
       page === 'Team' ||
@@ -495,8 +499,35 @@ function App() {
   }
 
   function handleSelectTask(task) {
-    if (!task || task.workflowState === 'DRAFT') return
-
+    if (!task) return
+  
+    // DRAFT: hanya pembuatnya yang boleh edit
+    if (task.workflowState === 'DRAFT') {
+      if (
+        currentUser?.role !== 'strategic' ||
+        task.createdByUid !== currentUser?.uid
+      ) {
+        return
+      }
+  
+      setSelectedTaskId(null)
+      setShowDetail(false)
+      setShowEditTask(false)
+      setShowNewTask(false)
+  
+      setDraftToEdit({
+        id: task.id,
+        requestId: Date.now(),
+      })
+  
+      return
+    }
+  
+    // ASSIGNED: bersihkan request edit draft sebelumnya
+    setDraftToEdit(null)
+  
+    setShowEditTask(false)
+    setShowNewTask(false)
     setSelectedTaskId(task.id)
     setShowDetail(true)
   }
@@ -756,7 +787,7 @@ function App() {
     }
   }
 
-  // Delete only drafts owned by the current creator.
+
   async function handleDeleteDraft(draftId) {
     if (!canUseMyBrief || !currentUser?.uid) {
       showToast(
@@ -765,14 +796,14 @@ function App() {
       )
       return
     }
-
+  
     const draft = tasks.find(
       (task) =>
         String(task.id) === String(draftId) &&
         task.workflowState === 'DRAFT' &&
         task.createdByUid === currentUser.uid
     )
-
+  
     if (!draft) {
       showToast(
         "Draft not found or you don't have permission to access it.",
@@ -780,31 +811,23 @@ function App() {
       )
       return
     }
-
-    setConfirmModal({
-      title: 'Delete draft?',
-      message: `Draft "${draft.title}" will be permanently deleted. This action cannot be undone.`,
-      confirmText: 'Delete Draft',
-
-      onConfirm: async () => {
-        try {
-          await removeTask(draftId)
-
-          showToast(
-            'Draft deleted successfully!',
-            'success'
-          )
-        } catch (error) {
-          console.error('Failed to delete draft:', error)
-
-          showToast(
-            error.message || 'Failed to delete draft.',
-            'error'
-          )
-        }
-      },
-    })
+  
+    try {
+      await removeTask(draft.id)
+  
+      showToast('Draft deleted successfully!', 'success')
+    } catch (error) {
+      console.error('Failed to delete draft:', error)
+  
+      showToast(
+        error.message || 'Failed to delete draft.',
+        'error'
+      )
+  
+      throw error
+    }
   }
+  
 
   async function handleStatusChange(taskId, status) {
     const task = activeTasks.find(
@@ -957,6 +980,48 @@ function App() {
     }
   }
 
+
+  async function handleForgiveOverdue() {
+    if (role !== 'admin' || !selectedTask) {
+      showToast('Only Admin can forgive overdue tasks.', 'error')
+      return
+    }
+  
+    const shouldForgive = selectedTask.overdueForgiven !== true
+  
+    try {
+      if (shouldForgive) {
+        await editTask(selectedTask.id, {
+          overdueForgiven: true,
+          overdueForgivenByUid: currentUser.uid,
+          overdueForgivenByName: currentUser.name || currentUser.email,
+          overdueForgivenAt: new Date(),
+        })
+      } else {
+        await editTask(selectedTask.id, {
+          overdueForgiven: false,
+          overdueForgivenByUid: null,
+          overdueForgivenByName: null,
+          overdueForgivenAt: null,
+        })
+      }
+  
+      showToast(
+        shouldForgive
+          ? 'Overdue successfully forgiven.'
+          : 'Overdue forgiveness has been removed.',
+        'success'
+      )
+    } catch (error) {
+      console.error('Failed to update overdue forgiveness:', error)
+  
+      showToast(
+        error.message || 'Failed to update overdue forgiveness.',
+        'error'
+      )
+    }
+  }
+  
   async function handleDeleteTask(taskId) {
     if (!canDeleteTasks) return
 
@@ -1019,39 +1084,47 @@ function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar
-        activeNav={activeNav}
-        onNavigate={handleNavigate}
-        taskCount={activeTasks.length}
-        currentUser={currentUser}
-        onLogout={handleLogout}
-      />
+
+<Sidebar
+  activeNav={activeNav}
+  onNavigate={handleNavigate}
+  taskCount={activeTasks.length}
+  currentUser={currentUser}
+  onLogout={handleLogout}
+  isMobileOpen={isMobileOpen}
+  onCloseMobile={() => setIsMobileOpen(false)}
+/>
+
 
       <main className="main-area">
-        <Header
-          activeNav={activeNav}
-          search={search}
-          onSearchChange={setSearch}
-          currentUser={currentUser}
-          onLogout={handleLogout}
-          notifications={notifications}
-          unreadCount={unreadCount}
-          notificationsLoading={notificationsLoading}
-          notificationsError={notificationsError}
-          onMarkAsRead={markAsRead}
-          onMarkAllAsRead={markAllAsRead}
-          onOpenNotification={(notification) => {
-            const task = activeTasks.find(
-              (item) =>
-                String(item.id) === String(notification.taskId)
-            )
 
-            if (task) {
-              setSelectedTaskId(task.id)
-              setShowDetail(true)
-            }
-          }}
-        />
+      <Header
+  activeNav={activeNav}
+  search={search}
+  onSearchChange={setSearch}
+  currentUser={currentUser}
+  onLogout={handleLogout}
+  onOpenSidebar={() => setIsMobileOpen(true)}
+  notifications={notifications}
+  unreadCount={unreadCount}
+  notificationsLoading={notificationsLoading}
+  notificationsError={notificationsError}
+  onMarkAsRead={markAsRead}
+  onMarkAllAsRead={markAllAsRead}
+  onOpenNotification={(notification) => {
+    const task = activeTasks.find(
+      (item) =>
+        String(item.id) === String(notification.taskId)
+    )
+
+    if (task) {
+      setSelectedTaskId(task.id)
+      setShowDetail(true)
+      setIsMobileOpen(false)
+    }
+  }}
+/>
+
 
         <div className="workspace-layout">
           <div className="workspace-main">
@@ -1061,6 +1134,7 @@ function App() {
                 selectedTaskId={selectedTaskId}
                 onSelectTask={handleSelectTask}
                 onNavigate={handleNavigate}
+                currentUser={currentUser}
                 onAddTask={
                   CAN_MANAGE_TASKS
                     ? () => setShowNewTask(true)
@@ -1086,17 +1160,24 @@ function App() {
                 }
               />
             )}
+
+
             {activeNav === 'Organic Calendar' && (
               <OrganicCalendar
                 tasks={tasks}
                 selectedTaskId={selectedTaskId}
                 onSelectTask={handleSelectTask}
+                onNewBrief={() => {
+                  setNewBriefRequest(Date.now())
+                }}
                 year={monthDate.getFullYear()}
                 month={monthDate.getMonth()}
                 onChangeMonth={handleChangeMonth}
                 onToday={handleToday}
               />
             )}
+
+
             {activeNav === 'Board' && (
               <Board
                 tasks={filteredTasks}
@@ -1138,25 +1219,28 @@ function App() {
               />
             )}
 
-            {activeNav === 'My Brief' &&
-              canUseMyBrief && (
-                <MyBrief
-                  drafts={myDrafts}
-                  currentUser={currentUser}
-                  creatives={creatives}
-                  creativesLoading={creativesLoading}
-                  creativesError={creativesError}
-                  onSaveDraft={handleSaveDraft}
-                  onUpdateDraft={handleUpdateDraft}
-                  onAssignDraft={handleAssignDraft}
-                  onDeleteDraft={handleDeleteDraft}
-                  onSelectTask={handleSelectBrief}
-                  showToast={showToast}
-                  onRequestConfirm={(config) =>
-                    setConfirmModal(config)
-                  }
-                />
-              )}
+{canUseMyBrief &&
+  (activeNav === 'My Brief' ||
+    activeNav === 'Organic Calendar') && (
+<MyBrief
+  drafts={myDrafts}
+  currentUser={currentUser}
+  creatives={creatives}
+  creativesLoading={creativesLoading}
+  creativesError={creativesError}
+  externalEditTask={draftToEdit}
+  newBriefRequest={newBriefRequest}
+  hidePageContent={activeNav !== 'My Brief'}
+  onSaveDraft={handleSaveDraft}
+  onUpdateDraft={handleUpdateDraft}
+  onAssignDraft={handleAssignDraft}
+  onDeleteDraft={handleDeleteDraft}
+  onSelectTask={handleSelectBrief}
+  showToast={showToast}
+  onRequestConfirm={(config) => setConfirmModal(config)}
+/>
+)}
+
 
             {activeNav === 'Team' && (
               <Team
@@ -1475,6 +1559,19 @@ function App() {
                   </div>
 
                   <div className="detail-actions">
+
+                  {role === 'admin' && selectedTask.deadline && (
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={handleForgiveOverdue}
+                    >
+                      {selectedTask.overdueForgiven === true
+                        ? 'Restore Overdue'
+                        : 'Forgive Overdue'}
+                    </button>
+                  )}
+
                     {CAN_MANAGE_TASKS && (
                       <button
                         type="button"

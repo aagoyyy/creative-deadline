@@ -12,7 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react'
-
+import './Calendar.css'
 import {
   getCalendarCells,
   getMonthName,
@@ -47,6 +47,12 @@ const STATUS_PROGRESS = {
   'APPROVAL 1': 50,
   'APPROVAL 2': 75,
   DONE: 100,
+}
+
+function normalizeStatus(status) {
+  return String(status || 'NOT STARTED')
+    .trim()
+    .toUpperCase()
 }
 
 function normalizePriority(priority) {
@@ -88,7 +94,10 @@ function matchesCalendarDate(value, day, year, month) {
   if (!value || !day) return false
 
   const date = parseDate(value)
-  if (!date) return false
+
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return false
+  }
 
   return (
     date.getFullYear() === year &&
@@ -96,6 +105,79 @@ function matchesCalendarDate(value, day, year, month) {
     date.getDate() === day
   )
 }
+
+/**
+ * Overdue rules:
+ * - Deadline must be before today.
+ * - Task must not be DONE.
+ * - Task must not have been forgiven by Admin.
+ *
+ * A DONE task stays in its completed color, even if completed late.
+ */
+
+function isTaskLate(task, now = new Date()) {
+  if (!task?.deadline) return false
+  if (task.overdueForgiven === true) return false
+
+  const deadline = parseDate(task.deadline)
+
+  if (
+    !(deadline instanceof Date) ||
+    Number.isNaN(deadline.getTime())
+  ) {
+    return false
+  }
+
+  const todayDate = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  )
+
+  const deadlineDate = new Date(
+    deadline.getFullYear(),
+    deadline.getMonth(),
+    deadline.getDate()
+  )
+
+  return deadlineDate < todayDate
+}
+
+function isTaskOverdue(task, now = new Date()) {
+  if (!task?.deadline) return false
+  if (task.overdueForgiven === true) return false
+
+  const deadline = parseDate(task.deadline)
+
+  if (
+    !(deadline instanceof Date) ||
+    Number.isNaN(deadline.getTime())
+  ) {
+    return false
+  }
+
+  const todayDate = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  )
+
+  const deadlineDate = new Date(
+    deadline.getFullYear(),
+    deadline.getMonth(),
+    deadline.getDate()
+  )
+
+  return deadlineDate < todayDate
+}
+
+function isTaskCompletedLate(task, now = new Date()) {
+  return (
+    normalizeStatus(task?.status) === 'DONE' &&
+    isTaskLate(task, now)
+  )
+}
+
 
 function getTaskDateMatch(task, day, year, month, dateFilter) {
   if (!day) return false
@@ -135,7 +217,10 @@ function formatDate(value) {
   if (!value) return '-'
 
   const date = parseDate(value)
-  if (!date) return '-'
+
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return '-'
+  }
 
   return date.toLocaleDateString('en-US', {
     day: 'numeric',
@@ -144,7 +229,9 @@ function formatDate(value) {
 }
 
 function getProgress(task) {
-  if (task.status === 'DONE') return 100
+  const status = normalizeStatus(task.status)
+
+  if (status === 'DONE') return 100
 
   const value = Number(task.progress)
 
@@ -157,7 +244,7 @@ function getProgress(task) {
     return Math.max(0, Math.min(100, value))
   }
 
-  return STATUS_PROGRESS[task.status] ?? 0
+  return STATUS_PROGRESS[status] ?? 0
 }
 
 function getStatusLabel(status) {
@@ -169,7 +256,9 @@ function getStatusLabel(status) {
     DONE: 'Completed',
   }
 
-  return labels[status] || status || 'Not Started'
+  const normalized = normalizeStatus(status)
+
+  return labels[normalized] || status || 'Not Started'
 }
 
 function getProjectLabel(project) {
@@ -221,7 +310,25 @@ function getTypeLabel(type) {
 
   return type
 }
+function getProjectColor(project) {
+  const value = String(project || '').trim().toUpperCase()
 
+  if (value.includes('ORGANIC')) return 'organic'
+  if (value.includes('SMM')) return 'smm'
+  if (value.includes('BIG PROJECT')) return 'big-project'
+
+  return 'other-project'
+}
+
+function getTypeColor(type) {
+  const value = String(type || '').trim().toUpperCase()
+
+  if (value.includes('VIDEO')) return 'video'
+  if (value.includes('CAROUSEL')) return 'carousel'
+  if (value.includes('SINGLE')) return 'single-image'
+
+  return 'other-type'
+}
 export default function Calendar({
   tasks = [],
   selectedTaskId,
@@ -257,72 +364,62 @@ export default function Calendar({
     today.getFullYear() === year &&
     today.getMonth() === month
 
+  const activeTasks = useMemo(
+    () =>
+      tasks.filter(
+        (task) =>
+          String(task.workflowState || '').toUpperCase() !== 'DRAFT'
+      ),
+    [tasks]
+  )
+
   const projects = useMemo(
     () =>
-      [
-        ...new Set(
-          tasks
-            .filter(
-              (task) =>
-                String(task.workflowState || '').toUpperCase() !==
-                'DRAFT'
-            )
-            .map((task) => task.project)
-            .filter(Boolean)
-        ),
-      ].sort(),
-    [tasks]
+      [...new Set(
+        activeTasks
+          .map((task) => task.project)
+          .filter(Boolean)
+      )].sort(),
+    [activeTasks]
   )
 
   const pics = useMemo(
     () =>
-      [
-        ...new Set(
-          tasks
-            .filter(
-              (task) =>
-                String(task.workflowState || '').toUpperCase() !==
-                'DRAFT'
-            )
-            .map((task) => task.pic)
-            .filter(Boolean)
-        ),
-      ].sort(),
-    [tasks]
+      [...new Set(
+        activeTasks
+          .map((task) => task.pic)
+          .filter(Boolean)
+      )].sort(),
+    [activeTasks]
   )
 
   const types = useMemo(
     () =>
-      [
-        ...new Set(
-          tasks
-            .filter(
-              (task) =>
-                String(task.workflowState || '').toUpperCase() !==
-                'DRAFT'
-            )
-            .map((task) => task.type)
-            .filter(Boolean)
-        ),
-      ].sort(),
-    [tasks]
+      [...new Set(
+        activeTasks
+          .map((task) => task.type)
+          .filter(Boolean)
+      )].sort(),
+    [activeTasks]
   )
 
   const filteredTasks = useMemo(() => {
-    const filtered = tasks.filter(
-      (task) =>
-        String(task.workflowState || '').toUpperCase() !== 'DRAFT' &&
+    const filtered = activeTasks.filter((task) => {
+      const taskStatus = normalizeStatus(task.status)
+
+      return (
         (projectFilter === 'ALL' || task.project === projectFilter) &&
         (picFilter === 'ALL' || task.pic === picFilter) &&
         (typeFilter === 'ALL' || task.type === typeFilter) &&
-        (statusFilter === 'ALL' || task.status === statusFilter) &&
+        (statusFilter === 'ALL' || taskStatus === statusFilter) &&
         (priorityFilter === 'ALL' ||
           normalizePriority(task.priority) === priorityFilter)
-    )
+      )
+    })
 
     return sortTasksByPriority(filtered)
   }, [
-    tasks,
+    activeTasks,
     projectFilter,
     picFilter,
     typeFilter,
@@ -677,6 +774,10 @@ export default function Calendar({
                       const projectLabel = getProjectLabel(task.project)
                       const typeLabel = getTypeLabel(task.type)
                       const priority = normalizePriority(task.priority)
+                      const status = normalizeStatus(task.status)
+                      const isDone = status === 'DONE'
+                      const isOverdue = isTaskOverdue(task)
+                      const isCompletedLate = isTaskCompletedLate(task)
 
                       return (
                         <button
@@ -696,16 +797,31 @@ export default function Calendar({
                             'task-chip',
                             getPicColor(task.pic, pics),
                             'task-card-readable',
-                            task.status === 'DONE' ? 'task-done' : '',
+
+                            // DONE always keeps its completed styling.
+                            isDone ? 'task-done' : '',
+
+                            // Only active, un-forgiven overdue tasks are red.
+                            isOverdue ? 'task-overdue' : '',
+                            isCompletedLate ? 'task-completed-late' : '',
+
+                            task.overdueForgiven === true
+                              ? 'task-overdue-forgiven'
+                              : '',
+
                             isSelected ? 'task-selected' : '',
                             isDragging ? 'task-dragging' : '',
                           ]
                             .filter(Boolean)
                             .join(' ')}
                           title={
-                            onMoveDeadline && isDeadline
-                              ? `${task.title} — drag to another date to move the deadline`
-                              : task.title
+                            task.overdueForgiven === true
+                              ? `${task.title || 'Untitled Task'} — overdue forgiven by Admin`
+                              : isOverdue
+                                ? `${task.title || 'Untitled Task'} — overdue`
+                                : onMoveDeadline && isDeadline
+                                  ? `${task.title || 'Untitled Task'} — drag to another date to move the deadline`
+                                  : task.title || 'Untitled Task'
                           }
                         >
                           <span className="task-card-header">
@@ -719,11 +835,13 @@ export default function Calendar({
                           </span>
 
                           <span className="task-card-tags">
-                            <span className="task-card-project">
+                          <span
+                              className={`task-card-project ${getProjectColor(task.project)}`}>
                               {projectLabel}
                             </span>
 
-                            <span className="task-card-type">
+                            <span
+                              className={`task-card-type ${getTypeColor(task.type)}`}>
                               {typeLabel}
                             </span>
                           </span>
@@ -757,11 +875,16 @@ export default function Calendar({
 
                           <span className="task-card-progress-info">
                             <span className="task-card-status">
-                              {statusLabel}
+                              {isOverdue
+                                ? 'OVERDUE'
+                                : isCompletedLate
+                                  ? 'DONE · LATE'
+                                  : statusLabel}
                             </span>
 
                             <strong>{progress}%</strong>
                           </span>
+
 
                           <span className="task-progress-track">
                             <span
@@ -770,17 +893,24 @@ export default function Calendar({
                             />
                           </span>
 
-                          <span className="task-card-footer">
-                            {task.status === 'DONE'
-                              ? 'Completed'
-                              : isDeadline
-                                ? 'Deadline Day'
-                                : isStart
-                                  ? 'Start Day'
-                                  : task.deadline
-                                    ? `Due ${formatDate(task.deadline)}`
-                                    : 'No Deadline Set'}
-                          </span>
+<span className="task-card-footer">
+  {isCompletedLate
+    ? 'Completed Late'
+    : isDone
+      ? 'Completed'
+      : task.overdueForgiven === true
+        ? 'Overdue Forgiven'
+        : isOverdue
+          ? 'Overdue'
+          : isDeadline
+            ? 'Deadline Day'
+            : isStart
+              ? 'Start Day'
+              : task.deadline
+                ? `Due ${formatDate(task.deadline)}`
+                : 'No Deadline Set'}
+</span>
+
                         </button>
                       )
                     })}
@@ -827,6 +957,9 @@ export default function Calendar({
 
           <span className="legend-dot orange-dot" />
           Needs Attention
+
+          <span className="legend-dot red-dot" />
+          Overdue
         </div>
 
         <span>{filteredTasks.length} tasks match the filters</span>

@@ -4,1080 +4,1062 @@
 ========================================= */
 
 .my-brief-page {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    width: 100%;
-    min-width: 0;
-    color: var(--text-primary, #f2f4fa);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  min-width: 0;
+  color: var(--text-primary, #f2f4fa);
+}
+
+/* HEADER */
+
+.my-brief-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 26px;
+  min-width: 100%;
+}
+
+.my-brief-header > div {
+  min-width: 0;
+}
+
+.my-brief-header h2 {
+  margin: 5px 0 7px;
+  font-size: 25px;
+  line-height: 1.25;
+}
+
+.my-brief-header p {
+  margin: 0;
+  color: var(--text-secondary, #9298aa);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.my-brief-header > .primary-button {
+  flex-shrink: 0;
+}
+
+/* =========================================
+   SUMMARY CARDS
+========================================= */
+
+.brief-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+.brief-summary-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border-color, #293246);
+  border-radius: 14px;
+  background: var(--surface-color, #151a27);
+}
+
+.brief-summary-icon {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 11px;
+  background: #252b3b;
+  color: #c4b5fd;
+}
+
+.brief-summary-icon.draft {
+  color: #cbd5e1;
+}
+
+.brief-summary-icon.assigned {
+  color: #93c5fd;
+}
+
+.brief-summary-icon.progress {
+  color: #c4b5fd;
+}
+
+.brief-summary-icon.done {
+  color: #86efac;
+}
+
+.brief-summary-card > div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.brief-summary-card span {
+  color: var(--text-secondary, #9298aa);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.brief-summary-card strong {
+  color: var(--text-primary, #f2f4fa);
+  font-size: 25px;
+  line-height: 1.2;
+}
+
+.brief-summary-card small {
+  color: var(--text-secondary, #9298aa);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* =========================================
+   MY BRIEF — CREATE / EDIT POPUP
+========================================= */
+
+.brief-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+  background: rgba(5, 8, 17, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  overflow-y: auto;
+}
+
+/* POPUP CONTAINER */
+
+.brief-modal-overlay > form.brief-form-modal {
+  position: relative;
+  flex: 0 1 760px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 18px;
+  width: 100%;
+  max-width: 760px;
+  max-height: calc(100dvh - 48px);
+  margin: auto;
+  padding: 26px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #293246;
+  border-radius: 16px;
+  background: #151a27;
+  color: #f1f3fa;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+}
+
+/* CUSTOM SCROLLBAR POPUP */
+
+.brief-modal-overlay > form.brief-form-modal {
+  scrollbar-width: thin;
+  scrollbar-color: #343b50 transparent;
+}
+
+.brief-modal-overlay > form.brief-form-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.brief-modal-overlay > form.brief-form-modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.brief-modal-overlay > form.brief-form-modal::-webkit-scrollbar-thumb {
+  border-radius: 99px;
+  background: #343b50;
+}
+
+/* POPUP HEADING */
+
+.brief-modal-overlay .brief-form-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.brief-modal-overlay .brief-form-heading h3 {
+  margin: 6px 0;
+  color: #f1f3fa;
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+
+.brief-modal-overlay .brief-form-heading p {
+  margin: 0;
+  color: #8993a8;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* FORM LABELS */
+
+.brief-modal-overlay > form.brief-form-modal > label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  color: #b9c1d2;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* FULL WIDTH FIELDS */
+
+.brief-modal-overlay > form.brief-form-modal > label:nth-of-type(1),
+.brief-modal-overlay > form.brief-form-modal > label:nth-of-type(8),
+.brief-modal-overlay > form.brief-form-modal > .brief-form-full {
+  grid-column: 1 / -1;
+}
+
+/* INPUTS, SELECTS, TEXTAREAS */
+
+.brief-modal-overlay > form.brief-form-modal input,
+.brief-modal-overlay > form.brief-form-modal select,
+.brief-modal-overlay > form.brief-form-modal textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #293246;
+  border-radius: 9px;
+  outline: none;
+  background: #111625;
+  color: #f1f3fa;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.brief-modal-overlay > form.brief-form-modal input::placeholder,
+.brief-modal-overlay > form.brief-form-modal textarea::placeholder {
+  color: #737e94;
+}
+
+/* FOCUS */
+
+.brief-modal-overlay > form.brief-form-modal input:focus,
+.brief-modal-overlay > form.brief-form-modal select:focus,
+.brief-modal-overlay > form.brief-form-modal textarea:focus {
+  border-color: #8065f5;
+  box-shadow: 0 0 0 3px rgba(128, 101, 245, 0.14);
+  outline: none;
+}
+
+/* DATE INPUT */
+
+.brief-modal-overlay > form.brief-form-modal input[type="date"] {
+  color-scheme: dark;
+}
+
+/* SELECT OPTIONS */
+
+.brief-modal-overlay > form.brief-form-modal select option {
+  background: #151a27;
+  color: #f1f3fa;
+}
+
+/* TEXTAREA */
+
+.brief-modal-overlay > form.brief-form-modal textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+/* DISABLED INPUT */
+
+.brief-modal-overlay > form.brief-form-modal input:disabled,
+.brief-modal-overlay > form.brief-form-modal select:disabled,
+.brief-modal-overlay > form.brief-form-modal textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* ERROR MESSAGE */
+
+.brief-modal-overlay > form.brief-form-modal .brief-form-error {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #fca5a5;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* =========================================
+   POPUP ACTIONS
+========================================= */
+
+.brief-modal-overlay > form.brief-form-modal .brief-form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 18px;
+  border-top: 1px solid #293246;
+}
+
+/* BUTTON BASE */
+
+.brief-modal-overlay .brief-form-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 9px 15px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.brief-modal-overlay .brief-form-actions button:active {
+  transform: scale(0.98);
+}
+
+.brief-modal-overlay .brief-form-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* PRIMARY BUTTON */
+
+.brief-modal-overlay .brief-form-actions .primary-button {
+  border: 1px solid transparent;
+  background: #8065f5;
+  color: #ffffff;
+}
+
+.brief-modal-overlay .brief-form-actions .primary-button:hover:not(:disabled) {
+  background: #7155e8;
+}
+
+/* SECONDARY BUTTON */
+
+.brief-modal-overlay .brief-form-actions .secondary-button {
+  border: 1px solid #293246;
+  background: #1b2130;
+  color: #c3cada;
+}
+
+.brief-modal-overlay .brief-form-actions .secondary-button:hover:not(:disabled) {
+  background: #252d40;
+  border-color: #3a4560;
+}
+
+/* FALLBACK BUTTONS
+   Jangan override tombol Assign.
+*/
+
+.brief-modal-overlay
+.brief-form-actions
+button:not(.primary-button):not(.secondary-button):not(.brief-assign-button) {
+  border: 1px solid #293246;
+  background: #1b2130;
+  color: #c3cada;
+}
+
+.brief-modal-overlay
+.brief-form-actions
+button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hover:not(:disabled) {
+  background: #252d40;
+}
+
+/* ASSIGN BUTTON — MATCH MY BRIEF PAGE */
+
+.brief-modal-overlay .brief-form-actions .brief-assign-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid rgba(128, 101, 245, 0.3);
+  border-radius: 7px;
+  background: rgba(128, 101, 245, 0.13);
+  color: #b8aaff;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.brief-modal-overlay
+.brief-form-actions
+.brief-assign-button:hover:not(:disabled) {
+  background: rgba(128, 101, 245, 0.23);
+}
+
+.brief-modal-overlay
+.brief-form-actions
+.brief-assign-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* =========================================
+   BRIEF MONITORING TOOLBAR
+========================================= */
+
+.brief-list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-width: 0;
+  margin-bottom: -8px;
+}
+
+.brief-list-toolbar > div:first-child {
+  min-width: 0;
+}
+
+.brief-list-toolbar h3 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+.brief-list-toolbar > div:first-child > span {
+  display: inline-block;
+  margin-top: 5px;
+  color: var(--text-secondary, #9298aa);
+  font-size: 12px;
+}
+
+.brief-toolbar-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+
+.brief-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  box-sizing: border-box;
+  width: 225px;
+  min-width: 0;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--border-color, #293246);
+  border-radius: 9px;
+  background: var(--surface-color, #151a27);
+  color: var(--text-secondary, #9298aa);
+}
+
+.brief-search > svg {
+  flex: 0 0 auto;
+}
+
+.brief-search input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text-primary, #f2f4fa);
+  font: inherit;
+  font-size: 12px;
+}
+
+.brief-search input:focus {
+  box-shadow: none;
+}
+
+.brief-status-filter {
+  box-sizing: border-box;
+  min-height: 42px;
+  max-width: 180px;
+  padding: 0 12px;
+  border: 1px solid var(--border-color, #293246);
+  border-radius: 9px;
+  background: var(--surface-color, #151a27);
+  color: var(--text-primary, #f2f4fa);
+  font-family: inherit;
+  font-size: 12px;
+}
+
+/* =========================================
+   MONITORING TABLE
+========================================= */
+
+.brief-list-wrapper {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  border: 1px solid var(--border-color, #293246);
+  border-radius: 13px;
+  background: var(--surface-color, #151a27);
+  scrollbar-width: thin;
+  scrollbar-color: #343b50 transparent;
+}
+
+.brief-list-header,
+.brief-row {
+  display: grid;
+  grid-template-columns:
+    minmax(180px, 1.65fr)
+    minmax(95px, 0.8fr)
+    minmax(105px, 0.9fr)
+    minmax(110px, 0.9fr)
+    minmax(110px, 0.9fr)
+    minmax(125px, 0.95fr)
+    minmax(145px, 1fr);
+  align-items: center;
+  gap: 14px;
+  min-width: 1050px;
+  padding: 16px 18px;
+  box-sizing: border-box;
+}
+
+.brief-list-header {
+  border-bottom: 1px solid var(--border-color, #293246);
+  background: var(--header-background, #111625);
+}
+
+.brief-list-header > span {
+  min-width: 0;
+  color: var(--text-secondary, #9298aa);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  line-height: 1.5;
+}
+
+.brief-row {
+  min-height: 92px;
+  border-bottom: 1px solid var(--border-color, #293246);
+  transition: background 0.15s ease;
+}
+
+.brief-row:last-child {
+  border-bottom: 0;
+}
+
+.brief-row:hover {
+  background: var(--hover-background, #1b2130);
+}
+
+/* BRIEF NAME */
+
+.brief-name-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.brief-file-icon {
+  display: grid;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(145, 125, 255, 0.22);
+  border-radius: 9px;
+  background: rgba(125, 103, 255, 0.12);
+  color: #a99aff;
+}
+
+.brief-name-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.brief-name-content > strong {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-primary, #f2f4fa);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.brief-row-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  color: #a99aff;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.brief-row-link:hover {
+  text-decoration: underline;
+}
+
+.brief-row-notes {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-secondary, #9298aa);
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* PROJECT AND CONTENT TYPE */
+
+.brief-project-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  min-width: 0;
+}
+
+.brief-project-cell > span {
+  color: var(--text-primary, #f2f4fa);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.brief-project-cell > small {
+  color: var(--text-secondary, #9298aa);
+  font-size: 11px;
+}
+
+/* PIC */
+
+.brief-pic-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--text-primary, #f2f4fa);
+  font-size: 11px;
+}
+
+.brief-pic-cell > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brief-avatar {
+  display: grid;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(100, 190, 255, 0.14);
+  color: #8bd2ff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.brief-unassigned {
+  color: var(--text-secondary, #9298aa);
+  overflow-wrap: anywhere;
+}
+
+/* DATES */
+
+.brief-date-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 0;
+  color: var(--text-secondary, #a5abbb);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.brief-date-cell > svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: #9298aa;
+}
+
+.brief-date-cell > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================
+   STATUS AND PROGRESS
+========================================= */
+
+.brief-status-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 0;
+}
+
+.brief-status {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 5px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: #303545;
+  color: #e2e8f0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.035em;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.brief-status-draft {
+  border-color: rgba(148, 163, 184, 0.2);
+  background: rgba(100, 116, 139, 0.18);
+  color: #cbd5e1;
+}
+
+.brief-status-assigned {
+  background: #172d48;
+  color: #93c5fd;
+}
+
+.brief-status-in-progress {
+  background: #30234d;
+  color: #c4b5fd;
+}
+
+.brief-status-done {
+  background: #153a2b;
+  color: #86efac;
+}
+
+.brief-progress-track {
+  width: 100%;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: var(--border-color, #293246);
+}
+
+.brief-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: #8065f5;
+  transition: width 0.25s ease;
+}
+
+.brief-status-cell:has(.brief-status-done) .brief-progress-fill {
+  background: #22c55e;
+}
+
+.brief-status-cell:has(.brief-status-draft) .brief-progress-fill {
+  background: #64748b;
+}
+
+.brief-status-cell > small {
+  color: var(--text-secondary, #9298aa);
+  font-size: 10px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================
+   ROW ACTIONS
+========================================= */
+
+.brief-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-width: 0;
+}
+
+.brief-row-actions .icon-button {
+  flex: 0 0 36px;
+}
+
+/* ASSIGN BUTTON — PAGE */
+
+.brief-assign-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid rgba(128, 101, 245, 0.3);
+  border-radius: 7px;
+  background: rgba(128, 101, 245, 0.13);
+  color: #b8aaff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.brief-assign-button:hover:not(:disabled) {
+  background: rgba(128, 101, 245, 0.23);
+}
+
+.brief-assign-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.brief-monitor-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary, #9298aa);
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: normal;
+}
+
+/* =========================================
+   EMPTY STATE
+========================================= */
+
+.my-brief-page .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 20px;
+  border: 1px dashed var(--border-color, #343b50);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.my-brief-page .empty-state > svg {
+  color: var(--text-secondary, #9298aa);
+}
+
+.my-brief-page .empty-state h3 {
+  margin: 5px 0 0;
+}
+
+.my-brief-page .empty-state p {
+  margin: 0;
+  color: var(--text-secondary, #9298aa);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* =========================================
+   BRIEF TASK TITLE
+========================================= */
+
+.brief-task-title {
+  display: block;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary, #f2f4fa);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.brief-task-title.is-clickable {
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.brief-task-title.is-clickable:hover {
+  color: #a99aff;
+}
+
+.brief-task-title:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+/* MONITOR BUTTON */
+
+.brief-monitor-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border: 1px solid rgba(128, 101, 245, 0.35);
+  border-radius: 8px;
+  background: rgba(128, 101, 245, 0.12);
+  color: #b9a5ff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.brief-monitor-button:hover {
+  background: rgba(128, 101, 245, 0.22);
+  border-color: rgba(128, 101, 245, 0.6);
+}
+
+.brief-monitor-button:focus-visible {
+  outline: 2px solid #a99aff;
+  outline-offset: 2px;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1250px) {
+  .brief-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-  
-  /* HEADER */
-  
-  .my-brief-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+
+  .brief-list-toolbar {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  .my-brief-page {
     gap: 20px;
-    min-width: 0;
   }
-  
-  .my-brief-header > div {
-    min-width: 0;
+
+  .my-brief-header {
+    align-items: flex-start;
   }
-  
+
   .my-brief-header h2 {
-    margin: 5px 0 7px;
-    font-size: 25px;
-    line-height: 1.25;
+    font-size: 22px;
   }
-  
-  .my-brief-header p {
-    margin: 0;
-    color: var(--text-secondary, #9298aa);
-    font-size: 13px;
-    line-height: 1.6;
-  }
-  
-  .my-brief-header > .primary-button {
+
+  .my-brief-header .primary-button {
     flex-shrink: 0;
   }
-  
-  /* =========================================
-     SUMMARY CARDS
-  ========================================= */
-  
+
   .brief-summary-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 12px;
-    width: 100%;
-    min-width: 0;
-  }
-  
-  .brief-summary-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
-    padding: 16px;
-    border: 1px solid var(--border-color, #293246);
-    border-radius: 14px;
-    background: var(--surface-color, #151a27);
-  }
-  
-  .brief-summary-icon {
-    display: grid;
-    flex: 0 0 40px;
-    width: 40px;
-    height: 40px;
-    place-items: center;
-    border-radius: 11px;
-    background: #252b3b;
-    color: #c4b5fd;
-  }
-  
-  .brief-summary-icon.draft {
-    color: #cbd5e1;
-  }
-  
-  .brief-summary-icon.assigned {
-    color: #93c5fd;
-  }
-  
-  .brief-summary-icon.progress {
-    color: #c4b5fd;
-  }
-  
-  .brief-summary-icon.done {
-    color: #86efac;
-  }
-  
-  .brief-summary-card > div:last-child {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-  }
-  
-  .brief-summary-card span {
-    color: var(--text-secondary, #9298aa);
-    font-size: 12px;
-    line-height: 1.4;
-  }
-  
-  .brief-summary-card strong {
-    color: var(--text-primary, #f2f4fa);
-    font-size: 25px;
-    line-height: 1.2;
-  }
-  
-  .brief-summary-card small {
-    color: var(--text-secondary, #9298aa);
-    font-size: 11px;
-    line-height: 1.5;
-  }
-  
-  /* =========================================
-     MY BRIEF — CREATE / EDIT POPUP
-     MATCH CREATIVE DEADLINE DASHBOARD
-  ========================================= */
-  
-  .brief-modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-  
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  
-    width: 100%;
-    height: 100%;
-    padding: 24px;
-    box-sizing: border-box;
-  
-    background: rgba(5, 8, 17, 0.78);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-  
-    overflow-y: auto;
-  }
-  
-  /* POPUP CONTAINER */
-  
-  .brief-modal-overlay > form.brief-form-modal {
-    position: relative;
-    flex: 0 1 760px;
-  
-    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-content: start;
-    gap: 18px;
-  
-    width: 100%;
-    max-width: 760px;
-    max-height: calc(100dvh - 48px);
-  
-    margin: auto;
-    padding: 26px;
-    box-sizing: border-box;
-  
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  
-    border: 1px solid #293246;
-    border-radius: 16px;
-  
-    background: #151a27;
-    color: #f1f3fa;
-  
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
-  }
-  
-  /* CUSTOM SCROLLBAR POPUP */
-  
-  .brief-modal-overlay > form.brief-form-modal {
-    scrollbar-width: thin;
-    scrollbar-color: #343b50 transparent;
-  }
-  
-  .brief-modal-overlay > form.brief-form-modal::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  .brief-modal-overlay > form.brief-form-modal::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  .brief-modal-overlay > form.brief-form-modal::-webkit-scrollbar-thumb {
-    border-radius: 99px;
-    background: #343b50;
-  }
-  
-  /* POPUP HEADING */
-  
-  .brief-modal-overlay .brief-form-heading {
-    grid-column: 1 / -1;
-  
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-  
-    margin-bottom: 4px;
-  }
-  
-  .brief-modal-overlay .brief-form-heading h3 {
-    margin: 6px 0;
-    color: #f1f3fa;
-    font-size: 23px;
-    font-weight: 700;
-    letter-spacing: -0.4px;
-  }
-  
-  .brief-modal-overlay .brief-form-heading p {
-    margin: 0;
-    color: #8993a8;
-    font-size: 12px;
-    line-height: 1.6;
-  }
-  
-  /* FORM LABELS */
-  
-  .brief-modal-overlay > form.brief-form-modal > label {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  
-    min-width: 0;
-    margin: 0;
-  
-    color: #b9c1d2;
-    font-size: 12px;
-    font-weight: 600;
-  }
-  
-  /* FULL WIDTH FIELDS */
-  
-  .brief-modal-overlay > form.brief-form-modal > label:nth-of-type(1),
-  .brief-modal-overlay > form.brief-form-modal > label:nth-of-type(8),
-  .brief-modal-overlay > form.brief-form-modal > .brief-form-full {
-    grid-column: 1 / -1;
-  }
-  
-  /* INPUTS, SELECTS, TEXTAREAS */
-  
-  .brief-modal-overlay > form.brief-form-modal input,
-  .brief-modal-overlay > form.brief-form-modal select,
-  .brief-modal-overlay > form.brief-form-modal textarea {
-    display: block;
-    width: 100%;
-    min-width: 0;
-    min-height: 42px;
-    box-sizing: border-box;
-  
-    padding: 10px 12px;
-  
-    border: 1px solid #293246;
-    border-radius: 9px;
-  
-    outline: none;
-    background: #111625;
-    color: #f1f3fa;
-  
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 400;
-  
-    transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease,
-      background 0.2s ease;
-  }
-  
-  .brief-modal-overlay > form.brief-form-modal input::placeholder,
-  .brief-modal-overlay > form.brief-form-modal textarea::placeholder {
-    color: #737e94;
-  }
-  
-  /* FOCUS */
-  
-  .brief-modal-overlay > form.brief-form-modal input:focus,
-  .brief-modal-overlay > form.brief-form-modal select:focus,
-  .brief-modal-overlay > form.brief-form-modal textarea:focus {
-    border-color: #8065f5;
-    box-shadow: 0 0 0 3px rgba(128, 101, 245, 0.14);
-    outline: none;
-  }
-  
-  /* DATE INPUT */
-  
-  .brief-modal-overlay > form.brief-form-modal input[type="date"] {
-    color-scheme: dark;
-  }
-  
-  /* SELECT OPTIONS */
-  
-  .brief-modal-overlay > form.brief-form-modal select option {
-    background: #151a27;
-    color: #f1f3fa;
-  }
-  
-  /* TEXTAREA */
-  
-  .brief-modal-overlay > form.brief-form-modal textarea {
-    min-height: 88px;
-    resize: vertical;
-  }
-  
-  /* DISABLED INPUT */
-  
-  .brief-modal-overlay > form.brief-form-modal input:disabled,
-  .brief-modal-overlay > form.brief-form-modal select:disabled,
-  .brief-modal-overlay > form.brief-form-modal textarea:disabled {
-    cursor: not-allowed;
-    opacity: 0.55;
-  }
-  
-  /* ERROR MESSAGE */
-  
-  .brief-modal-overlay > form.brief-form-modal .brief-form-error {
-    grid-column: 1 / -1;
-    margin: 0;
-    color: #fca5a5;
-    font-size: 12px;
-    line-height: 1.5;
-  }
-  
-  /* POPUP ACTIONS */
-  
-  .brief-modal-overlay > form.brief-form-modal .brief-form-actions {
-    grid-column: 1 / -1;
-  
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex-wrap: wrap;
     gap: 10px;
-  
-    margin-top: 4px;
-    padding-top: 18px;
-  
-    border-top: 1px solid #293246;
   }
-  
-  /* BUTTON BASE */
-  
-  .brief-modal-overlay .brief-form-actions button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-  
-    min-height: 40px;
-    padding: 9px 15px;
-  
-    border-radius: 8px;
-  
-    font-family: inherit;
-    font-size: 12px;
-    font-weight: 600;
-  
-    cursor: pointer;
-  
-    transition:
-      background 0.2s ease,
-      border-color 0.2s ease,
-      transform 0.2s ease;
-  }
-  
-  .brief-modal-overlay .brief-form-actions button:active {
-    transform: scale(0.98);
-  }
-  
-  .brief-modal-overlay .brief-form-actions button:disabled {
-    cursor: not-allowed;
-    opacity: 0.55;
-  }
-  
-  /*
-    Tombol simpan menggunakan class primary-button
-    jika class tersebut memang ada pada JSX.
-  */
-  
-  .brief-modal-overlay .brief-form-actions .primary-button {
-    border: 1px solid transparent;
-    background: #8065f5;
-    color: #ffffff;
-  }
-  
-  .brief-modal-overlay .brief-form-actions .primary-button:hover:not(:disabled) {
-    background: #7155e8;
-  }
-  
-  /* Tombol sekunder */
-  
-  .brief-modal-overlay .brief-form-actions .secondary-button {
-    border: 1px solid #293246;
-    background: #1b2130;
-    color: #c3cada;
-  }
-  
-  .brief-modal-overlay .brief-form-actions .secondary-button:hover:not(:disabled) {
-    background: #252d40;
-    border-color: #3a4560;
-  }
-  
-  /* Fallback jika tombol belum punya class */
-  
-  .brief-modal-overlay .brief-form-actions button:not(.primary-button):not(.secondary-button) {
-    border: 1px solid #293246;
-    background: #1b2130;
-    color: #c3cada;
-  }
-  
-  .brief-modal-overlay .brief-form-actions button:not(.primary-button):not(.secondary-button):hover:not(:disabled) {
-    background: #252d40;
-  }
-  
-  /* =========================================
-     BRIEF MONITORING TOOLBAR
-  ========================================= */
-  
-  .brief-list-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 18px;
-    min-width: 0;
-    margin-bottom: -8px;
-  }
-  
-  .brief-list-toolbar > div:first-child {
-    min-width: 0;
-  }
-  
-  .brief-list-toolbar h3 {
-    margin: 0;
-    font-size: 17px;
-    line-height: 1.4;
-  }
-  
-  .brief-list-toolbar > div:first-child > span {
-    display: inline-block;
-    margin-top: 5px;
-    color: var(--text-secondary, #9298aa);
-    font-size: 12px;
-  }
-  
-  .brief-toolbar-controls {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    min-width: 0;
-  }
-  
-  .brief-search {
-    display: flex;
-    align-items: center;
+
+  .brief-summary-card {
     gap: 9px;
-  
-    box-sizing: border-box;
-    width: 225px;
-    min-width: 0;
-    min-height: 42px;
-    padding: 0 12px;
-  
-    border: 1px solid var(--border-color, #293246);
-    border-radius: 9px;
-  
-    background: var(--surface-color, #151a27);
-    color: var(--text-secondary, #9298aa);
+    padding: 12px;
   }
-  
-  .brief-search > svg {
-    flex: 0 0 auto;
-  }
-  
-  .brief-search input {
-    width: 100%;
-    min-width: 0;
-    padding: 0;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    color: var(--text-primary, #f2f4fa);
-    font: inherit;
-    font-size: 12px;
-  }
-  
-  .brief-search input:focus {
-    box-shadow: none;
-  }
-  
-  .brief-status-filter {
-    box-sizing: border-box;
-    min-height: 42px;
-    max-width: 180px;
-    padding: 0 12px;
-  
-    border: 1px solid var(--border-color, #293246);
-    border-radius: 9px;
-  
-    background: var(--surface-color, #151a27);
-    color: var(--text-primary, #f2f4fa);
-  
-    font-family: inherit;
-    font-size: 12px;
-  }
-  
-  /* =========================================
-     MONITORING TABLE
-  ========================================= */
-  
-  .brief-list-wrapper {
-    width: 100%;
-    min-width: 0;
-    overflow-x: auto;
-  
-    border: 1px solid var(--border-color, #293246);
-    border-radius: 13px;
-  
-    background: var(--surface-color, #151a27);
-  
-    scrollbar-width: thin;
-    scrollbar-color: #343b50 transparent;
-  }
-  
-  .brief-list-header,
-  .brief-row {
-    display: grid;
-    grid-template-columns:
-      minmax(180px, 1.65fr)
-      minmax(95px, 0.8fr)
-      minmax(105px, 0.9fr)
-      minmax(110px, 0.9fr)
-      minmax(110px, 0.9fr)
-      minmax(125px, 0.95fr)
-      minmax(145px, 1fr);
-  
-    align-items: center;
-    gap: 14px;
-  
-    min-width: 1050px;
-    padding: 16px 18px;
-    box-sizing: border-box;
-  }
-  
-  .brief-list-header {
-    border-bottom: 1px solid var(--border-color, #293246);
-    background: var(--header-background, #111625);
-  }
-  
-  .brief-list-header > span {
-    min-width: 0;
-    color: var(--text-secondary, #9298aa);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.07em;
-    line-height: 1.5;
-  }
-  
-  .brief-row {
-    min-height: 92px;
-    border-bottom: 1px solid var(--border-color, #293246);
-    transition: background 0.15s ease;
-  }
-  
-  .brief-row:last-child {
-    border-bottom: 0;
-  }
-  
-  .brief-row:hover {
-    background: var(--hover-background, #1b2130);
-  }
-  
-  /* BRIEF NAME */
-  
-  .brief-name-cell {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    min-width: 0;
-  }
-  
-  .brief-file-icon {
-    display: grid;
-    flex: 0 0 34px;
+
+  .brief-summary-icon {
+    flex-basis: 34px;
     width: 34px;
     height: 34px;
-    place-items: center;
-  
-    border: 1px solid rgba(145, 125, 255, 0.22);
-    border-radius: 9px;
-  
-    background: rgba(125, 103, 255, 0.12);
-    color: #a99aff;
   }
-  
-  .brief-name-content {
-    display: flex;
+
+  .brief-summary-card strong {
+    font-size: 22px;
+  }
+
+  .brief-list-toolbar {
     flex-direction: column;
-    gap: 5px;
-    min-width: 0;
+    gap: 12px;
   }
-  
-  .brief-name-content > strong {
-    display: -webkit-box;
-    overflow: hidden;
-    color: var(--text-primary, #f2f4fa);
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 1.5;
-    overflow-wrap: anywhere;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
-  
-  .brief-row-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    width: fit-content;
-    color: #a99aff;
-    font-size: 11px;
-    text-decoration: none;
-  }
-  
-  .brief-row-link:hover {
-    text-decoration: underline;
-  }
-  
-  .brief-row-notes {
-    display: -webkit-box;
-    overflow: hidden;
-    color: var(--text-secondary, #9298aa);
-    font-size: 11px;
-    line-height: 1.45;
-    overflow-wrap: anywhere;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
-  
-  /* PROJECT AND CONTENT TYPE */
-  
-  .brief-project-cell {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-    min-width: 0;
-  }
-  
-  .brief-project-cell > span {
-    color: var(--text-primary, #f2f4fa);
-    font-size: 12px;
-    overflow-wrap: anywhere;
-  }
-  
-  .brief-project-cell > small {
-    color: var(--text-secondary, #9298aa);
-    font-size: 11px;
-  }
-  
-  /* PIC */
-  
-  .brief-pic-cell {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-    color: var(--text-primary, #f2f4fa);
-    font-size: 11px;
-  }
-  
-  .brief-pic-cell > span:last-child {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  
-  .brief-avatar {
-    display: grid;
-    flex: 0 0 28px;
-    width: 28px;
-    height: 28px;
-    place-items: center;
-    border-radius: 50%;
-    background: rgba(100, 190, 255, 0.14);
-    color: #8bd2ff;
-    font-size: 11px;
-    font-weight: 700;
-  }
-  
-  .brief-unassigned {
-    color: var(--text-secondary, #9298aa);
-    overflow-wrap: anywhere;
-  }
-  
-  /* DATES */
-  
-  .brief-date-cell {
-    display: flex;
-    align-items: flex-start;
-    gap: 7px;
-    min-width: 0;
-    color: var(--text-secondary, #a5abbb);
-    font-size: 11px;
-    line-height: 1.5;
-  }
-  
-  .brief-date-cell > svg {
-    flex: 0 0 auto;
-    margin-top: 1px;
-    color: #9298aa;
-  }
-  
-  .brief-date-cell > span {
-    min-width: 0;
-    overflow-wrap: anywhere;
-  }
-  
-  /* =========================================
-     STATUS AND PROGRESS
-  ========================================= */
-  
-  .brief-status-cell {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 7px;
-    min-width: 0;
-  }
-  
-  .brief-status {
-    display: inline-flex;
-    align-items: center;
-    max-width: 100%;
-    padding: 5px 8px;
-  
-    border: 1px solid transparent;
-    border-radius: 6px;
-  
-    background: #303545;
-    color: #e2e8f0;
-  
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.035em;
-    line-height: 1.35;
-  
-    white-space: normal;
-    overflow-wrap: anywhere;
-  }
-  
-  .brief-status-draft {
-    border-color: rgba(148, 163, 184, 0.2);
-    background: rgba(100, 116, 139, 0.18);
-    color: #cbd5e1;
-  }
-  
-  .brief-status-assigned {
-    background: #172d48;
-    color: #93c5fd;
-  }
-  
-  .brief-status-in-progress {
-    background: #30234d;
-    color: #c4b5fd;
-  }
-  
-  .brief-status-done {
-    background: #153a2b;
-    color: #86efac;
-  }
-  
-  .brief-progress-track {
-    width: 100%;
-    height: 5px;
-    overflow: hidden;
-    border-radius: 99px;
-    background: var(--border-color, #293246);
-  }
-  
-  .brief-progress-fill {
-    height: 100%;
-    border-radius: inherit;
-    background: #8065f5;
-    transition: width 0.25s ease;
-  }
-  
-  .brief-status-cell:has(.brief-status-done) .brief-progress-fill {
-    background: #22c55e;
-  }
-  
-  .brief-status-cell:has(.brief-status-draft) .brief-progress-fill {
-    background: #64748b;
-  }
-  
-  .brief-status-cell > small {
-    color: var(--text-secondary, #9298aa);
-    font-size: 10px;
-    line-height: 1.5;
-    overflow-wrap: anywhere;
-  }
-  
-  /* =========================================
-     ROW ACTIONS
-  ========================================= */
-  
-  .brief-row-actions {
-    display: flex;
-    align-items: center;
+
+  .brief-toolbar-controls {
     justify-content: flex-start;
     flex-wrap: wrap;
-    gap: 7px;
-    min-width: 0;
+    width: 100%;
   }
-  
-  .brief-row-actions .icon-button {
-    flex: 0 0 36px;
+
+  .brief-search {
+    flex: 1 1 180px;
+    width: auto;
   }
-  
-  .brief-assign-button {
-    display: inline-flex;
-    align-items: center;
+
+  .brief-status-filter {
+    flex: 1 1 140px;
+    max-width: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .brief-modal-overlay {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .brief-modal-overlay > form.brief-form-modal {
+    flex-basis: auto;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 15px;
+    width: 100%;
+    max-height: calc(100dvh - 24px);
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  .brief-modal-overlay > form.brief-form-modal > * {
+    grid-column: 1 / -1;
+  }
+
+  .brief-modal-overlay .brief-form-heading h3 {
+    font-size: 21px;
+  }
+}
+
+@media (max-width: 420px) {
+  .brief-summary-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .my-brief-header {
+    flex-wrap: wrap;
+  }
+
+  .my-brief-header .primary-button {
+    width: 100%;
     justify-content: center;
-    gap: 5px;
-  
-    min-height: 36px;
-    padding: 7px 10px;
-  
-    border: 1px solid rgba(128, 101, 245, 0.3);
-    border-radius: 7px;
-  
-    background: rgba(128, 101, 245, 0.13);
-    color: #b8aaff;
-  
-    cursor: pointer;
-    font-size: 11px;
-    font-weight: 600;
-    white-space: nowrap;
-  
-    transition: background 0.15s ease;
   }
-  
-  .brief-assign-button:hover:not(:disabled) {
-    background: rgba(128, 101, 245, 0.23);
-  }
-  
-  .brief-assign-button:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-  
-  .brief-monitor-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--text-secondary, #9298aa);
-    font-size: 11px;
-    line-height: 1.5;
-    white-space: normal;
-  }
-  
-  /* =========================================
-     EMPTY STATE
-  ========================================= */
-  
-  .my-brief-page .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 48px 20px;
-  
-    border: 1px dashed var(--border-color, #343b50);
-    border-radius: 12px;
-  
-    text-align: center;
-  }
-  
-  .my-brief-page .empty-state > svg {
-    color: var(--text-secondary, #9298aa);
-  }
-  
-  .my-brief-page .empty-state h3 {
-    margin: 5px 0 0;
-  }
-  
-  .my-brief-page .empty-state p {
-    margin: 0;
-    color: var(--text-secondary, #9298aa);
-    font-size: 12px;
-    line-height: 1.6;
-  }
-  
-  /* =========================================
-     BRIEF TASK TITLE
-  ========================================= */
-  
-  .brief-task-title {
-    display: block;
-    max-width: 100%;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--text-primary, #f2f4fa);
-    font: inherit;
-    font-size: 12px;
-    font-weight: 600;
-    text-align: left;
-    overflow-wrap: anywhere;
-  }
-  
-  .brief-task-title.is-clickable {
-    cursor: pointer;
-    transition: color 0.2s ease;
-  }
-  
-  .brief-task-title.is-clickable:hover {
-    color: #a99aff;
-  }
-  
-  .brief-task-title:disabled {
-    cursor: default;
-    opacity: 1;
-  }
-  
-  /* MONITOR BUTTON */
-  
-  .brief-monitor-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px 12px;
-  
-    border: 1px solid rgba(128, 101, 245, 0.35);
-    border-radius: 8px;
-  
-    background: rgba(128, 101, 245, 0.12);
-    color: #b9a5ff;
-  
-    font: inherit;
-    font-size: 12px;
-    font-weight: 600;
-  
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .brief-monitor-button:hover {
-    background: rgba(128, 101, 245, 0.22);
-    border-color: rgba(128, 101, 245, 0.6);
-  }
-  
-  .brief-monitor-button:focus-visible {
-    outline: 2px solid #a99aff;
-    outline-offset: 2px;
-  }
-  
-  /* =========================================
-     RESPONSIVE
-  ========================================= */
-  
-  @media (max-width: 1250px) {
-    .brief-summary-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  
-    .brief-list-toolbar {
-      align-items: flex-start;
-    }
-  }
-  
-  @media (max-width: 760px) {
-    .my-brief-page {
-      gap: 20px;
-    }
-  
-    .my-brief-header {
-      align-items: flex-start;
-    }
-  
-    .my-brief-header h2 {
-      font-size: 22px;
-    }
-  
-    .my-brief-header .primary-button {
-      flex-shrink: 0;
-    }
-  
-    .brief-summary-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-  
-    .brief-summary-card {
-      gap: 9px;
-      padding: 12px;
-    }
-  
-    .brief-summary-icon {
-      flex-basis: 34px;
-      width: 34px;
-      height: 34px;
-    }
-  
-    .brief-summary-card strong {
-      font-size: 22px;
-    }
-  
-    .brief-list-toolbar {
-      flex-direction: column;
-      gap: 12px;
-    }
-  
-    .brief-toolbar-controls {
-      justify-content: flex-start;
-      flex-wrap: wrap;
-      width: 100%;
-    }
-  
-    .brief-search {
-      flex: 1 1 180px;
-      width: auto;
-    }
-  
-    .brief-status-filter {
-      flex: 1 1 140px;
-      max-width: none;
-    }
-  }
-  
-  @media (max-width: 600px) {
-    .brief-modal-overlay {
-      align-items: flex-start;
-      padding: 12px;
-    }
-  
-    .brief-modal-overlay > form.brief-form-modal {
-      flex-basis: auto;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 15px;
-  
-      width: 100%;
-      max-height: calc(100dvh - 24px);
-      padding: 20px;
-  
-      border-radius: 14px;
-    }
-  
-    .brief-modal-overlay > form.brief-form-modal > * {
-      grid-column: 1 / -1;
-    }
-  
-    .brief-modal-overlay .brief-form-heading h3 {
-      font-size: 21px;
-    }
-  }
-  
-  @media (max-width: 420px) {
-    .brief-summary-grid {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  
-    .my-brief-header {
-      flex-wrap: wrap;
-    }
-  
-    .my-brief-header .primary-button {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-  
+}

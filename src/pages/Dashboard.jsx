@@ -144,7 +144,14 @@ function getCompletionDate(task) {
 
   return getDate(lastDoneEntry.changedAt)
 }
-
+function isOverdueForgiven(task) {
+  return (
+    task.overdueForgiven === true ||
+    task.overdue_forgiven === true ||
+    task.isOverdueForgiven === true ||
+    task.is_overdue_forgiven === true
+  )
+}
 function formatDate(date) {
   if (!date) return 'No Due Date'
 
@@ -179,9 +186,25 @@ function getDeadlineCategory(task) {
   const deadline = getDeadlineDate(task)
 
   if (!deadline) return 'NO DATE'
-  if (normalizeStatus(task.status) === 'DONE') return 'DONE'
 
+  // Admin sudah memaafkan keterlambatan.
+  if (isOverdueForgiven(task)) {
+    return normalizeStatus(task.status) === 'DONE'
+      ? 'DONE'
+      : deadline < getToday()
+        ? 'FORGIVEN'
+        : deadline.getTime() === getToday().getTime()
+          ? 'TODAY'
+          : 'UPCOMING'
+  }
+
+  const status = normalizeStatus(task.status)
   const today = getToday()
+
+  // Task DONE tetap overdue jika penyelesaiannya melewati deadline.
+  if (status === 'DONE') {
+    return isLateTask(task) ? 'OVERDUE' : 'DONE'
+  }
 
   if (deadline < today) return 'OVERDUE'
   if (deadline.getTime() === today.getTime()) return 'TODAY'
@@ -279,9 +302,11 @@ export default function Dashboard({
   onSelectTask,
   onNavigate,
   onAddTask,
+  currentUser,
 }) {
+  const isAdmin =
+  String(currentUser?.role || '').trim().toLowerCase() === 'admin'
   const currentMonth = getMonthKey(new Date())
-
   const [monthFilter, setMonthFilter] = useState(currentMonth)
   const [projectFilter, setProjectFilter] = useState('ALL')
   const [contentFilter, setContentFilter] = useState('ALL')
@@ -466,7 +491,9 @@ export default function Dashboard({
           return
         }
 
-        if (startOfDay(completedAt) > deadline) {
+        if (isOverdueForgiven(task)) {
+          member.onTime += 1
+        } else if (startOfDay(completedAt) > deadline) {
           member.late += 1
         } else {
           member.onTime += 1
@@ -513,10 +540,8 @@ export default function Dashboard({
       {/* HEADER */}
       <section className="welcome-row dashboard-welcome">
         <div>
-          <div className="eyebrow">WORKSPACE / OVERVIEW</div>
-
           <h1>
-            Overview<span className="heading-period">.</span>
+            Welcome<span className="heading-period">.</span>
           </h1>
 
           <p className="page-subtitle">
@@ -688,14 +713,23 @@ export default function Dashboard({
           label="OVERDUE TASKS"
           value={overdueTasks.length}
           icon={AlertTriangle}
-          trend="Past deadline and not completed"
+          trend="Past deadline"
           color="red"
         />
       </section>
 
       {/* WORKFLOW + TEAM PERFORMANCE */}
-      <section className="dashboard-insights-grid">
-        <div className="dashboard-panel workflow-panel">
+      <section
+        className={`dashboard-insights-grid ${
+          isAdmin ? 'admin-insights-layout' : 'workflow-only-layout'
+        }`}
+      >
+        {/* TASK WORKFLOW */}
+        <div
+          className={`dashboard-panel workflow-panel ${
+            !isAdmin ? 'task-workflow-panel-wide' : ''
+          }`}
+        >
           <div className="panel-heading">
             <div>
               <h2>Task Workflow</h2>
@@ -710,139 +744,145 @@ export default function Dashboard({
             <strong>{totalTasks}</strong>
           </div>
 
-          {workflowCounts.map((item) => {
-            const percentage = totalTasks
-              ? (item.count / totalTasks) * 100
-              : 0
+          <div className="task-workflow-grid">
+            {workflowCounts.map((item) => {
+              const percentage = totalTasks
+                ? (item.count / totalTasks) * 100
+                : 0
 
-            return (
-              <div className="workflow-row" key={item.status}>
-                <div className="workflow-label">
-                  <span>{item.label}</span>
-                  <strong>{item.count}</strong>
+              return (
+                <div className="workflow-row" key={item.status}>
+                  <div className="workflow-label">
+                    <span>{item.label}</span>
+                    <strong>{item.count}</strong>
+                  </div>
+
+                  <div className="workflow-track">
+                    <div
+                      className={`workflow-fill workflow-${item.status
+                        .toLowerCase()
+                        .replaceAll(' ', '-')}`}
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
                 </div>
-
-                <div className="workflow-track">
-                  <div
-                    className={`workflow-fill workflow-${item.status
-                      .toLowerCase()
-                      .replaceAll(' ', '-')}`}
-                    style={{ width: `${percentage}%` }}
-                  />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        <div className="dashboard-panel team-workload-panel">
-          <div className="panel-heading">
-            <div>
-              <h2>Team Performance</h2>
-              <p>
-                Compare team results based on deadlines in the selected month.
-              </p>
-            </div>
-
-            <Users size={21} />
+              )
+            })}
           </div>
-
-          {teamPerformance.length > 0 ? (
-            <div className="dashboard-performance-table-wrap">
-              <table className="dashboard-performance-table">
-                <thead>
-                  <tr>
-                    <th>Creative</th>
-                    <th>Total</th>
-                    <th>Completed</th>
-                    <th>Completed Late</th>
-                    <th>On Time</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {teamPerformance.map((member) => {
-                    const classifiedCompleted =
-                      member.onTime + member.late
-
-                    const onTimeRate =
-                      classifiedCompleted > 0
-                        ? Math.round(
-                            (member.onTime / classifiedCompleted) * 100
-                          )
-                        : null
-
-                    const hasUnknownCompletionDate =
-                      member.unknownCompletionDate > 0
-
-                    return (
-                      <tr key={member.name}>
-                        <td>
-                          <div className="dashboard-performance-person">
-                            <span className="dashboard-workload-avatar">
-                              {member.name.charAt(0).toUpperCase()}
-                            </span>
-
-                            <div>
-                              <strong>{member.name}</strong>
-                              <small>
-                                {member.active} active · {member.approval}{' '}
-                                awaiting approval
-                              </small>
-                            </div>
-                          </div>
-                        </td>
-
-                        <td>{member.total}</td>
-
-                        <td>{member.completed}</td>
-
-                        <td>
-                          <span
-                            className={
-                              member.late > 0
-                                ? 'dashboard-performance-late'
-                                : 'dashboard-performance-good'
-                            }
-                          >
-                            {member.late}
-                          </span>
-                        </td>
-
-                        <td>
-                          <span className="dashboard-performance-rate">
-                            {onTimeRate !== null
-                              ? `${member.onTime} tasks · ${onTimeRate}%`
-                              : hasUnknownCompletionDate
-                                ? 'Missing completion date'
-                                : 'No data yet'}
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-
-              <p className="dashboard-performance-note">
-                Total includes all tasks in the selected deadline period.
-                Completed Late only counts tasks completed after their
-                deadline. On Time counts tasks completed on or before
-                their deadline. Tasks without a completion date are
-                excluded from the percentage calculation.
-              </p>
-            </div>
-          ) : (
-            <div className="dashboard-empty">
-              <Users size={26} />
-              <strong>No Performance Data</strong>
-              <span>
-                Tasks with a deadline and assigned creative will appear here.
-              </span>
-            </div>
-          )}
         </div>
+
+        {/* TEAM PERFORMANCE — ADMIN ONLY */}
+        {isAdmin && (
+          <div className="dashboard-panel team-performance-panel">
+            <div className="panel-heading">
+              <div>
+                <h2>Team Performance</h2>
+                <p>
+                  Compare team results based on deadlines in the selected month.
+                </p>
+              </div>
+
+              <Users size={21} />
+            </div>
+
+            {teamPerformance.length > 0 ? (
+              <div className="dashboard-performance-table-wrap">
+                <table className="dashboard-performance-table">
+                  <thead>
+                    <tr>
+                      <th>Creative</th>
+                      <th>Total</th>
+                      <th>Completed</th>
+                      <th>Completed Late</th>
+                      <th>On Time</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {teamPerformance.map((member) => {
+                      const classifiedCompleted =
+                        member.onTime + member.late
+
+                      const onTimeRate =
+                        classifiedCompleted > 0
+                          ? Math.round(
+                              (member.onTime / classifiedCompleted) * 100
+                            )
+                          : null
+
+                      const hasUnknownCompletionDate =
+                        member.unknownCompletionDate > 0
+
+                      return (
+                        <tr key={member.name}>
+                          <td>
+                            <div className="dashboard-performance-person">
+                              <span className="dashboard-workload-avatar">
+                                {member.name.charAt(0).toUpperCase()}
+                              </span>
+
+                              <div>
+                                <strong>{member.name}</strong>
+                                <small>
+                                  {member.active} active · {member.approval}{' '}
+                                  awaiting approval
+                                </small>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td>{member.total}</td>
+
+                          <td>{member.completed}</td>
+
+                          <td>
+                            <span
+                              className={
+                                member.late > 0
+                                  ? 'dashboard-performance-late'
+                                  : 'dashboard-performance-good'
+                              }
+                            >
+                              {member.late}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span className="dashboard-performance-rate">
+                              {onTimeRate !== null
+                                ? `${member.onTime} tasks · ${onTimeRate}%`
+                                : hasUnknownCompletionDate
+                                  ? 'Missing completion date'
+                                  : 'No data yet'}
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+
+                <p className="dashboard-performance-note">
+                  Total includes all tasks in the selected deadline period.
+                  Completed Late only counts tasks completed after their
+                  deadline. On Time counts tasks completed on or before
+                  their deadline. Tasks without a completion date are
+                  excluded from the percentage calculation.
+                </p>
+              </div>
+            ) : (
+              <div className="dashboard-empty">
+                <Users size={26} />
+                <strong>No Performance Data</strong>
+                <span>
+                  Tasks with a deadline and assigned creative will appear here.
+                </span>
+              </div>
+            )}
+          </div>
+        )}
       </section>
+
 
       {/* DEADLINE MONITORING */}
       <section className="dashboard-panel dashboard-deadlines-panel">
@@ -934,6 +974,7 @@ export default function Dashboard({
         </div>
       </section>
 
+
       {/* PRIORITY TASKS */}
       <section className="dashboard-panel dashboard-priority-panel">
         <div className="panel-heading">
@@ -957,39 +998,65 @@ export default function Dashboard({
 
         <div className="dashboard-task-list">
           {priorityTasks.length > 0 ? (
-            priorityTasks.map((task) => (
-              <div className="dashboard-priority-item" key={task.id}>
-                <div className="dashboard-priority-task">
-                  <TaskCard
-                    task={task}
-                    selected={String(selectedTaskId) === String(task.id)}
-                    onClick={() => onSelectTask?.(task)}
-                  />
+            priorityTasks.map((task) => {
+              const deadlineCategory = getDeadlineCategory(task)
+              const overdue = deadlineCategory === 'OVERDUE'
+              const deadline = getDeadlineDate(task)
 
-                  <div className="dashboard-priority-meta">
-                    <span>{getTaskProject(task)}</span>
-                    <span>{getTaskContentType(task)}</span>
-                    <span>{getTaskPic(task)}</span>
+              return (
+                <div
+                  className={`dashboard-priority-item ${
+                    overdue ? 'is-overdue' : ''
+                  }`}
+                  key={task.id}
+                >
+                  <div className="dashboard-priority-task">
+                    <TaskCard
+                      task={task}
+                      selected={
+                        String(selectedTaskId) === String(task.id)
+                      }
+                      onClick={() => onSelectTask?.(task)}
+                    />
+
+                    <div className="dashboard-priority-meta">
+                      <span className="priority-meta-project">
+                        {getTaskProject(task)}
+                      </span>
+                      <span>{getTaskContentType(task)}</span>
+                      <span className="priority-meta-pic">
+                        <Users size={12} />
+                        {getTaskPic(task)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`dashboard-priority-deadline ${
+                      overdue ? 'is-overdue' : ''
+                    }`}
+                  >
+                    <span className="priority-deadline-label">
+                      {overdue
+                        ? `${getDaysOverdue(task)} days overdue`
+                        : deadlineCategory === 'TODAY'
+                          ? 'Due today'
+                          : 'Deadline'}
+                    </span>
+
+                    <div className="priority-deadline-date">
+                      {overdue ? (
+                        <AlertTriangle size={15} />
+                      ) : (
+                        <CalendarDays size={15} />
+                      )}
+
+                      <span>{formatDate(deadline)}</span>
+                    </div>
                   </div>
                 </div>
-
-                <div
-                  className={`dashboard-priority-deadline ${
-                    getDeadlineCategory(task) === 'OVERDUE'
-                      ? 'is-overdue'
-                      : ''
-                  }`}
-                >
-                  {getDeadlineCategory(task) === 'OVERDUE' ? (
-                    <AlertTriangle size={15} />
-                  ) : (
-                    <CalendarDays size={15} />
-                  )}
-
-                  <span>{formatDate(getDeadlineDate(task))}</span>
-                </div>
-              </div>
-            ))
+              )
+            })
           ) : (
             <div className="dashboard-empty">
               <Target size={26} />
@@ -1001,6 +1068,7 @@ export default function Dashboard({
           )}
         </div>
       </section>
+
 
       {/* TASKS WITHOUT DEADLINES */}
       {noDeadlineCount > 0 && (

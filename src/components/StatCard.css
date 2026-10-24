@@ -1,22 +1,33 @@
 
+/* =========================================
+   STATISTICS GRID
+========================================= */
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 14px;
   width: 100%;
+  margin-bottom: 24px;
+  align-items: stretch;
 }
+
+/* =========================================
+   STAT CARD — BASE
+========================================= */
 
 .stat-card {
   --card-accent: #8b7cff;
-  --card-soft: rgba(139, 124, 255, 0.14);
+  --card-soft: rgba(139, 124, 255, 0.13);
 
   position: relative;
   display: flex;
   flex-direction: column;
+
   min-width: 0;
-  min-height: 178px;
+  min-height: 174px;
   padding: 18px;
+
   overflow: hidden;
 
   background: #101827;
@@ -35,132 +46,379 @@
   transform: translateY(-2px);
 }
 
+/* =========================================
+   COLOR VARIANTS
+========================================= */
+
 .stat-card.purple {
-  --card-accent: #8b7cff;
-  --card-soft: rgba(139, 124, 255, 0.14);
+  --card-accent: #9b8aff;
+  --card-soft: rgba(155, 138, 255, 0.13);
 }
 
 .stat-card.blue {
-  --card-accent: #64a3ff;
-  --card-soft: rgba(100, 163, 255, 0.14);
+  --card-accent: #70adff;
+  --card-soft: rgba(112, 173, 255, 0.13);
 }
 
 .stat-card.orange {
   --card-accent: #ffb66e;
-  --card-soft: rgba(255, 182, 110, 0.14);
+  --card-soft: rgba(255, 182, 110, 0.13);
 }
 
 .stat-card.green {
   --card-accent: #5bd6a1;
-  --card-soft: rgba(91, 214, 161, 0.14);
+  --card-soft: rgba(91, 214, 161, 0.13);
 }
 
 .stat-card.red {
   --card-accent: #ff7180;
-  --card-soft: rgba(255, 113, 128, 0.14);
+  --card-soft: rgba(255, 113, 128, 0.13);
 }
+
+/* =========================================
+   CARD TOP
+========================================= */
+
+.stat-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+
+  min-width: 0;
+}
+
+.stat-card-heading {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+
+  min-width: 0;
+}
+
+/* =========================================
+   LABEL
+========================================= */
 
 .stat-card-label {
   color: #c4cde0;
+
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.07em;
-  line-height: 1.5;
+  letter-spacing: 0.075em;
+  line-height: 1.55;
+  text-transform: uppercase;
+
   overflow-wrap: anywhere;
 }
 
-.stat-card-trend,
-.stat-card-caption {
-  color: #8491aa;
-  font-size: 10px;
-  line-height: 1.5;
-}
-
-.stat-card-value {
-  margin-top: 17px;
-  color: #e7ebf7;
-  font-size: clamp(25px, 2vw, 34px);
-  font-weight: 750;
-  letter-spacing: -0.045em;
-  line-height: 1.1;
-  overflow-wrap: anywhere;
-}
+/* =========================================
+   ICON
+========================================= */
 
 .stat-card-icon {
   display: flex;
   align-items: center;
   justify-content: center;
+
   flex-shrink: 0;
   width: 38px;
   height: 38px;
+
   color: var(--card-accent);
   background: var(--card-soft);
   border: 1px solid var(--card-soft);
   border-radius: 11px;
 }
 
-.stat-card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
+/* =========================================
+   VALUE
+========================================= */
+
+.stat-card-value {
+  margin-top: 17px;
+
+  color: #e7ebf7;
+
+  font-size: clamp(26px, 2vw, 34px);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
-.stat-card-heading {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  min-width: 0;
+/* =========================================
+   TREND & CAPTION
+========================================= */
+
+.stat-card-trend,
+.stat-card-caption {
+  color: #8491aa;
+
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.55;
+
+  overflow-wrap: anywhere;
 }
+
+/* =========================================
+   CARD BOTTOM
+========================================= */
 
 .stat-card-bottom {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 7px;
+
   margin-top: auto;
-  padding-top: 15px;
+  padding-top: 14px;
+
+  min-width: 0;
 }
 
 .stat-card-status-dot {
   width: 6px;
   height: 6px;
+  margin-top: 4px;
+
   flex-shrink: 0;
   border-radius: 50%;
+
   background: var(--card-accent);
 }
+
+/* =========================================
+   BOTTOM ACCENT
+========================================= */
 
 .stat-card-accent {
   position: absolute;
+  right: 18px;
   bottom: 0;
   left: 18px;
-  right: 18px;
+
   height: 2px;
+
   border-radius: 3px 3px 0 0;
   background: var(--card-accent);
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
-/* Responsive */
+/* =========================================
+   LAPTOP
+========================================= */
+
 @media (max-width: 1200px) {
   .stats-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 13px;
+  }
+
+  .stat-card {
+    min-height: 165px;
+    padding: 17px;
+  }
+
+  .stat-card-value {
+    font-size: clamp(26px, 2.6vw, 33px);
   }
 }
+
+/* =========================================
+   TABLET
+========================================= */
 
 @media (max-width: 800px) {
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
+    margin-bottom: 20px;
   }
 
   .stat-card {
-    min-height: 165px;
+    min-height: 154px;
     padding: 15px;
+    border-radius: 13px;
+  }
+
+  .stat-card-top {
+    gap: 8px;
+  }
+
+  .stat-card-label {
+    font-size: 10px;
+    letter-spacing: 0.055em;
+  }
+
+  .stat-card-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .stat-card-value {
+    margin-top: 15px;
+    font-size: clamp(25px, 4vw, 31px);
+  }
+
+  .stat-card-bottom {
+    padding-top: 12px;
+  }
+
+  .stat-card-accent {
+    right: 15px;
+    left: 15px;
   }
 }
 
+/* =========================================
+   MOBILE
+========================================= */
+
 @media (max-width: 480px) {
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .stat-card {
+    min-height: 140px;
+    padding: 13px;
+    border-radius: 12px;
+  }
+
+  .stat-card-top {
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .stat-card-heading {
+    gap: 5px;
+  }
+
+  .stat-card-label {
+    font-size: 9px;
+    line-height: 1.5;
+    letter-spacing: 0.045em;
+  }
+
+  .stat-card-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+  }
+
+  .stat-card-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .stat-card-value {
+    margin-top: 14px;
+    font-size: clamp(22px, 7vw, 28px);
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+  }
+
+  .stat-card-trend,
+  .stat-card-caption {
+    font-size: 9px;
+    line-height: 1.45;
+  }
+
+  .stat-card-bottom {
+    gap: 6px;
+    padding-top: 11px;
+  }
+
+  .stat-card-status-dot {
+    width: 5px;
+    height: 5px;
+    margin-top: 4px;
+  }
+
+  .stat-card-accent {
+    right: 13px;
+    left: 13px;
+    height: 2px;
+  }
+
+  /* Kurangi gerakan pada layar sentuh */
+  .stat-card:hover {
+    transform: none;
+  }
+}
+
+/* =========================================
+   EXTRA SMALL MOBILE
+========================================= */
+
+@media (max-width: 360px) {
+  .stats-grid {
+    gap: 8px;
+  }
+
+  .stat-card {
+    min-height: 132px;
+    padding: 11px;
+    border-radius: 11px;
+  }
+
+  .stat-card-top {
+    gap: 5px;
+  }
+
+  .stat-card-label {
+    font-size: 8px;
+  }
+
+  .stat-card-icon {
+    width: 27px;
+    height: 27px;
+  }
+
+  .stat-card-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .stat-card-value {
+    margin-top: 13px;
+    font-size: 22px;
+  }
+
+  .stat-card-trend,
+  .stat-card-caption {
+    font-size: 8px;
+  }
+
+  .stat-card-bottom {
+    gap: 5px;
+    padding-top: 10px;
+  }
+
+  .stat-card-accent {
+    right: 11px;
+    left: 11px;
+  }
+}
+
+/* =========================================
+   ACCESSIBILITY
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .stat-card {
+    transition: none;
+  }
+
+  .stat-card:hover {
+    transform: none;
   }
 }

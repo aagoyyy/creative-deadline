@@ -207,26 +207,37 @@
   font-size: 11px;
 }
 
+/* Calendar controls */
+
 .organic-calendar-controls {
   display: flex;
   align-items: center;
-  gap: 7px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .organic-calendar-controls button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 35px;
+  gap: 7px;
+  height: 36px;
+  padding: 0 11px;
   color: #cbd5e1;
   background: #172337;
   border: 1px solid #2b3a52;
   border-radius: 9px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
   cursor: pointer;
   transition:
-    background 0.18s ease,
-    border-color 0.18s ease,
-    color 0.18s ease;
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .organic-calendar-controls button:hover {
@@ -234,6 +245,56 @@
   background: #202d43;
   border-color: rgba(139, 124, 255, 0.5);
 }
+
+.organic-calendar-controls button:focus-visible {
+  outline: 2px solid #a99cff;
+  outline-offset: 3px;
+}
+
+.organic-calendar-controls button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* New Brief */
+
+.organic-calendar-controls .organic-new-brief-button {
+  height: 40px;
+  padding: 0 17px;
+  gap: 8px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #8b78ff 0%, #6f50e8 100%);
+  border: 1px solid rgba(173, 155, 255, 0.28);
+  border-radius: 11px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.1px;
+  box-shadow:
+    0 5px 14px rgba(111, 80, 232, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.organic-calendar-controls .organic-new-brief-button:hover {
+  color: #ffffff;
+  background: linear-gradient(135deg, #9b8aff 0%, #7b5bf0 100%);
+  border-color: rgba(190, 177, 255, 0.55);
+  box-shadow:
+    0 7px 19px rgba(111, 80, 232, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+.organic-calendar-controls .organic-new-brief-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 7px rgba(111, 80, 232, 0.2);
+}
+
+.organic-calendar-controls .organic-new-brief-button svg {
+  flex: 0 0 auto;
+}
+
+/* Today */
 
 .organic-calendar-controls .organic-today-button {
   padding: 0 13px;
@@ -247,8 +308,12 @@
   background: rgba(139, 124, 255, 0.17);
 }
 
-.organic-arrow-button {
-  width: 35px;
+/* Previous / next month */
+
+.organic-calendar-controls .organic-arrow-button {
+  width: 36px;
+  padding: 0;
+  flex: 0 0 auto;
 }
 
 /* =========================================
@@ -287,7 +352,6 @@
   border-right: none;
 }
 
-/* Tanggal hari ini */
 .organic-day-cell.is-today {
   background: rgba(139, 124, 255, 0.07);
   box-shadow: inset 0 0 0 1px rgba(139, 124, 255, 0.15);
@@ -321,8 +385,7 @@
 }
 
 /* =========================================
-   TASK LIST INSIDE CALENDAR
-   Card task sengaja dipertahankan
+   TASK CHIPS
 ========================================= */
 
 .organic-day-tasks {
@@ -345,39 +408,21 @@
   cursor: pointer;
   transition:
     border-color 0.18s ease,
-    filter 0.18s ease;
+    filter 0.18s ease,
+    background 0.18s ease;
 }
 
 .organic-task-chip:hover {
   filter: brightness(1.15);
 }
 
+.organic-task-chip:focus-visible {
+  outline: 2px solid #a99cff;
+  outline-offset: 2px;
+}
+
 .organic-task-chip.is-selected {
   border-color: #b0a5ff;
-}
-
-/* Draft — warna asli dipertahankan */
-.organic-task-draft {
-  color: #f0d7a0;
-  background: rgba(217, 164, 65, 0.12);
-  border: 1px solid rgba(217, 164, 65, 0.25);
-  border-left: 3px solid #c9a45c;
-}
-
-.organic-task-draft:hover {
-  background: rgba(217, 164, 65, 0.2);
-}
-
-/* Assigned — warna ungu dipertahankan */
-.organic-task-assigned {
-  color: #e1d9ff;
-  background: rgba(139, 124, 255, 0.15);
-  border: 1px solid rgba(139, 124, 255, 0.22);
-  border-left: 3px solid #9a86ff;
-}
-
-.organic-task-assigned:hover {
-  background: rgba(139, 124, 255, 0.25);
 }
 
 .organic-task-chip-title {
@@ -398,6 +443,155 @@
   font-weight: 750;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* =========================================
+   DRAFT — ALWAYS YELLOW
+========================================= */
+
+.organic-calendar-page .organic-task-chip.organic-task-draft,
+.organic-calendar-page .organic-task-chip.organic-task-draft.is-overdue,
+.organic-calendar-page .organic-task-chip.organic-task-draft.is-done-late {
+  color: #f0d7a0;
+  background: rgba(217, 164, 65, 0.12);
+  border: 1px solid rgba(217, 164, 65, 0.35);
+  border-left: 3px solid #c9a45c;
+  box-shadow: none;
+}
+
+.organic-calendar-page .organic-task-chip.organic-task-draft:hover {
+  background: rgba(217, 164, 65, 0.2);
+  border-color: rgba(217, 164, 65, 0.55);
+}
+
+.organic-calendar-page .organic-task-chip.organic-task-draft
+.organic-task-chip-title {
+  color: #fde68a;
+}
+
+.organic-calendar-page .organic-task-chip.organic-task-draft
+.organic-task-chip-state {
+  color: #facc15;
+}
+
+/* Draft status in Content Schedule */
+
+.organic-workflow-badge.draft {
+  color: #f0d7a0;
+  background: rgba(217, 164, 65, 0.12);
+  border-color: rgba(217, 164, 65, 0.25);
+}
+
+/* =========================================
+   ASSIGNED — NORMAL
+========================================= */
+
+.organic-task-assigned {
+  color: #e1d9ff;
+  background: rgba(139, 124, 255, 0.15);
+  border: 1px solid rgba(139, 124, 255, 0.22);
+  border-left: 3px solid #9a86ff;
+}
+
+.organic-task-assigned:hover {
+  background: rgba(139, 124, 255, 0.25);
+}
+
+/* =========================================
+   OVERDUE — RED
+========================================= */
+
+.organic-calendar-page .organic-task-chip.organic-task-assigned.is-overdue {
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(248, 113, 113, 0.5);
+  border-left: 3px solid #f87171;
+  box-shadow: none;
+}
+
+.organic-calendar-page .organic-task-chip.organic-task-assigned.is-overdue:hover {
+  background: rgba(239, 68, 68, 0.23);
+  border-color: rgba(248, 113, 113, 0.8);
+}
+
+.organic-calendar-page .organic-task-chip.is-overdue
+.organic-task-chip-title {
+  color: #fecaca;
+}
+
+.organic-calendar-page .organic-task-chip.is-overdue
+.organic-task-chip-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #f87171;
+}
+
+/* =========================================
+   COMPLETED — GREEN
+========================================= */
+
+.organic-calendar-page .organic-task-chip.is-done:not(.is-done-late) {
+  color: #e2fff2;
+  background: rgba(35, 126, 91, 0.2);
+  border: 1px solid rgba(69, 214, 160, 0.48);
+  border-left: 3px solid #45d6a0;
+  box-shadow: none;
+}
+
+.organic-calendar-page .organic-task-chip.is-done:not(.is-done-late):hover {
+  background: rgba(35, 126, 91, 0.3);
+  border-color: rgba(69, 214, 160, 0.75);
+}
+
+.organic-calendar-page .organic-task-chip.is-done:not(.is-done-late)
+.organic-task-chip-title {
+  color: #e2fff2;
+}
+
+.organic-calendar-page .organic-task-chip.is-done:not(.is-done-late)
+.organic-task-chip-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #79f0be;
+  font-weight: 700;
+}
+
+.organic-status-badge.organic-status-done {
+  color: #79f0be;
+  background: rgba(35, 126, 91, 0.22);
+  border: 1px solid rgba(69, 214, 160, 0.4);
+}
+
+/* =========================================
+   DONE LATE — DARK RED
+========================================= */
+
+.organic-calendar-page .organic-task-chip.is-done-late {
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.28);
+  border: 1px solid rgba(248, 113, 113, 0.48);
+  border-left: 3px solid #b91c1c;
+  box-shadow: none;
+}
+
+.organic-calendar-page .organic-task-chip.is-done-late:hover {
+  background: rgba(153, 27, 27, 0.35);
+  border-color: rgba(248, 113, 113, 0.7);
+}
+
+.organic-calendar-page .organic-task-chip.is-done-late
+.organic-task-chip-title {
+  color: #fecaca;
+}
+
+.organic-calendar-page .organic-task-chip.is-done-late
+.organic-task-chip-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #f87171;
 }
 
 /* =========================================
@@ -439,8 +633,12 @@
   background: #ff7288;
 }
 
+.organic-legend-dot.done-late {
+  background: #b91c1c;
+}
+
 /* =========================================
-   UPCOMING DEADLINES
+   CONTENT SCHEDULE
 ========================================= */
 
 .organic-deadline-section {
@@ -502,7 +700,9 @@
   border-bottom: 1px solid var(--organic-border);
   text-align: left;
   cursor: pointer;
-  transition: background 0.18s ease;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .organic-deadline-row:last-child {
@@ -512,6 +712,11 @@
 .organic-deadline-row:hover,
 .organic-deadline-row.is-selected {
   background: var(--organic-card-hover);
+}
+
+.organic-deadline-row:focus-visible {
+  outline: 2px solid #a99cff;
+  outline-offset: -2px;
 }
 
 .organic-deadline-date {
@@ -584,21 +789,17 @@
 
 .organic-workflow-badge,
 .organic-status-badge,
-.organic-overdue-badge {
+.organic-overdue-badge,
+.organic-done-late-badge {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   padding: 6px 8px;
   border: 1px solid transparent;
   border-radius: 7px;
   font-size: 9px;
   font-weight: 800;
   white-space: nowrap;
-}
-
-.organic-workflow-badge.draft {
-  color: #f0d7a0;
-  background: rgba(217, 164, 65, 0.12);
-  border-color: rgba(217, 164, 65, 0.25);
 }
 
 .organic-workflow-badge.assigned {
@@ -627,10 +828,101 @@
   background: rgba(44, 190, 139, 0.12);
 }
 
-.organic-overdue-badge {
+/* Overdue badge */
+
+.organic-overdue-badge,
+.organic-done-late-badge {
   color: #ff8b9c;
   background: rgba(245, 91, 116, 0.12);
-  border-color: rgba(245, 91, 116, 0.2);
+  border-color: rgba(245, 91, 116, 0.3);
+}
+
+/* =========================================
+   CONTENT SCHEDULE — OVERDUE
+========================================= */
+
+.organic-calendar-page .organic-deadline-row.is-overdue {
+  background: rgba(127, 29, 29, 0.12);
+  border-color: rgba(248, 113, 113, 0.35);
+}
+
+.organic-calendar-page .organic-deadline-row.is-overdue:hover {
+  background: rgba(127, 29, 29, 0.2);
+  border-color: rgba(248, 113, 113, 0.65);
+}
+
+.organic-calendar-page .organic-deadline-row.is-overdue
+.organic-deadline-date {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(248, 113, 113, 0.35);
+}
+
+.organic-calendar-page .organic-deadline-row.is-overdue
+.organic-deadline-date strong,
+.organic-calendar-page .organic-deadline-row.is-overdue
+.organic-deadline-date span {
+  color: #f87171;
+}
+
+.organic-calendar-page .organic-deadline-row.is-overdue
+.organic-deadline-info > strong {
+  color: #fecaca;
+}
+
+/* =========================================
+   CONTENT SCHEDULE — DONE
+========================================= */
+
+.organic-calendar-page .organic-deadline-row.is-done:not(.is-done-late) {
+  background: rgba(35, 126, 91, 0.08);
+  border-color: rgba(69, 214, 160, 0.24);
+}
+
+.organic-calendar-page .organic-deadline-row.is-done:not(.is-done-late):hover {
+  background: rgba(35, 126, 91, 0.15);
+  border-color: rgba(69, 214, 160, 0.5);
+}
+
+.organic-calendar-page .organic-deadline-row.is-done:not(.is-done-late)
+.organic-deadline-date {
+  border-color: rgba(69, 214, 160, 0.4);
+}
+
+.organic-calendar-page .organic-deadline-row.is-done:not(.is-done-late)
+.organic-deadline-date strong {
+  color: #79f0be;
+}
+
+/* =========================================
+   CONTENT SCHEDULE — DONE LATE
+========================================= */
+
+.organic-calendar-page .organic-deadline-row.is-done-late {
+  background: rgba(127, 29, 29, 0.12);
+  border-color: rgba(248, 113, 113, 0.3);
+}
+
+.organic-calendar-page .organic-deadline-row.is-done-late:hover {
+  background: rgba(127, 29, 29, 0.2);
+  border-color: rgba(248, 113, 113, 0.6);
+}
+
+.organic-calendar-page .organic-deadline-row.is-done-late
+.organic-deadline-date {
+  background: rgba(127, 29, 29, 0.2);
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+.organic-calendar-page .organic-deadline-row.is-done-late
+.organic-deadline-date strong,
+.organic-calendar-page .organic-deadline-row.is-done-late
+.organic-deadline-date span {
+  color: #f87171;
+}
+
+.organic-calendar-page .organic-deadline-row.is-done-late
+.organic-deadline-info > strong {
+  color: #fecaca;
 }
 
 /* =========================================
@@ -751,8 +1043,9 @@
 
   .organic-calendar-toolbar {
     align-items: flex-start;
+    flex-direction: column;
     padding: 16px 12px;
-    gap: 10px;
+    gap: 13px;
   }
 
   .organic-month-heading h2 {
@@ -764,19 +1057,26 @@
   }
 
   .organic-calendar-controls {
-    gap: 4px;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .organic-calendar-controls .organic-new-brief-button {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 11px;
   }
 
   .organic-calendar-controls button {
-    height: 31px;
+    height: 32px;
   }
 
   .organic-calendar-controls .organic-today-button {
-    padding: 0 8px;
+    padding: 0 9px;
   }
 
-  .organic-arrow-button {
-    width: 31px;
+  .organic-calendar-controls .organic-arrow-button {
+    width: 32px;
   }
 
   .organic-calendar-grid {
@@ -814,7 +1114,8 @@
 
   .organic-workflow-badge,
   .organic-status-badge,
-  .organic-overdue-badge {
+  .organic-overdue-badge,
+  .organic-done-late-badge {
     padding: 5px 6px;
     font-size: 8px;
   }
@@ -855,4 +1156,79 @@
     padding-left: 52px;
     justify-content: flex-start;
   }
+}
+/* =========================================
+   FORGIVEN — OVERDUE DIABAIKAN
+========================================= */
+
+/* Task yang overdue-nya sudah di-forgive */
+.organic-calendar-page .organic-task-chip.is-forgiven {
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-left: 3px solid #94a3b8;
+  box-shadow: none;
+}
+
+.organic-calendar-page .organic-task-chip.is-forgiven:hover {
+  background: rgba(148, 163, 184, 0.17);
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+.organic-calendar-page .organic-task-chip.is-forgiven
+.organic-task-chip-title {
+  color: #e2e8f0;
+}
+
+.organic-calendar-page .organic-task-chip.is-forgiven
+.organic-task-chip-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #a8b3c5;
+}
+
+/* Baris Content Schedule yang sudah di-forgive */
+.organic-calendar-page .organic-deadline-row.is-forgiven {
+  background: rgba(148, 163, 184, 0.06);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.organic-calendar-page .organic-deadline-row.is-forgiven:hover {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+/* Tanggal pada task forgiven */
+.organic-calendar-page .organic-deadline-row.is-forgiven
+.organic-deadline-date {
+  background: rgba(148, 163, 184, 0.1);
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+.organic-calendar-page .organic-deadline-row.is-forgiven
+.organic-deadline-date strong,
+.organic-calendar-page .organic-deadline-row.is-forgiven
+.organic-deadline-date span {
+  color: #a8b3c5;
+}
+
+/* Badge Forgiven */
+.organic-forgiven-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 7px;
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* Legend Forgiven */
+.organic-legend-dot.forgiven {
+  background: #94a3b8;
 }

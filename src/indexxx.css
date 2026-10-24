@@ -139,9 +139,6 @@ h1 { margin: 10px 0 7px; font: 600 clamp(25px,2.3vw,32px) 'Space Grotesk',sans-s
 .task-chip-copy b { font-size: 8px; font-weight: 700; letter-spacing: .1px; }
 .task-chip-copy span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 9px; line-height: 1.35; overflow-wrap: anywhere; }
 .task-chip-label { display: none; }
-.more-tasks { padding-left: 5px; color: #7d8ca6; font-size: 9px; }
-.calendar-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 19px; color: #7e8ca4; font-size: 9px; }
-.calendar-footer > div { display: flex; align-items: center; gap: 7px; }.calendar-footer .legend-dot:not(:first-child) { margin-left: 9px; }
 .task-list-view { min-height: 300px; padding: 6px 18px; }
 .list-task { display: flex; align-items: center; gap: 13px; width: 100%; padding: 12px 5px; border: 0; border-bottom: 1px solid #222e42; background: transparent; text-align: left; color: #e7ebf7; }
 .list-task:hover, .list-task-selected { background: #151f31; }

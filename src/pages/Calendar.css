@@ -1,0 +1,1033 @@
+
+/* =========================================================
+   CALENDAR — THEME
+========================================================= */
+
+.calendar-panel {
+    --calendar-bg: #101827;
+    --calendar-surface: #141e2e;
+    --calendar-border: #29364b;
+    --calendar-text: #f3f6ff;
+    --calendar-muted: #a5b3ca;
+    --calendar-purple: #a99aff;
+  
+    min-width: 0;
+    overflow: hidden;
+    color: var(--calendar-text);
+    background: var(--calendar-bg);
+    border: 1px solid var(--calendar-border);
+    border-radius: 12px;
+  }
+  
+  /* =========================================================
+     TOOLBAR
+  ========================================================= */
+  
+  .calendar-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 20px;
+  }
+  
+  .calendar-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+  
+  .calendar-heading h2 {
+    margin: 0;
+    color: #f4f6ff;
+    font: 600 16px 'Space Grotesk', sans-serif;
+  }
+  
+  .calendar-heading p {
+    margin: 4px 0 0;
+    color: var(--calendar-muted);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  
+  .calendar-icon {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    color: #c4baff;
+    background: #242343;
+    border: 1px solid #494477;
+    border-radius: 10px;
+  }
+  
+  .calendar-controls {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  
+  .calendar-panel .today-button,
+  .calendar-panel .filter-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 11px;
+    color: #d8e1f2;
+    background: #172235;
+    border: 1px solid #35435c;
+    border-radius: 7px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  
+  .calendar-panel .today-button:hover,
+  .calendar-panel .filter-button:hover {
+    color: #fff;
+    background: #222541;
+    border-color: #8b7cff;
+  }
+  
+  /* =========================================================
+     FILTERS
+  ========================================================= */
+  
+  .calendar-filters {
+    padding: 15px 19px 12px;
+    background: #0e1624;
+    border-top: 1px solid #29364b;
+    border-bottom: 1px solid #29364b;
+  }
+  
+  .calendar-filters-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 13px;
+  }
+  
+  .calendar-filters-heading h3 {
+    margin: 0;
+    color: #edf1ff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  
+  .calendar-filters-heading p {
+    margin: 4px 0 0;
+    color: #a0aec5;
+    font-size: 11px;
+  }
+  
+  .calendar-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  
+  .calendar-filter-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+  
+  .calendar-filter-grid label > span {
+    color: #b1bfd5;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  
+  .calendar-filter-grid select {
+    width: 100%;
+    min-width: 0;
+    padding: 9px 10px;
+    color: #f0f4ff;
+    background: #172235;
+    border: 1px solid #35435c;
+    border-radius: 7px;
+    outline: none;
+    font: inherit;
+    font-size: 12px;
+  }
+  
+  .calendar-filter-grid select:focus {
+    border-color: #a99aff;
+    box-shadow: 0 0 0 2px rgba(139, 124, 255, 0.18);
+  }
+  
+  .calendar-filter-grid select option {
+    color: #f0f4ff;
+    background: #172235;
+  }
+  
+  .calendar-filter-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 13px;
+  }
+  
+  .calendar-filter-footer > span,
+  .calendar-filter-footer button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #a5b3ca;
+    font-size: 11px;
+  }
+  
+  .calendar-filter-footer button {
+    padding: 7px 10px;
+    background: #172235;
+    border: 1px solid #35435c;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .calendar-filter-footer button:hover:not(:disabled) {
+    color: #fff;
+    border-color: #8b7cff;
+  }
+  
+  .calendar-filter-footer button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* =========================================================
+     CALENDAR GRID
+  ========================================================= */
+  
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+  
+  .calendar-panel .weekday {
+    padding: 12px 6px;
+    color: #a5b3ca;
+    text-align: center;
+    border-bottom: 1px solid #2b3850;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+  }
+  
+  .calendar-panel .day-cell {
+    position: relative;
+    min-width: 0;
+    min-height: 145px;
+    padding: 8px 6px;
+    background: #101827;
+    border-right: 1px solid #29364b;
+    border-bottom: 1px solid #29364b;
+  }
+  
+  .calendar-panel .day-cell:nth-child(7n) {
+    border-right: 0;
+  }
+  
+  .calendar-panel .day-cell.empty-day {
+    background: #0d1522;
+  }
+  
+  .calendar-panel .day-cell.today-cell {
+    background: linear-gradient(180deg, #191d37, #111827);
+  }
+  
+  .calendar-panel .day-cell.drag-over {
+    outline: 2px dashed #a99aff;
+    outline-offset: -3px;
+  }
+  
+  .day-number-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 22px;
+    padding: 0 3px 7px;
+    color: #b1bfd5;
+    font-size: 11px;
+  }
+  
+  .today-number {
+    display: grid;
+    place-items: center;
+    width: 23px;
+    height: 23px;
+    margin: -3px 0;
+    color: #fff;
+    background: #7667ef;
+    border-radius: 7px;
+    box-shadow: 0 3px 10px rgba(116, 101, 255, 0.25);
+    font-weight: 700;
+  }
+  
+  .day-task-count {
+    color: #a5b3ca;
+    font-size: 10px;
+  }
+  
+  .day-tasks {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    min-width: 0;
+  }
+  
+  /* =========================================================
+     TASK CARD — BASE LAYOUT
+  ========================================================= */
+  
+  .calendar-panel .task-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 7px;
+  
+    width: 100%;
+    min-width: 0;
+    padding: 9px;
+  
+    color: #f3f4ff;
+    background: #282448;
+    border: 1px solid #494174;
+    border-radius: 8px;
+  
+    text-align: left;
+    overflow: hidden;
+    cursor: pointer;
+  
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      box-shadow 0.15s ease,
+      filter 0.15s ease,
+      transform 0.15s ease;
+  }
+  
+  .calendar-panel .task-chip:hover {
+    filter: brightness(1.08);
+  }
+  
+  .calendar-panel .task-chip:focus-visible {
+    outline: 2px solid #c4baff;
+    outline-offset: 2px;
+  }
+  
+  /* =========================================================
+     PIC COLORS
+     Keep each creator's own card color.
+  ========================================================= */
+  
+  .calendar-panel .task-chip.purple {
+    color: #e5ddff;
+    background: #282448;
+    border-color: #494174;
+  }
+  
+  .calendar-panel .task-chip.cyan {
+    color: #c5fff8;
+    background: #16343a;
+    border-color: #34747b;
+  }
+  
+  .calendar-panel .task-chip.blue {
+    color: #d2e4ff;
+    background: #1a2e49;
+    border-color: #3d608c;
+  }
+  
+  .calendar-panel .task-chip.pink {
+    color: #ffd9ef;
+    background: #3b233a;
+    border-color: #77476c;
+  }
+  
+  .calendar-panel .task-chip.orange {
+    color: #ffe0c2;
+    background: #3b2b22;
+    border-color: #79543b;
+  }
+  
+  .calendar-panel .task-chip.green {
+    color: #d0ffe1;
+    background: #19372b;
+    border-color: #367853;
+  }
+  
+  .calendar-panel .task-chip.red {
+    color: #ffd4d8;
+    background: #3b2227;
+    border-color: #82404c;
+  }
+  
+  .calendar-panel .task-chip.yellow {
+    color: #fff3bc;
+    background: #39331e;
+    border-color: #786a34;
+  }
+  
+  .calendar-panel .task-chip.indigo {
+    color: #dce1ff;
+    background: #242b4a;
+    border-color: #46578d;
+  }
+  
+  .calendar-panel .task-chip.teal {
+    color: #c8fff1;
+    background: #183732;
+    border-color: #347267;
+  }
+  
+  /* =========================================================
+     TASK HEADER
+     PIC and title sit on the same row.
+  ========================================================= */
+  
+  .calendar-panel .task-card-header {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .calendar-panel .task-card-pic {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    max-width: 48%;
+    padding: 3px 6px;
+  
+    overflow: hidden;
+    color: inherit;
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+  
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  
+  .calendar-panel .task-card-title {
+    display: -webkit-box;
+    flex: 1;
+    min-width: 0;
+    max-height: 2.7em;
+    overflow: hidden;
+  
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  
+/* =========================================================
+   PROJECT AND CONTENT TAGS
+========================================================= */
+
+.calendar-panel .task-card-tags {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    min-width: 0;
+  }
+ /* PROJECT AND CONTENT TAGS */
+.calendar-panel .task-card-project,
+.calendar-panel .task-card-type {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 8px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+  
+  /* PROJECT COLORS */
+  
+  .calendar-panel .task-card-project.organic {
+    color: #a7f3b5;
+    background: rgba(34, 197, 94, 0.16);
+    border-color: rgba(74, 222, 128, 0.32);
+  }
+  
+  .calendar-panel .task-card-project.smm {
+    color: #bfdbfe;
+    background: rgba(59, 130, 246, 0.18);
+    border-color: rgba(96, 165, 250, 0.35);
+  }
+  
+  .calendar-panel .task-card-project.big-project {
+    color: #e0ceff;
+    background: rgba(139, 92, 246, 0.2);
+    border-color: rgba(167, 139, 250, 0.35);
+  }
+  
+  .calendar-panel .task-card-project.other-project {
+    color: #d1d5db;
+    background: rgba(148, 163, 184, 0.14);
+    border-color: rgba(203, 213, 225, 0.25);
+  }
+  
+  /* CONTENT TYPE COLORS */
+  
+  .calendar-panel .task-card-type.video {
+    color: #e9d5ff;
+    background: rgba(168, 85, 247, 0.2);
+    border-color: rgba(192, 132, 252, 0.35);
+  }
+  
+  .calendar-panel .task-card-type.carousel {
+    color: #a5f3fc;
+    background: rgba(6, 182, 212, 0.18);
+    border-color: rgba(103, 232, 249, 0.35);
+  }
+  
+  .calendar-panel .task-card-type.single-image {
+    color: #fed7aa;
+    background: rgba(249, 115, 22, 0.18);
+    border-color: rgba(253, 186, 116, 0.35);
+  }
+  
+  .calendar-panel .task-card-type.other-type {
+    color: #d1d5db;
+    background: rgba(148, 163, 184, 0.14);
+    border-color: rgba(203, 213, 225, 0.25);
+  }
+  
+  /* =========================================================
+     PRIORITY
+  ========================================================= */
+  
+  .calendar-panel .task-card-priority-row {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+  
+  .calendar-panel .priority-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  
+    max-width: 100%;
+    padding: 2px 5px;
+  
+    color: inherit;
+    background: rgba(10, 15, 28, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+  
+    font-size: 8px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  
+  /* Priority uses text emphasis, not a replacement for PIC color. */
+  
+  .calendar-panel .priority-urgent {
+    color: #ffb3bc;
+  }
+  
+  .calendar-panel .priority-high {
+    color: #ffc995;
+  }
+  
+  .calendar-panel .priority-medium {
+    color: #d5d0ff;
+  }
+  
+  .calendar-panel .priority-low {
+    color: #c4d4e8;
+  }
+  
+  /* =========================================================
+     DATES
+  ========================================================= */
+  
+  .calendar-panel .task-card-dates {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    min-width: 0;
+    min-height: 14px;
+  
+    color: #e3eaff;
+    font-size: 9px;
+  }
+  
+  .calendar-panel .task-date-start,
+  .calendar-panel .task-date-deadline {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 5px;
+    border-radius: 4px;
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  
+  .calendar-panel .task-date-start {
+    color: #d8e8ff;
+    background: rgba(96, 165, 250, 0.2);
+  }
+  
+  .calendar-panel .task-date-deadline {
+    color: #f0f4ff;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .calendar-panel .task-card-deadline-date {
+    color: #e3eaff;
+    font-size: 9px;
+    font-weight: 700;
+  }
+  
+  /* =========================================================
+     STATUS AND PROGRESS
+  ========================================================= */
+  
+  .calendar-panel .task-card-progress-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    min-width: 0;
+    margin-top: 1px;
+  }
+  
+  .calendar-panel .task-card-status {
+    min-width: 0;
+    overflow: hidden;
+    color: #f0f2ff;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .calendar-panel .task-card-progress-info strong {
+    flex-shrink: 0;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  
+  .calendar-panel .task-progress-track {
+    width: 100%;
+    height: 3px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 99px;
+  }
+  
+  .calendar-panel .task-progress-fill {
+    display: block;
+    height: 100%;
+    background: currentColor;
+    border-radius: inherit;
+    transition: width 0.2s ease;
+  }
+  
+  .calendar-panel .task-card-footer {
+    color: #e1e7f7;
+    font-size: 9px;
+    font-weight: 500;
+    line-height: 1.3;
+    opacity: 0.85;
+  }
+  
+  /* =========================================================
+     SELECTED TASK
+     Keep the original PIC background.
+  ========================================================= */
+  
+  .calendar-panel .task-chip.task-selected {
+    position: relative;
+    z-index: 1;
+    outline: 2px solid #c0b4ff;
+    outline-offset: 1px;
+    box-shadow: 0 0 0 3px rgba(139, 124, 255, 0.16);
+  }
+  
+/* =========================================================
+   COMPLETED TASK — MUTED PIC COLORS
+   Tetap mengikuti warna PIC, tetapi lebih redup.
+========================================================= */
+
+.calendar-panel .task-chip.task-done {
+    opacity: 0.68;
+    filter: saturate(0.75);
+    box-shadow: none;
+  }
+  
+  /* Teks tetap terbaca */
+  .calendar-panel .task-chip.task-done .task-card-title {
+    color: #e2e5ee;
+  }
+  
+  .calendar-panel .task-chip.task-done .task-card-pic {
+    opacity: 0.85;
+  }
+  
+  .calendar-panel .task-chip.task-done .task-card-status,
+  .calendar-panel .task-chip.task-done .task-card-progress-info strong {
+    color: #e0e3ed;
+  }
+  
+  .calendar-panel .task-chip.task-done .task-card-footer,
+  .calendar-panel .task-chip.task-done .task-card-deadline-date {
+    color: #c2c8d6;
+  }
+  
+  /* Progress tetap terlihat, tetapi lebih kalem */
+  .calendar-panel .task-chip.task-done .task-progress-track {
+    background: rgba(255, 255, 255, 0.13);
+  }
+  
+  .calendar-panel .task-chip.task-done .task-progress-fill {
+    background: #b7b0d9;
+  }
+  
+  /* Saat dipilih atau diarahkan, card kembali jelas */
+  .calendar-panel .task-chip.task-done:hover,
+  .calendar-panel .task-chip.task-done.task-selected {
+    opacity: 0.9;
+    filter: saturate(0.9);
+  }
+  
+  /* =========================================================
+     ACTIVE OVERDUE
+     Overdue active tasks are red.
+  ========================================================= */
+  
+  .calendar-panel .task-chip.task-overdue:not(.task-done) {
+    opacity: 1;
+    filter: none;
+    color: #ffd8dc;
+    background: #471923;
+    border: 2px solid #ff454f;
+    box-shadow: 0 0 8px rgba(255, 69, 79, 0.16);
+  }
+  
+  .calendar-panel .task-chip.task-overdue:not(.task-done) .task-card-title,
+  .calendar-panel .task-chip.task-overdue:not(.task-done) .task-card-pic,
+  .calendar-panel .task-chip.task-overdue:not(.task-done) .task-card-progress-info strong {
+    color: #fff;
+  }
+  
+  .calendar-panel .task-chip.task-overdue:not(.task-done) .task-card-status,
+  .calendar-panel .task-chip.task-overdue:not(.task-done) .task-card-footer,
+  .calendar-panel .task-chip.task-overdue:not(.task-done) .task-card-deadline-date {
+    color: #ffc2c7;
+  }
+  
+  .calendar-panel .task-chip.task-overdue:not(.task-done) .task-card-project,
+  .calendar-panel .task-chip.task-overdue:not(.task-done) .task-card-type {
+    color: #ffe4e6;
+    border-color: #d76b78;
+  }
+  
+  .calendar-panel .task-chip.task-overdue:not(.task-done) .task-date-deadline {
+    color: #fff;
+    background: #8b2735;
+  }
+  
+  .calendar-panel .task-chip.task-overdue:not(.task-done) .task-progress-track {
+    background: #792532;
+  }
+  
+  .calendar-panel .task-chip.task-overdue:not(.task-done) .task-progress-fill {
+    background: #ff454f;
+  }
+  
+  .calendar-panel .task-chip.task-overdue:not(.task-done):hover {
+    background: #571d29;
+    border-color: #ff737b;
+    box-shadow: 0 0 12px rgba(255, 69, 79, 0.24);
+  }
+  
+  /* =========================================================
+     COMPLETED LATE
+     Muted red, distinct from active overdue.
+  ========================================================= */
+  
+  .calendar-panel .task-chip.task-completed-late {
+    border-color: #bd5969;
+  }
+  
+  .calendar-panel .task-chip.task-done.task-overdue {
+    opacity: 1;
+    filter: none;
+    color: #ffdce0;
+    background: #382329;
+    border: 2px solid #bd5969;
+    box-shadow: 0 0 6px rgba(189, 89, 105, 0.12);
+  }
+  
+  .calendar-panel .task-chip.task-done.task-overdue .task-card-title,
+  .calendar-panel .task-chip.task-done.task-overdue .task-card-pic,
+  .calendar-panel .task-chip.task-done.task-overdue .task-card-progress-info strong {
+    color: #fff1f2;
+  }
+  
+  .calendar-panel .task-chip.task-done.task-overdue .task-card-status,
+  .calendar-panel .task-chip.task-done.task-overdue .task-card-footer,
+  .calendar-panel .task-chip.task-done.task-overdue .task-card-deadline-date {
+    color: #f5a8b2;
+  }
+  
+  .calendar-panel .task-chip.task-done.task-overdue .task-card-project,
+  .calendar-panel .task-chip.task-done.task-overdue .task-card-type {
+    color: #ffdce0;
+    border-color: #a95563;
+  }
+  
+  .calendar-panel .task-chip.task-done.task-overdue .task-date-deadline {
+    color: #ffe4e6;
+    background: #58303a;
+  }
+  
+  .calendar-panel .task-chip.task-done.task-overdue .task-progress-track {
+    background: #512b34;
+  }
+  
+  .calendar-panel .task-chip.task-done.task-overdue .task-progress-fill {
+    background: #bd5969;
+  }
+  
+  .calendar-panel .task-chip.task-done.task-overdue:hover {
+    background: #432730;
+    border-color: #d97786;
+  }
+  
+  .calendar-panel .task-chip.task-completed-late .task-card-status,
+  .calendar-panel .task-chip.task-completed-late .task-card-footer {
+    color: #ffb8c1;
+    font-weight: 700;
+  }
+  
+  /* =========================================================
+     FORGIVEN OVERDUE
+  ========================================================= */
+  
+  .calendar-panel .task-chip.task-overdue-forgiven {
+    border-style: dashed;
+  }
+  
+  /* =========================================================
+     DRAGGING
+  ========================================================= */
+  
+  .calendar-panel .task-chip.task-dragging {
+    opacity: 0.45;
+    cursor: grabbing;
+  }
+  
+  /* =========================================================
+     MORE TASKS
+  ========================================================= */
+  
+  .calendar-panel .more-tasks {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  
+    width: 100%;
+    padding: 7px 5px;
+    margin-top: 2px;
+  
+    color: #bdc8dc;
+    background: transparent;
+    border: 1px dashed #45516a;
+    border-radius: 6px;
+  
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  
+  .calendar-panel .more-tasks:hover {
+    color: #fff;
+    border-color: #a99aff;
+  }
+  
+  /* =========================================================
+     FOOTER & LEGEND
+  ========================================================= */
+  
+  .calendar-footer {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 10px;
+    color: #a5b3ca;
+    font-size: 10px;
+  }
+  
+  .calendar-footer > div {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .calendar-footer .legend-dot:not(:first-child) {
+    margin-left: 4px;
+  }
+  
+  .calendar-panel .legend-dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+  }
+  
+  .calendar-panel .purple-dot {
+    background: #a99aff;
+  }
+  
+  .calendar-panel .cyan-dot {
+    background: #49dcd0;
+  }
+  
+  .calendar-panel .orange-dot {
+    background: #ffb66e;
+  }
+  
+  .calendar-panel .green-dot {
+    background: #5bd6a1;
+  }
+  
+  .calendar-panel .red-dot {
+    background: #ff454f;
+    box-shadow: 0 0 8px rgba(255, 69, 79, 0.3);
+  }
+  
+  /* =========================================================
+     RESPONSIVE
+  ========================================================= */
+  
+  @media (max-width: 1100px) {
+    .calendar-panel .day-cell {
+      min-height: 135px;
+      padding: 7px 5px;
+    }
+  
+    .calendar-panel .task-chip {
+      padding: 7px;
+      gap: 6px;
+    }
+  
+    .calendar-panel .task-card-header {
+      flex-wrap: wrap;
+      gap: 4px 5px;
+    }
+  
+    .calendar-panel .task-card-pic {
+      max-width: 100%;
+    }
+  }
+  
+  @media (max-width: 900px) {
+    .calendar-toolbar {
+      flex-wrap: wrap;
+    }
+  
+    .calendar-controls {
+      flex-wrap: wrap;
+    }
+  
+    .calendar-filter-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  
+    .calendar-panel .day-cell {
+      min-height: 115px;
+      padding: 6px 4px;
+    }
+  
+    .calendar-panel .task-chip {
+      padding: 6px;
+      gap: 5px;
+    }
+  
+    .calendar-panel .task-card-title {
+      font-size: 10px;
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .calendar-toolbar {
+      padding: 14px;
+    }
+  
+    .calendar-heading h2 {
+      font-size: 14px;
+    }
+  
+    .calendar-controls {
+      width: 100%;
+    }
+  
+    .calendar-filter-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  
+    .calendar-panel .calendar-grid {
+      grid-template-columns: repeat(7, minmax(70px, 1fr));
+    }
+  
+    .calendar-panel {
+      overflow-x: auto;
+    }
+  
+    .calendar-panel .weekday {
+      padding: 10px 3px;
+      font-size: 9px;
+    }
+  
+    .calendar-panel .day-cell {
+      min-height: 100px;
+    }
+  
+    .calendar-panel .task-card-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .calendar-panel .task-card-title {
+      font-size: 10px;
+    }
+  
+    .calendar-footer {
+      flex-direction: column;
+    }
+  }
+  

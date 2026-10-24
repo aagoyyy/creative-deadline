@@ -1,22 +1,23 @@
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
-  Activity,
   Archive,
   CalendarDays,
   CalendarRange,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   FileText,
   FolderKanban,
   LayoutDashboard,
   List,
-  LogOut,
   UserRoundCheck,
   UsersRound,
+  X,
   Zap,
 } from 'lucide-react'
+
+import './Sidebar.css'
+
 const BASE_NAV_ITEMS = [
   { name: 'Overview', icon: LayoutDashboard },
   { name: 'Calendar', icon: CalendarDays },
@@ -26,7 +27,6 @@ const BASE_NAV_ITEMS = [
 function getNavItems(role) {
   const items = [...BASE_NAV_ITEMS]
 
-  // Organic Calendar hanya untuk Admin dan Strategic.
   if (role === 'admin' || role === 'strategic') {
     items.push({
       name: 'Organic Calendar',
@@ -71,29 +71,90 @@ export default function Sidebar({
   onNavigate,
   taskCount = 0,
   currentUser,
-  onLogout,
+  isMobileOpen = false,
+  onCloseMobile,
 }) {
   const [isMinimized, setIsMinimized] = useState(true)
 
-  const displayName =
-    currentUser?.name || currentUser?.email || 'User'
+  const role = String(currentUser?.role || 'member')
+    .trim()
+    .toLowerCase()
 
-  const role = String(currentUser?.role || 'Member').toLowerCase()
   const navItems = getNavItems(role)
 
-  return (
-    <aside
-      className={`sidebar ${
-        isMinimized ? 'sidebar-minimized' : ''
-      }`}
-    >
-      {/* Brand */}
-      <div className="brand">
-        <div className="brand-mark">
-          <Zap size={21} fill="currentColor" />
-        </div>
+  function closeMobileSidebar() {
+    if (typeof onCloseMobile === 'function') {
+      onCloseMobile()
+    }
+  }
 
-        {!isMinimized && (
+  function handleNavigate(name) {
+    if (typeof onNavigate === 'function') {
+      onNavigate(name)
+    }
+
+    closeMobileSidebar()
+  }
+
+  // Tutup drawer dengan tombol Escape.
+  useEffect(() => {
+    if (!isMobileOpen) return
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        closeMobileSidebar()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isMobileOpen])
+
+  // Kunci scroll halaman saat drawer terbuka.
+  useEffect(() => {
+    if (!isMobileOpen) return
+
+    const previousOverflow = document.body.style.overflow
+
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isMobileOpen])
+
+  return (
+    <>
+      {/* Overlay untuk drawer mobile */}
+      <button
+        type="button"
+        className={`sidebar-overlay ${
+          isMobileOpen ? 'sidebar-overlay-visible' : ''
+        }`}
+        onClick={closeMobileSidebar}
+        aria-label="Close navigation menu"
+        aria-hidden={!isMobileOpen}
+        tabIndex={isMobileOpen ? 0 : -1}
+      />
+
+      <aside
+        id="creative-sidebar"
+        className={`sidebar ${
+          isMinimized ? 'sidebar-minimized' : ''
+        } ${
+          isMobileOpen ? 'mobile-sidebar-open' : ''
+        }`}
+        aria-label="Main sidebar"
+      >
+        {/* Brand */}
+        <div className="brand">
+          <div className="brand-mark">
+            <Zap size={21} fill="currentColor" />
+          </div>
+
           <div className="brand-copy">
             <div className="brand-name">
               CREATIVE<span>.</span>
@@ -103,92 +164,107 @@ export default function Sidebar({
               DEADLINE WORKSPACE
             </div>
           </div>
-        )}
 
-        <button
-          type="button"
-          className="sidebar-toggle"
-          onClick={() => setIsMinimized((previous) => !previous)}
-          title={
-            isMinimized ? 'Expand sidebar' : 'Minimize sidebar'
-          }
-          aria-label={
-            isMinimized ? 'Expand sidebar' : 'Minimize sidebar'
-          }
-        >
-          {isMinimized ? (
-            <ChevronRight size={18} />
-          ) : (
-            <ChevronLeft size={18} />
-          )}
-        </button>
-      </div>
-
-      {/* Workspace */}
-      <button
-        type="button"
-        className="workspace-switch"
-        title="Creative Team Workspace"
-        onClick={() => {
-          if (isMinimized) setIsMinimized(false)
-        }}
-      >
-        <div className="workspace-avatar">C</div>
-
-        {!isMinimized && (
-          <>
-            <div className="workspace-copy">
-              <strong>Creative Team</strong>
-              <span>Workspace</span>
-            </div>
-
-            <ChevronDown size={15} />
-          </>
-        )}
-      </button>
-
-      {!isMinimized && (
-        <div className="nav-label">WORKSPACE</div>
-      )}
-
-      {/* Main navigation */}
-      <nav className="main-nav">
-        {navItems.map(({ name, icon: Icon }) => (
+          {/* Toggle hanya untuk desktop */}
           <button
             type="button"
-            key={name}
-            className={`nav-item ${
-              activeNav === name ? 'active' : ''
-            }`}
-            onClick={() => onNavigate(name)}
-            title={isMinimized ? name : undefined}
+            className="sidebar-toggle"
+            onClick={() =>
+              setIsMinimized((previous) => !previous)
+            }
+            title={
+              isMinimized
+                ? 'Expand sidebar'
+                : 'Minimize sidebar'
+            }
+            aria-label={
+              isMinimized
+                ? 'Expand sidebar'
+                : 'Minimize sidebar'
+            }
+            aria-expanded={!isMinimized}
           >
-            <Icon size={18} />
-
-            {!isMinimized && <span>{name}</span>}
-
-            {!isMinimized && name === 'All Tasks' && (
-              <span className="nav-count">{taskCount}</span>
+            {isMinimized ? (
+              <ChevronRight size={18} />
+            ) : (
+              <ChevronLeft size={18} />
             )}
           </button>
-        ))}
-      </nav>
 
-      {/* Bottom navigation and profile */}
-      <div className="sidebar-bottom">
-        <button
-          type="button"
-          className={`nav-item ${
-            activeNav === 'Team' ? 'active' : ''
-          }`}
-          onClick={() => onNavigate('Team')}
-          title={isMinimized ? 'Team' : undefined}
+          {/* Tombol tutup drawer mobile */}
+          <button
+            type="button"
+            className="mobile-sidebar-close"
+            onClick={closeMobileSidebar}
+            aria-label="Close navigation"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Label navigasi */}
+        <div className="nav-label">
+          WORKSPACE
+        </div>
+
+        {/* Navigasi utama */}
+        <nav
+          className="main-nav"
+          aria-label="Workspace navigation"
         >
-          <UsersRound size={18} />
+          {navItems.map(({ name, icon: Icon }) => {
+            const isActive = activeNav === name
 
-          {!isMinimized && <span>Team</span>}
-        </button>
-      </div>
-    </aside>
+            return (
+              <button
+                type="button"
+                key={name}
+                className={`nav-item ${
+                  isActive ? 'active' : ''
+                }`}
+                onClick={() => handleNavigate(name)}
+                title={isMinimized ? name : undefined}
+                aria-label={isMinimized ? name : undefined}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                <Icon size={18} />
+
+                <span className="nav-item-label">
+                  {name}
+                </span>
+
+                {name === 'All Tasks' && (
+                  <span className="nav-count">
+                    {taskCount}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </nav>
+
+        {/* Navigasi bawah */}
+        <div className="sidebar-bottom">
+          <button
+            type="button"
+            className={`nav-item ${
+              activeNav === 'Team' ? 'active' : ''
+            }`}
+            onClick={() => handleNavigate('Team')}
+            title={isMinimized ? 'Team' : undefined}
+            aria-label={isMinimized ? 'Team' : undefined}
+            aria-current={
+              activeNav === 'Team' ? 'page' : undefined
+            }
+          >
+            <UsersRound size={18} />
+
+            <span className="nav-item-label">
+              Team
+            </span>
+          </button>
+        </div>
+      </aside>
+    </>
   )
 }

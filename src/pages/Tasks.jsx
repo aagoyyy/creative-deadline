@@ -51,6 +51,12 @@ const MONTHS = [
   'December',
 ]
 
+function normalizeStatus(status) {
+  return String(status || 'NOT STARTED')
+    .trim()
+    .toUpperCase()
+}
+
 function normalizePriority(priority) {
   const normalized = String(priority || 'MEDIUM').toUpperCase()
 
@@ -69,44 +75,71 @@ function getDeadlineDate(task) {
     return null
   }
 
-  if (typeof value?.toDate === 'function') {
-    const date = value.toDate()
+  let date
 
-    if (Number.isNaN(date.getTime())) return null
-
-    date.setHours(0, 0, 0, 0)
-    return date
-  }
-
-  if (typeof value === 'string') {
+  if (value instanceof Date) {
+    date = new Date(value)
+  } else if (typeof value?.toDate === 'function') {
+    date = value.toDate()
+  } else if (typeof value === 'string') {
     if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
       const [year, month, day] = value.split('-').map(Number)
-      const date = new Date(year, month - 1, day)
-
-      if (Number.isNaN(date.getTime())) return null
-
-      date.setHours(0, 0, 0, 0)
-      return date
+      date = new Date(year, month - 1, day)
+    } else {
+      date = new Date(value)
     }
-
-    const date = new Date(value)
-
-    if (Number.isNaN(date.getTime())) return null
-
-    date.setHours(0, 0, 0, 0)
-    return date
+  } else if (typeof value === 'number') {
+    date = new Date(value)
+  } else {
+    return null
   }
 
-  if (typeof value === 'number') {
-    const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
 
-    if (Number.isNaN(date.getTime())) return null
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  )
+}
 
-    date.setHours(0, 0, 0, 0)
-    return date
+function getCompletionDate(task) {
+  const value =
+    task.completedAt ??
+    task.completed_at ??
+    task.doneAt ??
+    task.finishedAt ??
+    task.completedDate ??
+    task.completed_date
+
+  if (!value) return null
+
+  let date
+
+  if (value instanceof Date) {
+    date = new Date(value)
+  } else if (typeof value?.toDate === 'function') {
+    date = value.toDate()
+  } else if (typeof value === 'string') {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [year, month, day] = value.split('-').map(Number)
+      date = new Date(year, month - 1, day)
+    } else {
+      date = new Date(value)
+    }
+  } else if (typeof value === 'number') {
+    date = new Date(value)
+  } else {
+    return null
   }
 
-  return null
+  if (Number.isNaN(date.getTime())) return null
+
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  )
 }
 
 function getDeadlineCategory(task) {
@@ -128,31 +161,103 @@ function getDeadlineCategory(task) {
   return 'UPCOMING'
 }
 
-function sortTasksByPriority(tasks) {
-  return [...tasks].sort((a, b) => {
-    const priorityA =
-      PRIORITY_ORDER[normalizePriority(a.priority)]
+function getTaskPriorityGroup(task, today) {
+  const status = normalizeStatus(task.status)
+  const workflowState = String(
+    task.workflowState || ''
+  ).toUpperCase()
 
-    const priorityB =
-      PRIORITY_ORDER[normalizePriority(b.priority)]
+  const deadline = getDeadlineDate(task)
+  const completedDate = getCompletionDate(task)
+
+  const isDraft = workflowState === 'DRAFT'
+  const isDone = status === 'DONE'
+  const isForgiven = task.overdueForgiven === true
+
+  const isOverdue =
+    Boolean(deadline) &&
+    deadline < today &&
+    !isDraft &&
+    !isDone &&
+    !isForgiven
+
+  // 0: overdue aktif
+  if (isOverdue) return 0
+
+  // 1: deadline hari ini, belum selesai dan bukan draft/forgiven
+  if (
+    deadline &&
+    deadline.getTime() === today.getTime() &&
+    !isDraft &&
+    !isDone &&
+    !isForgiven
+  ) {
+    return 1
+  }
+
+  // 2: task aktif lainnya, termasuk task yang menunggu approval
+  if (!isDraft && !isDone && !isForgiven) return 2
+
+  // 3: task selesai, termasuk DONE LATE
+  if (isDone) {
+    // Completion date tetap dibaca agar field yang tersedia
+    // konsisten dengan data task, tanpa mengubah statusnya.
+    void completedDate
+    return 3
+  }
+
+  // 4: forgiven
+  if (isForgiven) return 4
+
+  // 5: draft
+  if (isDraft) return 5
+
+  return 2
+}
+
+function sortTasksByPriority(tasks) {
+  const now = new Date()
+  const today = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  )
+
+  return [...tasks].sort((a, b) => {
+    const priorityA = getTaskPriorityGroup(a, today)
+    const priorityB = getTaskPriorityGroup(b, today)
 
     if (priorityA !== priorityB) {
       return priorityA - priorityB
     }
 
-    const dateA = getDeadlineDate(a)
-    const dateB = getDeadlineDate(b)
+    const deadlineA = getDeadlineDate(a)
+    const deadlineB = getDeadlineDate(b)
 
-    if (dateA && dateB) {
-      const difference = dateA.getTime() - dateB.getTime()
+    // Task tanpa deadline diletakkan setelah task dengan deadline
+    // dalam kelompok prioritas yang sama.
+    if (deadlineA && !deadlineB) return -1
+    if (!deadlineA && deadlineB) return 1
 
-      if (difference !== 0) return difference
-    } else if (dateA) {
-      return -1
-    } else if (dateB) {
-      return 1
+    if (deadlineA && deadlineB) {
+      const dateDifference =
+        deadlineA.getTime() - deadlineB.getTime()
+
+      if (dateDifference !== 0) {
+        return dateDifference
+      }
     }
 
+    // Jika deadline sama, prioritas task lebih tinggi dahulu.
+    const taskPriorityDifference =
+      PRIORITY_ORDER[normalizePriority(a.priority)] -
+      PRIORITY_ORDER[normalizePriority(b.priority)]
+
+    if (taskPriorityDifference !== 0) {
+      return taskPriorityDifference
+    }
+
+    // Jika semuanya sama, urutkan berdasarkan judul A–Z.
     return String(a.title || '').localeCompare(
       String(b.title || '')
     )
@@ -256,7 +361,7 @@ export default function Tasks({
 
       const matchesStatus =
         statusFilter === 'ALL' ||
-        task.status === statusFilter
+        normalizeStatus(task.status) === statusFilter
 
       const matchesType =
         typeFilter === 'ALL' ||

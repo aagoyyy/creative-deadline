@@ -542,3 +542,11 @@
       transition-duration: 0.01ms !important;
     }
   }
+
+
+/* Sembunyikan branding hanya di mobile */
+@media (max-width: 600px) {
+  .login-intro {
+    display: none !important;
+  }
+}

@@ -1,5 +1,6 @@
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   FileText,
   Plus,
@@ -16,7 +17,6 @@ import {
   ClipboardList,
   Flag,
 } from 'lucide-react'
-
 
 const PRIORITY_OPTIONS = [
   { value: 'URGENT', label: 'Urgent' },
@@ -72,12 +72,12 @@ function dateValue(value) {
 }
 
 function displayDate(value) {
-  if (!value) return 'Belum diatur'
+  if (!value) return 'Not set'
 
   const normalized = dateValue(value)
   const date = new Date(`${normalized}T00:00:00`)
 
-  return date.toLocaleDateString('id-ID', {
+  return date.toLocaleDateString('en-US', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -141,6 +141,9 @@ const EMPTY_FORM = {
 export default function MyBrief({
   drafts = [],
   currentUser,
+  hidePageContent = false,
+  externalEditTask = null,
+  newBriefRequest = 0,
   creatives = [],
   creativesLoading = false,
   creativesError = '',
@@ -155,6 +158,7 @@ export default function MyBrief({
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState(null)
   const [formOpen, setFormOpen] = useState(false)
+  const lastExternalEditRequest = useRef(null)
   const [submitting, setSubmitting] = useState(false)
   const [deletingId, setDeletingId] = useState(null)
   const [search, setSearch] = useState('')
@@ -241,6 +245,49 @@ export default function MyBrief({
       })
   }, [myBriefs, search, statusFilter])
 
+  function openNewForm() {
+    setEditingId(null)
+    setForm({
+      ...EMPTY_FORM,
+      start: todayDate(),
+      deadline: todayDate(),
+    })
+    setFormOpen(true)
+  }
+
+  useEffect(() => {
+    if (!newBriefRequest) return
+  
+    openNewForm()
+  }, [newBriefRequest])
+  
+  function openEditForm(task) {
+    if (task.workflowState !== 'DRAFT') return
+
+    const matchedCreative =
+      creatives.find((item) => item.uid === task.picUid) ||
+      creatives.find(
+        (item) =>
+          String(item.name || '').trim().toLowerCase() ===
+          String(task.pic || '').trim().toLowerCase()
+      )
+
+    setForm({
+      title: task.title || '',
+      project: task.project || 'Organic',
+      type: task.type || 'Video',
+      priority: normalizePriority(task.priority),
+      picUid: matchedCreative?.uid || '',
+      start: dateValue(task.startDate || task.start),
+      deadline: dateValue(task.deadline),
+      link: task.link || '',
+      notes: task.notes || '',
+    })
+
+    setEditingId(task.id)
+    setFormOpen(true)
+  }
+
   useEffect(() => {
     if (!editingId) return
 
@@ -275,6 +322,47 @@ export default function MyBrief({
     })
   }, [editingId, myBriefs, creatives])
 
+  
+useEffect(() => {
+  if (!externalEditTask?.id || !externalEditTask?.requestId) {
+    return
+  }
+
+  if (
+    lastExternalEditRequest.current === externalEditTask.requestId
+  ) {
+    return
+  }
+
+  // Tandai request ini sudah diproses agar tidak dibuka ulang.
+  lastExternalEditRequest.current = externalEditTask.requestId
+
+  const task = myBriefs.find(
+    (item) =>
+      String(item.id) === String(externalEditTask.id) &&
+      item.workflowState === 'DRAFT' &&
+      item.createdByUid === currentUser?.uid
+  )
+
+  if (!task) return
+
+  openEditForm(task)
+}, [
+  externalEditTask?.requestId,
+  externalEditTask?.id,
+  myBriefs,
+  creatives,
+  currentUser?.uid,
+])
+
+
+  function closeForm() {
+    if (submitting) return
+
+    setFormOpen(false)
+    setEditingId(null)
+  }
+
   useEffect(() => {
     if (!formOpen) return undefined
 
@@ -300,73 +388,32 @@ export default function MyBrief({
     }))
   }
 
-  function openNewForm() {
-    setEditingId(null)
-    setForm({
-      ...EMPTY_FORM,
-      start: todayDate(),
-      deadline: todayDate(),
-    })
-    setFormOpen(true)
-  }
-
-  function openEditForm(task) {
-    if (task.workflowState !== 'DRAFT') return
-
-    const matchedCreative =
-      creatives.find((item) => item.uid === task.picUid) ||
-      creatives.find(
-        (item) =>
-          String(item.name || '').trim().toLowerCase() ===
-          String(task.pic || '').trim().toLowerCase()
-      )
-
-    setForm({
-      title: task.title || '',
-      project: task.project || 'Organic',
-      type: task.type || 'Video',
-      priority: normalizePriority(task.priority),
-      picUid: matchedCreative?.uid || '',
-      start: dateValue(task.startDate || task.start),
-      deadline: dateValue(task.deadline),
-      link: task.link || '',
-      notes: task.notes || '',
-    })
-
-    setEditingId(task.id)
-    setFormOpen(true)
-  }
-
-  function closeForm() {
-    if (submitting) return
-
-    setFormOpen(false)
-    setEditingId(null)
-  }
-
   function buildTaskData(requirePIC = false) {
     const title = form.title.trim()
-  
+
     if (!title) {
-      showToast?.('Nama task wajib diisi.', 'error')
+      showToast?.('Task name is required.', 'error')
       return null
     }
-  
+
     if (!form.start || !form.deadline) {
-      showToast?.('Start date dan deadline wajib diisi.', 'error')
+      showToast?.('Start date and deadline are required.', 'error')
       return null
     }
-  
+
     if (form.deadline < form.start) {
-      showToast?.('Deadline tidak boleh sebelum start date.', 'error')
+      showToast?.(
+        'Deadline cannot be earlier than the start date.',
+        'error'
+      )
       return null
     }
-  
+
     if (requirePIC && !selectedCreative) {
-      showToast?.('Pilih PIC sebelum assign task.', 'error')
+      showToast?.('Please select a creative before assigning.', 'error')
       return null
     }
-  
+
     return {
       title,
       project: form.project,
@@ -385,7 +432,6 @@ export default function MyBrief({
       createdByUid: currentUser?.uid || '',
     }
   }
-  
 
   async function handleSaveDraft(event) {
     event.preventDefault()
@@ -405,7 +451,7 @@ export default function MyBrief({
 
         if (!task || task.workflowState !== 'DRAFT') {
           throw new Error(
-            'Draft tidak ditemukan atau sudah di-assign.'
+            'Draft not found or it has already been assigned.'
           )
         }
 
@@ -416,58 +462,121 @@ export default function MyBrief({
 
       setFormOpen(false)
       setEditingId(null)
+      showToast?.('Draft saved successfully.', 'success')
     } catch (error) {
-      showToast?.(error.message || 'Gagal menyimpan draft.', 'error')
+      showToast?.(error.message || 'Failed to save draft.', 'error')
     } finally {
       setSubmitting(false)
     }
   }
 
   async function handleAssignDraft(task) {
-    if (task.workflowState !== 'DRAFT') return
-    if (submitting || deletingId) return
+    if (
+      !task ||
+      task.workflowState !== 'DRAFT' ||
+      submitting ||
+      deletingId
+    ) {
+      return
+    }
+  
+    const taskData =
+      String(task.id) === String(editingId)
+        ? buildTaskData(true)
+        : {
+            ...task,
+            pic: task.pic || '',
+            picUid: task.picUid || '',
+            priority: normalizePriority(task.priority),
+          }
+  
+    if (!taskData) return
   
     const matchedCreative =
-      creatives.find((item) => item.uid === task.picUid) ||
       creatives.find(
-        (item) =>
-          String(item.name || '').trim().toLowerCase() ===
-          String(task.pic || '').trim().toLowerCase()
+        (creative) =>
+          creative.uid === (taskData.picUid || task.picUid)
+      ) ||
+      creatives.find(
+        (creative) =>
+          String(creative.name || '').trim().toLowerCase() ===
+          String(taskData.pic || task.pic || '')
+            .trim()
+            .toLowerCase()
       )
   
     if (!matchedCreative) {
       showToast?.(
-        'Pilih dan simpan PIC aktif pada draft sebelum assign task.',
+        'Please select a creative before assigning.',
         'error'
       )
-      openEditForm(task)
       return
     }
   
-    onRequestConfirm?.({
-      title: 'Assign task?',
-      message: `Assign "${task.title}" kepada ${matchedCreative.name}? Task akan masuk ke workflow aktif.`,
-      confirmText: 'Assign Task',
+    if (typeof onRequestConfirm !== 'function') {
+      showToast?.(
+        'Confirmation dialog is not available.',
+        'error'
+      )
+      return
+    }
+  
+    onRequestConfirm({
+      title: 'Assign Task',
+      message: `Assign "${taskData.title || task.title}" to ${matchedCreative.name}?`,
+      confirmText: 'Assign',
+      cancelText: 'Cancel',
+  
       onConfirm: async () => {
         setSubmitting(true)
   
         try {
+          const latestTask = myBriefs.find(
+            (item) => String(item.id) === String(task.id)
+          )
+  
+          if (
+            !latestTask ||
+            latestTask.workflowState !== 'DRAFT'
+          ) {
+            throw new Error(
+              'Draft not found or it has already been assigned.'
+            )
+          }
+  
+          if (String(task.id) === String(editingId)) {
+            await onUpdateDraft?.(task.id, {
+              ...taskData,
+              pic: matchedCreative.name,
+              picUid: matchedCreative.uid,
+            })
+          }
+  
           await onAssignDraft?.(task.id, {
-            ...task,
+            ...latestTask,
+            ...taskData,
             pic: matchedCreative.name,
             picUid: matchedCreative.uid,
-            priority: normalizePriority(task.priority),
+            priority: normalizePriority(taskData.priority),
             workflowState: 'ASSIGNED',
             status: 'NOT STARTED',
             progress: 0,
           })
   
-          showToast?.('Task berhasil di-assign!', 'success')
+          setFormOpen(false)
+          setEditingId(null)
+  
+          showToast?.(
+            'Task assigned successfully!',
+            'success'
+          )
         } catch (error) {
           showToast?.(
-            error.message || 'Gagal assign task.',
+            error.message || 'Failed to assign task.',
             'error'
           )
+  
+          throw error
         } finally {
           setSubmitting(false)
         }
@@ -476,19 +585,100 @@ export default function MyBrief({
   }
   
 
+  async function handleAssignFromForm() {
+    if (submitting || deletingId) return
+  
+    // Assign hanya bisa dilakukan untuk draft yang sedang diedit.
+    if (!editingId) {
+      showToast?.(
+        'Save the draft first before assigning it.',
+        'error'
+      )
+      return
+    }
+  
+    const task = myBriefs.find(
+      (item) => String(item.id) === String(editingId)
+    )
+  
+    if (!task || task.workflowState !== 'DRAFT') {
+      showToast?.(
+        'Draft not found or it has already been assigned.',
+        'error'
+      )
+      return
+    }
+  
+    const taskData = buildTaskData(true)
+    if (!taskData) return
+  
+    setSubmitting(true)
+  
+    try {
+      await onUpdateDraft?.(editingId, taskData)
+  
+      await onAssignDraft?.(editingId, {
+        ...task,
+        ...taskData,
+        workflowState: 'ASSIGNED',
+        status: 'NOT STARTED',
+        progress: 0,
+      })
+  
+      setFormOpen(false)
+      setEditingId(null)
+  
+      showToast?.('Task assigned successfully!', 'success')
+    } catch (error) {
+      showToast?.(
+        error.message || 'Failed to assign task.',
+        'error'
+      )
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   async function handleDeleteDraft(task) {
     if (task.workflowState !== 'DRAFT') return
     if (deletingId || submitting) return
   
-    setDeletingId(task.id)
-  
-    try {
-      await onDeleteDraft?.(task.id)
-    } catch (error) {
-      console.error('Gagal menghapus draft:', error)
-    } finally {
-      setDeletingId(null)
+    if (!onRequestConfirm) {
+      showToast?.('Confirmation dialog is not available.', 'error')
+      return
     }
+  
+    await onRequestConfirm({
+      title: 'Delete Draft',
+      message: `Are you sure you want to delete "${task.title || 'Untitled brief'}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+  
+      onConfirm: async () => {
+        setDeletingId(task.id)
+  
+        try {
+          if (typeof onDeleteDraft !== 'function') {
+            throw new Error('onDeleteDraft is not a function.')
+          }
+  
+          await onDeleteDraft(task.id)
+  
+          showToast?.('Draft deleted successfully.', 'success')
+        } catch (error) {
+          console.error('Failed to delete draft:', error)
+  
+          showToast?.(
+            error.message || 'Failed to delete draft.',
+            'error'
+          )
+  
+          throw error
+        } finally {
+          setDeletingId(null)
+        }
+      },
+    })
   }
   
 
@@ -498,524 +688,555 @@ export default function MyBrief({
   }
 
   return (
-    <section className="my-brief-page">
-      <div className="my-brief-header">
-        <div>
-          <div className="eyebrow">STRATEGIC WORKSPACE</div>
-          <h2>My Brief</h2>
-          <p>
-            Pantau brief dari tahap persiapan sampai task selesai.
-          </p>
-        </div>
+    <>
+      <section
+        className="my-brief-page"
+        style={{
+          display: hidePageContent ? 'none' : undefined,
+        }}
+      >
+        <div className="my-brief-header">
 
-        <button
-          type="button"
-          className="primary-button"
-          onClick={openNewForm}
-          disabled={submitting}
-        >
-          <Plus size={16} />
-          New Brief
-        </button>
-      </div>
-
-      <div className="brief-summary-grid">
-        <div className="brief-summary-card">
-          <div className="brief-summary-icon">
-            <ClipboardList size={19} />
-          </div>
-          <div>
-            <span>Total Brief</span>
-            <strong>{summary.total}</strong>
-            <small>Semua brief milik lu</small>
-          </div>
-        </div>
-
-        <div className="brief-summary-card">
-          <div className="brief-summary-icon draft">
-            <FileText size={19} />
-          </div>
-          <div>
-            <span>Draft</span>
-            <strong>{summary.draft}</strong>
-            <small>Belum di-assign</small>
-          </div>
-        </div>
-
-        <div className="brief-summary-card">
-          <div className="brief-summary-icon assigned">
-            <Clock3 size={19} />
-          </div>
-          <div>
-            <span>Assigned</span>
-            <strong>{summary.assigned}</strong>
-            <small>Menunggu pengerjaan</small>
-          </div>
-        </div>
-
-        <div className="brief-summary-card">
-          <div className="brief-summary-icon progress">
-            <Clock3 size={19} />
-          </div>
-          <div>
-            <span>In Progress</span>
-            <strong>{summary.progress}</strong>
-            <small>Sedang dikerjakan</small>
-          </div>
-        </div>
-
-        <div className="brief-summary-card">
-          <div className="brief-summary-icon done">
-            <CheckCircle2 size={19} />
-          </div>
-          <div>
-            <span>Done</span>
-            <strong>{summary.done}</strong>
-            <small>Task selesai</small>
-          </div>
-        </div>
-      </div>
-
-      {formOpen && (
-        <div
-          className="brief-modal-overlay"
-          onMouseDown={(event) => {
-            if (
-              event.target === event.currentTarget &&
-              !submitting
-            ) {
-              closeForm()
-            }
-          }}
-        >
-          <form
-            className="task-modal brief-form brief-form-modal"
-            onSubmit={handleSaveDraft}
+          <button
+            type="button"
+            className="primary-button"
+            onClick={openNewForm}
+            disabled={submitting}
           >
-            <div className="section-title-row brief-form-heading">
-              <div>
-                <div className="eyebrow">BRIEF DETAILS</div>
-                <h3>{editingId ? 'Edit Draft' : 'Create Brief'}</h3>
-                <p>
-                  Lengkapi detail brief sebelum masuk ke workflow.
-                </p>
+            <Plus size={16} />
+            New Brief
+          </button>
+        </div>
+
+        <div className="brief-summary-grid">
+          <div className="brief-summary-card">
+            <div className="brief-summary-icon">
+              <ClipboardList size={19} />
+            </div>
+            <div>
+              <span>Total Briefs</span>
+              <strong>{summary.total}</strong>
+              <small>All your briefs</small>
+            </div>
+          </div>
+
+          <div className="brief-summary-card">
+            <div className="brief-summary-icon draft">
+              <FileText size={19} />
+            </div>
+            <div>
+              <span>Drafts</span>
+              <strong>{summary.draft}</strong>
+              <small>Not yet assigned</small>
+            </div>
+          </div>
+
+          <div className="brief-summary-card">
+            <div className="brief-summary-icon assigned">
+              <Clock3 size={19} />
+            </div>
+            <div>
+              <span>Assigned</span>
+              <strong>{summary.assigned}</strong>
+              <small>Waiting to be started</small>
+            </div>
+          </div>
+
+          <div className="brief-summary-card">
+            <div className="brief-summary-icon progress">
+              <Clock3 size={19} />
+            </div>
+            <div>
+              <span>In Progress</span>
+              <strong>{summary.progress}</strong>
+              <small>Currently in progress</small>
+            </div>
+          </div>
+
+          <div className="brief-summary-card">
+            <div className="brief-summary-icon done">
+              <CheckCircle2 size={19} />
+            </div>
+            <div>
+              <span>Completed</span>
+              <strong>{summary.done}</strong>
+              <small>Tasks completed</small>
+            </div>
+          </div>
+        </div>
+
+        <div className="brief-list-toolbar">
+          <div>
+            <h3>Brief Monitoring</h3>
+            <span>
+              {filteredDrafts.length} of {myBriefs.length} briefs
+            </span>
+          </div>
+
+          <div className="brief-toolbar-controls">
+            <label className="brief-search">
+              <Search size={16} />
+              <input
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search briefs..."
+                aria-label="Search briefs"
+              />
+            </label>
+
+            <select
+              className="brief-status-filter"
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              aria-label="Filter brief status"
+            >
+              <option value="ALL">All statuses</option>
+              <option value="DRAFT">Draft</option>
+              <option value="ASSIGNED">Assigned</option>
+              <option value="IN PROGRESS">In Progress</option>
+              <option value="DONE">Completed</option>
+            </select>
+          </div>
+        </div>
+
+        {myBriefs.length === 0 ? (
+          <div className="empty-state">
+            <FileText size={28} />
+            <h3>No briefs yet</h3>
+            <p>
+              Create a new brief to prepare and track creative tasks.
+            </p>
+          </div>
+        ) : filteredDrafts.length === 0 ? (
+          <div className="empty-state">
+            <Search size={26} />
+            <h3>No briefs found</h3>
+            <p>
+              Try a different keyword or status filter.
+            </p>
+          </div>
+        ) : (
+          <div className="brief-list-wrapper">
+            <div className="brief-list-header">
+              <span>BRIEF NAME</span>
+              <span>PROJECT / TYPE</span>
+              <span>PIC</span>
+              <span>PRIORITY</span>
+              <span>START DATE</span>
+              <span>DEADLINE</span>
+              <span>STATUS / PROGRESS</span>
+              <span>ACTIONS</span>
+            </div>
+
+            <div className="brief-list">
+              {filteredDrafts.map((task) => {
+                const label = getBriefLabel(task)
+                const progress = getTaskProgress(task)
+                const isDraft = task.workflowState === 'DRAFT'
+                const isDeleting = deletingId === task.id
+                const priority = normalizePriority(task.priority)
+
+                return (
+                  <div className="brief-row" key={task.id}>
+                    <div className="brief-name-cell">
+                      <div className="brief-file-icon">
+                        <FileText size={17} />
+                      </div>
+
+                      <div className="brief-name-content">
+                        <button
+                          type="button"
+                          className={`brief-task-title ${
+                            !isDraft ? 'is-clickable' : ''
+                          }`}
+                          title={
+                            isDraft
+                              ? 'Draft has not been assigned'
+                              : 'Click to view task details'
+                          }
+                          disabled={isDraft}
+                          onClick={() => handleOpenTask(task)}
+                        >
+                          {task.title || 'Untitled brief'}
+                        </button>
+
+                        {task.link && (
+                          <a
+                            href={task.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="brief-row-link"
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            <ExternalLink size={12} />
+                            Open link
+                          </a>
+                        )}
+
+                        {task.notes && (
+                          <span
+                            className="brief-row-notes"
+                            title={task.notes}
+                          >
+                            {task.notes}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="brief-project-cell">
+                      <span>{task.project || 'Other'}</span>
+                      <small>{task.type || 'Video'}</small>
+                    </div>
+
+                    <div className="brief-pic-cell">
+                      {task.pic ? (
+                        <>
+                          <span className="brief-avatar">
+                            {task.pic.charAt(0).toUpperCase()}
+                          </span>
+                          <span title={task.pic}>{task.pic}</span>
+                        </>
+                      ) : (
+                        <span className="brief-unassigned">
+                          Unassigned
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="brief-priority-cell">
+                      <span
+                        className={`priority-badge priority-${getPriorityClass(priority)}`}
+                      >
+                        <Flag size={12} />
+                        {priority}
+                      </span>
+                    </div>
+
+                    <div className="brief-date-cell">
+                      <CalendarDays size={14} />
+                      <span>
+                        {displayDate(task.startDate || task.start)}
+                      </span>
+                    </div>
+
+                    <div className="brief-date-cell">
+                      <CalendarDays size={14} />
+                      <span>{displayDate(task.deadline)}</span>
+                    </div>
+
+                    <div className="brief-status-cell">
+                      <span
+                        className={`brief-status brief-status-${getStatusClass(label)}`}
+                      >
+                        {label}
+                      </span>
+
+                      <div
+                        className="brief-progress-track"
+                        role="progressbar"
+                        aria-label={`Progress for ${task.title}`}
+                        aria-valuenow={progress}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                      >
+                        <div
+                          className="brief-progress-fill"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+
+                      <small>
+                        {progress}%{task.status ? ` · ${task.status}` : ''}
+                      </small>
+                    </div>
+
+                    <div className="brief-row-actions">
+                      {isDraft ? (
+                        <>
+                          <button
+                            type="button"
+                            className="icon-button small"
+                            onClick={() => openEditForm(task)}
+                            disabled={submitting || Boolean(deletingId)}
+                            aria-label={`Edit ${task.title}`}
+                            title="Edit draft"
+                          >
+                            <Pencil size={15} />
+                          </button>
+
+                          <button
+                            type="button"
+                            className="icon-button small"
+                            onClick={() => handleDeleteDraft(task)}
+                            disabled={submitting || Boolean(deletingId)}
+                            aria-label={`Delete ${task.title}`}
+                            title="Delete draft"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+
+                          <button
+                            type="button"
+                            className="brief-assign-button"
+                            onClick={() => handleAssignDraft(task)}
+                            disabled={
+                              submitting ||
+                              Boolean(deletingId) ||
+                              creativesLoading ||
+                              Boolean(creativesError)
+                            }
+                            title="Assign task"
+                          >
+                            <Send size={14} />
+                            Assign
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          className="brief-monitor-button"
+                          onClick={() => handleOpenTask(task)}
+                        >
+                          View Task
+                        </button>
+                      )}
+
+                      {isDeleting && <small>Deleting...</small>}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </section>
+
+      {formOpen &&
+        createPortal(
+          <div
+            className="brief-modal-overlay"
+            onMouseDown={(event) => {
+              if (
+                event.target === event.currentTarget &&
+                !submitting
+              ) {
+                closeForm()
+              }
+            }}
+          >
+            <form
+              className="task-modal brief-form brief-form-modal"
+              onSubmit={handleSaveDraft}
+            >
+              <div className="section-title-row brief-form-heading">
+                <div>
+                  <div className="eyebrow">BRIEF DETAILS</div>
+                  <h3>{editingId ? 'Edit Draft' : 'Create Brief'}</h3>
+                  <p>
+                    Complete the brief details before adding it to the workflow.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className="icon-button small"
+                  onClick={closeForm}
+                  disabled={submitting}
+                  aria-label="Close form"
+                >
+                  <X size={17} />
+                </button>
               </div>
 
-              <button
-                type="button"
-                className="icon-button small"
-                onClick={closeForm}
-                disabled={submitting}
-                aria-label="Close form"
-              >
-                <X size={17} />
-              </button>
-            </div>
+              <label>
+                Task name
+                <input
+                  name="title"
+                  value={form.title}
+                  onChange={changeField}
+                  placeholder="e.g. October campaign video"
+                  required
+                />
+              </label>
 
-            <label>
-              Task name
-              <input
-                name="title"
-                value={form.title}
-                onChange={changeField}
-                placeholder="e.g. October campaign video"
-                required
-              />
-            </label>
+              <label>
+                Project
+                <select
+                  name="project"
+                  value={form.project}
+                  onChange={changeField}
+                >
+                  <option>Organic</option>
+                  <option>SMM</option>
+                  <option>Big Project</option>
+                  <option>Other</option>
+                </select>
+              </label>
 
-            <label>
-              Project
-              <select
-                name="project"
-                value={form.project}
-                onChange={changeField}
-              >
-                <option>Organic</option>
-                <option>SMM</option>
-                <option>Big Project</option>
-                <option>Other</option>
-              </select>
-            </label>
+              <label>
+                Content type
+                <select
+                  name="type"
+                  value={form.type}
+                  onChange={changeField}
+                >
+                  <option>Video</option>
+                  <option>Carousel</option>
+                  <option>Single Image</option>
+                </select>
+              </label>
 
-            <label>
-              Content type
-              <select
-                name="type"
-                value={form.type}
-                onChange={changeField}
-              >
-                <option>Video</option>
-                <option>Carousel</option>
-                <option>Single Image</option>
-              </select>
-            </label>
+              <label>
+                <span>
+                  <Flag size={14} style={{ marginRight: 6 }} />
+                  Priority
+                </span>
+                <select
+                  name="priority"
+                  value={form.priority || 'MEDIUM'}
+                  onChange={changeField}
+                >
+                  {PRIORITY_OPTIONS.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-            <label>
-              <span>
-                <Flag size={14} style={{ marginRight: 6 }} />
-                Priority
-              </span>
-              <select
-                name="priority"
-                value={form.priority || 'MEDIUM'}
-                onChange={changeField}
-              >
-                {PRIORITY_OPTIONS.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
+              <label>
+                Assign to
+                <select
+                  name="picUid"
+                  value={form.picUid}
+                  onChange={changeField}
+                  disabled={
+                    creativesLoading || Boolean(creativesError)
+                  }
+                >
+                  <option value="">
+                    {creativesLoading
+                      ? 'Loading creatives...'
+                      : creativesError
+                        ? 'Failed to load creatives'
+                        : 'Select a creative (optional for drafts)'}
                   </option>
-                ))}
-              </select>
-            </label>
 
-            <label>
-              Assign to
-              <select
-                name="picUid"
-                value={form.picUid}
-                onChange={changeField}
-                disabled={
-                  creativesLoading || Boolean(creativesError)
-                }
-              >
-                <option value="">
-                  {creativesLoading
-                    ? 'Memuat daftar PIC...'
-                    : creativesError
-                      ? 'Gagal memuat PIC'
-                      : 'Pilih PIC (opsional untuk draft)'}
-                </option>
+                  {creatives.map((creative) => (
+                    <option key={creative.uid} value={creative.uid}>
+                      {creative.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-                {creatives.map((creative) => (
-                  <option key={creative.uid} value={creative.uid}>
-                    {creative.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+              {creativesError && (
+                <p
+                  className="error-message brief-form-error"
+                  role="alert"
+                >
+                  {creativesError}
+                </p>
+              )}
 
-            {creativesError && (
-              <p
-                className="error-message brief-form-error"
-                role="alert"
-              >
-                {creativesError}
-              </p>
-            )}
+              <label>
+                Start date
+                <input
+                  name="start"
+                  type="date"
+                  value={form.start}
+                  onChange={changeField}
+                  required
+                />
+              </label>
 
-            <label>
-              Start date
-              <input
-                name="start"
-                type="date"
-                value={form.start}
-                onChange={changeField}
-                required
-              />
-            </label>
+              <label>
+                Deadline
+                <input
+                  name="deadline"
+                  type="date"
+                  value={form.deadline}
+                  onChange={changeField}
+                  required
+                />
+              </label>
 
-            <label>
-              Deadline
-              <input
-                name="deadline"
-                type="date"
-                value={form.deadline}
-                onChange={changeField}
-                required
-              />
-            </label>
+              <label className="brief-form-full">
+                Brief / task link
+                <input
+                  name="link"
+                  type="url"
+                  value={form.link}
+                  onChange={changeField}
+                  placeholder="https://..."
+                />
+              </label>
 
-            <label className="brief-form-full">
-              Brief / task link
-              <input
-                name="link"
-                type="url"
-                value={form.link}
-                onChange={changeField}
-                placeholder="https://..."
-              />
-            </label>
+              <label className="brief-form-full">
+                Notes
+                <textarea
+                  name="notes"
+                  value={form.notes}
+                  onChange={changeField}
+                  placeholder="Brief details, instructions, or task notes..."
+                  rows={3}
+                />
+              </label>
 
-            <label className="brief-form-full">
-              Notes
-              <textarea
-                name="notes"
-                value={form.notes}
-                onChange={changeField}
-                placeholder="Brief, arahan, atau catatan task..."
-                rows={3}
-              />
-            </label>
+              <div className="modal-actions brief-form-actions">
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={closeForm}
+    disabled={submitting}
+  >
+    Cancel
+  </button>
 
-            <div className="modal-actions brief-form-actions">
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={closeForm}
-                disabled={submitting}
-              >
-                Cancel
-              </button>
+  <button
+    type="submit"
+    className="primary-button"
+    disabled={submitting}
+  >
+    <Save size={16} />
+    {submitting ? 'Saving...' : 'Save Draft'}
+  </button>
 
-              <button
-                type="submit"
-                className="primary-button"
-                disabled={submitting}
-              >
-                <Save size={16} />
-                {submitting ? 'Saving...' : 'Save Draft'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+  <button
+    type="button"
+    className="brief-assign-button"
+    onClick={() => {
+      const task = myBriefs.find(
+        (item) => String(item.id) === String(editingId)
+      )
 
-      <div className="brief-list-toolbar">
-        <div>
-          <h3>Brief Monitoring</h3>
-          <span>
-            {filteredDrafts.length} dari {myBriefs.length} brief
-          </span>
-        </div>
+      if (task) handleAssignDraft(task)
+    }}
+    disabled={
+      submitting ||
+      Boolean(deletingId) ||
+      creativesLoading ||
+      Boolean(creativesError) ||
+      !editingId
+    }
+    title={
+      !editingId
+        ? 'Save the draft first before assigning'
+        : 'Assign task'
+    }
+  >
+    <Send size={14} />
+    Assign
+  </button>
+</div>
 
-        <div className="brief-toolbar-controls">
-          <label className="brief-search">
-            <Search size={16} />
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Cari brief..."
-              aria-label="Cari brief"
-            />
-          </label>
 
-          <select
-            className="brief-status-filter"
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
-            aria-label="Filter status brief"
-          >
-            <option value="ALL">Semua status</option>
-            <option value="DRAFT">Draft</option>
-            <option value="ASSIGNED">Assigned</option>
-            <option value="IN PROGRESS">In Progress</option>
-            <option value="DONE">Done</option>
-          </select>
-        </div>
-      </div>
-
-      {myBriefs.length === 0 ? (
-        <div className="empty-state">
-          <FileText size={28} />
-          <h3>Belum ada brief</h3>
-          <p>
-            Buat brief baru untuk menyiapkan dan memantau task creative.
-          </p>
-        </div>
-      ) : filteredDrafts.length === 0 ? (
-        <div className="empty-state">
-          <Search size={26} />
-          <h3>Brief tidak ditemukan</h3>
-          <p>
-            Coba kata kunci atau filter status yang berbeda.
-          </p>
-        </div>
-      ) : (
-        <div className="brief-list-wrapper">
-          <div className="brief-list-header">
-            <span>BRIEF NAME</span>
-            <span>PROJECT / TYPE</span>
-            <span>PIC</span>
-            <span>PRIORITY</span>
-            <span>START DATE</span>
-            <span>DEADLINE</span>
-            <span>STATUS / PROGRESS</span>
-            <span>ACTIONS</span>
-          </div>
-
-          <div className="brief-list">
-            {filteredDrafts.map((task) => {
-              const label = getBriefLabel(task)
-              const progress = getTaskProgress(task)
-              const isDraft = task.workflowState === 'DRAFT'
-              const isDeleting = deletingId === task.id
-              const priority = normalizePriority(task.priority)
-
-              return (
-                <div className="brief-row" key={task.id}>
-                  <div className="brief-name-cell">
-                    <div className="brief-file-icon">
-                      <FileText size={17} />
-                    </div>
-
-                    <div className="brief-name-content">
-                      <button
-                        type="button"
-                        className={`brief-task-title ${
-                          !isDraft ? 'is-clickable' : ''
-                        }`}
-                        title={
-                          isDraft
-                            ? 'Draft belum di-assign'
-                            : 'Klik untuk melihat detail task'
-                        }
-                        disabled={isDraft}
-                        onClick={() => handleOpenTask(task)}
-                      >
-                        {task.title || 'Untitled brief'}
-                      </button>
-
-                      {task.link && (
-                        <a
-                          href={task.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="brief-row-link"
-                          onClick={(event) => event.stopPropagation()}
-                        >
-                          <ExternalLink size={12} />
-                          Open link
-                        </a>
-                      )}
-
-                      {task.notes && (
-                        <span
-                          className="brief-row-notes"
-                          title={task.notes}
-                        >
-                          {task.notes}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="brief-project-cell">
-                    <span>{task.project || 'Other'}</span>
-                    <small>{task.type || 'Video'}</small>
-                  </div>
-
-                  <div className="brief-pic-cell">
-                    {task.pic ? (
-                      <>
-                        <span className="brief-avatar">
-                          {task.pic.charAt(0).toUpperCase()}
-                        </span>
-                        <span title={task.pic}>{task.pic}</span>
-                      </>
-                    ) : (
-                      <span className="brief-unassigned">
-                        Unassigned
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="brief-priority-cell">
-                    <span
-                      className={`priority-badge priority-${getPriorityClass(priority)}`}
-                    >
-                      <Flag size={12} />
-                      {priority}
-                    </span>
-                  </div>
-
-                  <div className="brief-date-cell">
-                    <CalendarDays size={14} />
-                    <span>
-                      {displayDate(task.startDate || task.start)}
-                    </span>
-                  </div>
-
-                  <div className="brief-date-cell">
-                    <CalendarDays size={14} />
-                    <span>{displayDate(task.deadline)}</span>
-                  </div>
-
-                  <div className="brief-status-cell">
-                    <span
-                      className={`brief-status brief-status-${getStatusClass(label)}`}
-                    >
-                      {label}
-                    </span>
-
-                    <div
-                      className="brief-progress-track"
-                      role="progressbar"
-                      aria-label={`Progress ${task.title}`}
-                      aria-valuenow={progress}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                    >
-                      <div
-                        className="brief-progress-fill"
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-
-                    <small>
-                      {progress}%{task.status ? ` · ${task.status}` : ''}
-                    </small>
-                  </div>
-
-                  <div className="brief-row-actions">
-                    {isDraft ? (
-                      <>
-                        <button
-                          type="button"
-                          className="icon-button small"
-                          onClick={() => openEditForm(task)}
-                          disabled={submitting || Boolean(deletingId)}
-                          aria-label={`Edit ${task.title}`}
-                          title="Edit draft"
-                        >
-                          <Pencil size={15} />
-                        </button>
-
-                        <button
-                          type="button"
-                          className="icon-button small"
-                          onClick={() => handleDeleteDraft(task)}
-                          disabled={submitting || Boolean(deletingId)}
-                          aria-label={`Delete ${task.title}`}
-                          title="Delete draft"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-
-                        <button
-                          type="button"
-                          className="brief-assign-button"
-                          onClick={() => handleAssignDraft(task)}
-                          disabled={
-                            submitting ||
-                            Boolean(deletingId) ||
-                            creativesLoading ||
-                            Boolean(creativesError)
-                          }
-                          title="Assign task"
-                        >
-                          <Send size={14} />
-                          Assign
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        type="button"
-                        className="brief-monitor-button"
-                        onClick={() => handleOpenTask(task)}
-                      >
-                        Monitoring
-                      </button>
-                    )}
-
-                    {isDeleting && <small>Menghapus...</small>}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-    </section>
+            </form>
+          </div>,
+          document.body
+        )}
+    </>
   )
 }

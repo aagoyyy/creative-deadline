@@ -1,3 +1,4 @@
+
 {
   "functions": [
     {
@@ -12,5 +13,20 @@
         "*.local"
       ]
     }
-  ]
+  ],
+  "hosting": {
+    "site": "dashboard-creative",
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
 }
