@@ -774,18 +774,17 @@
    More muted than an active overdue task.
 ========================================================= */
 
+/* COMPLETED LATE — RED BORDER */
 .calendar-panel .task-chip.task-completed-late {
-  border-color: #bd5969;
+  border: 2px solid #ff454f !important;
+  box-shadow: 0 0 8px rgba(255, 69, 79, 0.16);
+  filter: none;
+}
+.calendar-panel .task-chip.task-completed-late:hover {
+  border-color: #ff737b !important;
+  box-shadow: 0 0 12px rgba(255, 69, 79, 0.24);
 }
 
-.calendar-panel .task-chip.task-done.task-overdue {
-  opacity: 1;
-  filter: saturate(0.4);
-  color: #ffdce0;
-  background: #382329;
-  border: 2px solid #bd5969;
-  box-shadow: 0 0 6px rgba(189, 89, 105, 0.12);
-}
 
 .calendar-panel .task-chip.task-done.task-overdue .task-card-title,
 .calendar-panel .task-chip.task-done.task-overdue .task-card-pic,
@@ -821,7 +820,8 @@
 
 .calendar-panel .task-chip.task-done.task-overdue:hover {
   background: #432730;
-  border-color: #d97786;
+  border-color: #ff454f;
+  box-shadow: 0 0 12px rgba(255, 69, 79, 0.24);
 }
 
 .calendar-panel .task-chip.task-completed-late .task-card-status,
