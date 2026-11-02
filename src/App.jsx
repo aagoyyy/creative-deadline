@@ -225,9 +225,7 @@ const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [showDetail, setShowDetail] = useState(false)
   const [draftToEdit, setDraftToEdit] = useState(null)
 
-  const [monthDate, setMonthDate] = useState(
-    () => new Date(2026, 9, 1)
-  )
+  const [monthDate, setMonthDate] = useState(() => new Date())
 
   // Fetch active creative team members from Firestore.
   useEffect(() => {
@@ -499,9 +497,14 @@ const [isMobileOpen, setIsMobileOpen] = useState(false)
   }
 
   function handleSelectTask(task) {
-    if (!task) return
+    if (!task) {
+      console.log('Task yang diklik kosong')
+      return
+    }
   
-    // DRAFT: hanya pembuatnya yang boleh edit
+    console.log('Task diklik:', task)
+    console.log('Workflow state:', task.workflowState)
+  
     if (task.workflowState === 'DRAFT') {
       if (
         currentUser?.role !== 'strategic' ||
@@ -523,14 +526,13 @@ const [isMobileOpen, setIsMobileOpen] = useState(false)
       return
     }
   
-    // ASSIGNED: bersihkan request edit draft sebelumnya
     setDraftToEdit(null)
-  
     setShowEditTask(false)
     setShowNewTask(false)
     setSelectedTaskId(task.id)
     setShowDetail(true)
   }
+  
 
   function handleSelectBrief(task) {
     if (!task || task.workflowState === 'DRAFT') return

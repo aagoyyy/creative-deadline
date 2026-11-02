@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
+import { onAuthStateChanged } from 'firebase/auth'
 import {
   collection,
   addDoc,
@@ -10,7 +11,8 @@ import {
   serverTimestamp,
   arrayUnion,
 } from 'firebase/firestore'
-import { db } from '../firebase'
+import { auth, db } from '../firebase'
+
 
 export const TASK_STATUSES = [
   'NOT STARTED',
@@ -107,36 +109,90 @@ export function useTasks(currentUser = null) {
   const [tasksLoading, setTasksLoading] = useState(true)
   const [tasksError, setTasksError] = useState('')
 
+
   useEffect(() => {
-    const tasksRef = collection(db, 'tasks')
-
-    const unsubscribe = onSnapshot(
-      tasksRef,
-      (snapshot) => {
-        const firestoreTasks = snapshot.docs.map((item) => {
-          const data = item.data()
-
-          return {
-            ...data,
-            id: item.id,
-            priority: normalizePriority(data.priority),
-            resultLink: String(data.resultLink || ''),
+    let unsubscribeTasks = null
+    let isActive = true
+  
+    setTasksLoading(true)
+    setTasksError('')
+  
+    const unsubscribeAuth = onAuthStateChanged(
+      auth,
+      (firebaseUser) => {
+        if (!isActive) return
+  
+        // Jangan membaca tasks jika belum login.
+        if (!firebaseUser) {
+          if (unsubscribeTasks) {
+            unsubscribeTasks()
+            unsubscribeTasks = null
           }
-        })
-
-        setTasks(firestoreTasks)
+  
+          setTasks([])
+          setTasksLoading(false)
+          setTasksError('')
+          return
+        }
+  
+        // Hindari memasang listener Firestore berulang
+        // untuk pengguna yang sama.
+        if (unsubscribeTasks) return
+  
+        setTasksLoading(true)
         setTasksError('')
-        setTasksLoading(false)
+  
+        unsubscribeTasks = onSnapshot(
+          collection(db, 'tasks'),
+          (snapshot) => {
+            if (!isActive) return
+  
+            const firestoreTasks = snapshot.docs.map((item) => {
+              const data = item.data()
+  
+              return {
+                ...data,
+                id: item.id,
+                priority: normalizePriority(data.priority),
+                resultLink: String(data.resultLink || ''),
+              }
+            })
+  
+            setTasks(firestoreTasks)
+            setTasksError('')
+            setTasksLoading(false)
+          },
+          (error) => {
+            if (!isActive) return
+  
+            console.error('Gagal membaca tasks:', error)
+            setTasksError(
+              error.message || 'Gagal membaca data task.'
+            )
+            setTasksLoading(false)
+          }
+        )
       },
       (error) => {
-        console.error('Gagal membaca tasks:', error)
-        setTasksError(error.message || 'Gagal membaca data task.')
+        if (!isActive) return
+  
+        console.error('Gagal memeriksa autentikasi:', error)
+        setTasksError(error.message || 'Gagal memeriksa login.')
         setTasksLoading(false)
       }
     )
-
-    return unsubscribe
+  
+    return () => {
+      isActive = false
+  
+      if (unsubscribeTasks) {
+        unsubscribeTasks()
+      }
+  
+      unsubscribeAuth()
+    }
   }, [])
+  
 
   // Simpan draft baru
   const saveDraft = useCallback(async (taskData) => {

@@ -68,6 +68,15 @@ function normalizePriority(priority) {
 
 function sortTasksByPriority(tasks) {
   return [...tasks].sort((a, b) => {
+    const doneA = normalizeStatus(a.status) === 'DONE'
+    const doneB = normalizeStatus(b.status) === 'DONE'
+
+    // Task DONE selalu berada di paling bawah.
+    if (doneA !== doneB) {
+      return doneA ? 1 : -1
+    }
+
+    // Task lainnya tetap diurutkan berdasarkan prioritas.
     const priorityA =
       PRIORITY_ORDER[normalizePriority(a.priority)]
     const priorityB =
@@ -77,6 +86,7 @@ function sortTasksByPriority(tasks) {
       return priorityA - priorityB
     }
 
+    // Jika prioritas sama, deadline yang lebih dekat didahulukan.
     const deadlineA = String(a.deadline || '9999-12-31')
     const deadlineB = String(b.deadline || '9999-12-31')
 
@@ -84,11 +94,13 @@ function sortTasksByPriority(tasks) {
       return deadlineA.localeCompare(deadlineB)
     }
 
+    // Jika masih sama, urutkan berdasarkan judul.
     return String(a.title || '').localeCompare(
       String(b.title || '')
     )
   })
 }
+
 
 function matchesCalendarDate(value, day, year, month) {
   if (!value || !day) return false
@@ -272,18 +284,18 @@ function getProjectLabel(project) {
   return project
 }
 
+
 const PIC_COLORS = [
   'purple',
   'cyan',
   'blue',
-  'pink',
+  'yellow',
   'orange',
   'green',
-  'red',
-  'yellow',
   'indigo',
   'teal',
 ]
+
 
 function getPicColor(pic, pics) {
   const name = String(pic || '').trim().toLowerCase()
@@ -949,17 +961,7 @@ export default function Calendar({
 
       <div className="calendar-footer">
         <div>
-          <span className="legend-dot purple-dot" />
-          In Progress
 
-          <span className="legend-dot green-dot" />
-          Completed
-
-          <span className="legend-dot orange-dot" />
-          Needs Attention
-
-          <span className="legend-dot red-dot" />
-          Overdue
         </div>
 
         <span>{filteredTasks.length} tasks match the filters</span>

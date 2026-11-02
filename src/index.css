@@ -452,11 +452,33 @@ select:focus-visible {
     border: 1px solid #111a29;
   }
 
-  .top-avatar {
-    width: 33px;
-    height: 33px;
-    font-size: 11px;
-  }
+ 
+/* ========================================
+   ACCOUNT AVATAR
+======================================== */
+
+.top-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 36px;
+
+  width: 36px;
+  height: 36px;
+
+  color: #e0d8ff;
+  background: linear-gradient(135deg, #8068ed, #5542a8);
+  border: 1px solid rgba(180, 160, 255, 0.35);
+  border-radius: 50%;
+
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+
+  box-shadow: 0 3px 10px rgba(118, 103, 239, 0.2);
+}
+
 
   /* Responsive */
   @media (max-width: 900px) {
@@ -1003,14 +1025,22 @@ h1 {
 /* --- Summary --- */
 .board-page .board-summary {
   display: flex;
-  align-items: center;
-  gap: 13px;
+  flex-direction: column;
+  gap: 14px;
   padding: 16px;
   margin-bottom: 22px;
   border: 1px solid #243149;
   border-radius: 13px;
   background: #10192a;
 }
+
+.board-page .board-summary-main {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
 .board-page .board-summary-icon {
   display: grid;
   place-items: center;
@@ -1021,23 +1051,93 @@ h1 {
   background: #282449;
   color: #b6a8ff;
 }
-.board-page .board-summary > div:nth-child(2) { display: flex; flex-direction: column; gap: 4px; }
-.board-page .board-summary strong { color: #edf0ff; font-size: 13px; }
-.board-page .board-summary span { color: #8290aa; font-size: 11px; }
+
+.board-page .board-summary-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: 4px;
+}
+
+.board-page .board-summary-info strong {
+  color: #edf0ff;
+  font-size: 13px;
+}
+
+.board-page .board-summary-info span {
+  color: #8290aa;
+  font-size: 11px;
+}
+
+.board-page .board-month-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.board-page .board-month-navigation > strong {
+  min-width: 125px;
+  text-align: center;
+  color: #f4f4f8;
+  font-size: 14px;
+}
+
+.board-page .board-month-arrow,
+.board-page .board-today-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 7px;
+  background: #20212a;
+  color: #c5c5d2;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.board-page .board-month-arrow {
+  width: 32px;
+  height: 32px;
+}
+
+.board-page .board-month-arrow:hover,
+.board-page .board-today-button:hover {
+  background: #30313e;
+  color: #fff;
+}
+
+.board-page .board-today-button {
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.board-page .board-summary-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,.07);
+}
+
 .board-page .board-summary-completed {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-left: auto;
+  margin-left: 0;
   color: #6ee7b7;
   font-size: 12px;
   white-space: nowrap;
 }
 
-/* --- Board & kolom (6 kolom) --- */
+/* --- Board & kolom (5 kolom) --- */
 .board-page .kanban-board {
   display: grid;
-  grid-template-columns: repeat(6, minmax(215px, 1fr));
+  grid-template-columns: repeat(5, minmax(215px, 1fr));
   gap: 13px;
   align-items: start;
   width: 100%;
@@ -1131,110 +1231,103 @@ h1 {
   font-size: 11px;
 }
 
-/* --- Kartu kanban --- */
-.board-page .kanban-card {
+/* =========================================================
+   BOARD — SEE ALL
+========================================================= */
+
+.board-page .kanban-see-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  padding: 7px 5px;
+  margin-top: 2px;
+
+  color: #bdc8dc;
+  background: transparent;
+  border: 1px dashed #45516a;
+  border-radius: 6px;
+
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.board-page .kanban-see-all:hover {
+  color: #fff;
+  border-color: #a99aff;
+}
+
+
+/* =========================================
+   BOARD — USE CALENDAR TASK CARD
+========================================= */
+
+/* Hilangkan tampilan panel Calendar pada root Board */
+.board-page.calendar-panel {
   min-width: 0;
-  padding: 12px;
-  border: 1px solid #29364c;
-  border-radius: 10px;
-  background: #172236;
+  overflow: visible;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+/* Card Calendar di Board tetap bisa di-drag */
+.board-page .kanban-column-body .task-chip {
   cursor: grab;
-  transition: border-color .15s, opacity .15s;
-}
-.board-page .kanban-card:hover { border-color: #6257a6; }
-.board-page .kanban-card:active { cursor: grabbing; }
-.board-page .kanban-card-selected { border-color: #8b7aff; box-shadow: 0 0 0 1px rgb(139 122 255 / 18%); }
-.board-page .kanban-card-dragging { opacity: .4; }
-.board-page .kanban-card.task-done { opacity: .65; }
-
-.board-page .kanban-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 12px;
+  user-select: none;
 }
 
-.board-page .kanban-type {
-  display: inline-block;
-  max-width: calc(100% - 22px);
-  padding: 5px 7px;
-  overflow: hidden;
-  border-radius: 5px;
-  background: #292449;
-  color: #c4b5fd;
-  font-size: 9px;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.board-page .kanban-column-body .task-chip:active {
+  cursor: grabbing;
 }
-.board-page .kanban-type.cyan   { background: #153b42; color: #72e5de; }
-.board-page .kanban-type.blue   { background: #1c3453; color: #93c5fd; }
-.board-page .kanban-type.pink   { background: #42233f; color: #f5a9dd; }
-.board-page .kanban-type.orange { background: #462f22; color: #fdba74; }
 
-.board-page .kanban-grip { flex-shrink: 0; color: #71809a; }
-
-.board-page .kanban-card h4 {
-  margin: 0 0 8px;
-  color: #e4e9f6;
-  font-size: 12px;
-  font-weight: 650;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-}
-.board-page .kanban-card-code { margin-bottom: 13px; color: #8291ab; font-size: 10px; }
-
-.board-page .kanban-card-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  color: #a9b5ca;
-  font-size: 10px;
-}
-.board-page .kanban-pic {
-  display: grid;
-  place-items: center;
-  width: 23px;
-  height: 23px;
+/* Grip */
+.board-page .kanban-grip {
   flex-shrink: 0;
-  border-radius: 50%;
-  background: #35305e;
-  color: #c8bdff;
-  font-size: 10px;
-  font-weight: 700;
-}
-.board-page .kanban-deadline { margin-left: auto; color: #8997af; font-size: 9px; white-space: nowrap; }
-
-.board-page .kanban-progress-track {
-  height: 4px;
-  overflow: hidden;
-  margin-top: 13px;
-  border-radius: 20px;
-  background: #2b374c;
-}
-.board-page .kanban-progress-fill {
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #8b7aff, #43d7ce);
+  color: #a5b3ca;
 }
 
-.board-page .kanban-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 8px;
-  color: #8492aa;
-  font-size: 10px;
+/* Responsive */
+@media (max-width: 700px) {
+  .board-page .kanban-column-body .task-chip {
+    padding: 7px;
+  }
 }
-.board-page .kanban-card-footer svg { color: #5ee0ae; }
+/* =========================================
+   BOARD RESPONSIVE
+========================================= */
 
 @media (max-width: 700px) {
-  .board-page .welcome-row { align-items: flex-start; flex-direction: column; }
-  .board-page .board-summary { flex-wrap: wrap; }
+  .board-page .board-summary {
+    padding: 13px;
+  }
+
+  .board-page .board-summary-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .board-page .board-month-navigation {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .board-page .board-month-navigation > strong {
+    min-width: 0;
+  }
+
+  .board-page .kanban-board {
+    grid-template-columns: repeat(5, minmax(240px, 1fr));
+  }
 }
+
 
 /* ==========================================================================
    15. TASK CARD READABLE

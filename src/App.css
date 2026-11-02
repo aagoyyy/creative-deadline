@@ -148,7 +148,7 @@ svg {
 ======================================== */
 
 .workspace-layout:has(.task-detail-sidebar) {
-  grid-template-columns: minmax(0, 1fr) 290px;
+  grid-template-columns: minmax(0, 1fr) 370px;
 }
 
 .task-detail-sidebar {

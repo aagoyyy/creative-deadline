@@ -11,7 +11,41 @@ import {
   RotateCcw,
   Eye,
   EyeOff,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react'
+
+import './Calendar.css'
+import { parseDate } from '../utils/dateUtils'
+
+const INITIAL_VISIBLE_TASKS = 5
+
+const PIC_COLORS = [
+  'purple',
+  'cyan',
+  'blue',
+  'yellow',
+  'orange',
+  'green',
+  'indigo',
+  'teal',
+]
+
+const getPicColor = (pic, pics) => {
+  const normalizedPic = String(pic || '').trim().toLowerCase()
+
+  if (!normalizedPic) return 'purple'
+
+  const index = pics.findIndex(
+    (item) => String(item).trim().toLowerCase() === normalizedPic
+  )
+
+  if (index === -1) return 'purple'
+
+  return PIC_COLORS[index % PIC_COLORS.length]
+}
 
 const columns = [
   { status: 'NOT STARTED', title: 'Not Started', color: 'gray' },
@@ -35,6 +69,18 @@ const PRIORITY_ORDER = {
   LOW: 3,
 }
 
+const STATUS_PROGRESS = {
+  'NOT STARTED': 0,
+  START: 25,
+  'APPROVAL 1': 50,
+  'APPROVAL 2': 75,
+  DONE: 100,
+}
+
+function normalizeStatus(status) {
+  return String(status || 'NOT STARTED').trim().toUpperCase()
+}
+
 function normalizePriority(priority) {
   const normalized = String(priority || 'MEDIUM').toUpperCase()
 
@@ -56,33 +102,19 @@ function getPriorityInfo(priority) {
 }
 
 function getDeadlineDate(task) {
-  const value = task.deadline
+  if (!task.deadline) return null
 
-  if (value === null || value === undefined || value === '') {
+  const date = parseDate(task.deadline)
+
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
     return null
   }
 
-  if (typeof value === 'number') {
-    // Supports legacy numeric deadline values.
-    const date = new Date()
-    date.setDate(1)
-    date.setDate(value)
-    date.setHours(0, 0, 0, 0)
-    return date
-  }
-
-  if (typeof value?.toDate === 'function') {
-    const date = value.toDate()
-    date.setHours(0, 0, 0, 0)
-    return date
-  }
-
-  const date = new Date(value)
-
-  if (Number.isNaN(date.getTime())) return null
-
-  date.setHours(0, 0, 0, 0)
-  return date
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  )
 }
 
 function getDeadlineCategory(task) {
@@ -131,6 +163,121 @@ function sortTasksByPriority(tasks) {
   })
 }
 
+function formatDate(value) {
+  if (!value) return '-'
+
+  const date = parseDate(value)
+
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return '-'
+  }
+
+  return date.toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'short',
+  })
+}
+
+function getProgress(task) {
+  const status = normalizeStatus(task.status)
+
+  if (status === 'DONE') return 100
+
+  const value = Number(task.progress)
+
+  if (
+    task.progress !== undefined &&
+    task.progress !== null &&
+    task.progress !== '' &&
+    Number.isFinite(value)
+  ) {
+    return Math.max(0, Math.min(100, value))
+  }
+
+  return STATUS_PROGRESS[status] ?? 0
+}
+
+function getStatusLabel(status) {
+  const labels = {
+    'NOT STARTED': 'Not Started',
+    START: 'In Progress',
+    'APPROVAL 1': 'Approval 1',
+    'APPROVAL 2': 'Approval 2',
+    DONE: 'Completed',
+  }
+
+  const normalized = normalizeStatus(status)
+
+  return labels[normalized] || status || 'Not Started'
+}
+
+function getProjectLabel(project) {
+  if (!project) return 'OTHER'
+
+  const value = String(project).trim().toUpperCase()
+
+  if (value.includes('SMM')) return 'SMM'
+  if (value.includes('ORGANIC')) return 'ORGANIC'
+
+  return project
+}
+
+function getTypeLabel(type) {
+  if (!type) return 'TYPE -'
+
+  const value = String(type).trim().toUpperCase()
+
+  if (value.includes('SINGLE')) return 'SINGLE IMAGE'
+  if (value.includes('CAROUSEL')) return 'CAROUSEL'
+  if (value.includes('VIDEO')) return 'VIDEO'
+
+  return type
+}
+
+function getProjectColor(project) {
+  const value = String(project || '').trim().toUpperCase()
+
+  if (value.includes('ORGANIC')) return 'organic'
+  if (value.includes('SMM')) return 'smm'
+  if (value.includes('BIG PROJECT')) return 'big-project'
+
+  return 'other-project'
+}
+
+function getTypeColor(type) {
+  const value = String(type || '').trim().toUpperCase()
+
+  if (value.includes('VIDEO')) return 'video'
+  if (value.includes('CAROUSEL')) return 'carousel'
+  if (value.includes('SINGLE')) return 'single-image'
+
+  return 'other-type'
+}
+
+function isTaskOverdue(task, now = new Date()) {
+  if (!task?.deadline) return false
+  if (task.overdueForgiven === true) return false
+
+  const deadline = getDeadlineDate(task)
+
+  if (!deadline) return false
+
+  const today = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  )
+
+  return deadline < today
+}
+
+function isTaskCompletedLate(task, now = new Date()) {
+  return (
+    normalizeStatus(task.status) === 'DONE' &&
+    isTaskOverdue(task, now)
+  )
+}
+
 export default function Board({
   tasks = [],
   selectedTaskId,
@@ -148,6 +295,33 @@ export default function Board({
   const [priorityFilter, setPriorityFilter] = useState('ALL')
   const [hideDone, setHideDone] = useState(false)
 
+  const [expandedColumns, setExpandedColumns] = useState({})
+
+  const [currentMonth, setCurrentMonth] = useState(
+    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+  )
+
+  const monthLabel = currentMonth.toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  })
+
+  function changeMonth(offset) {
+    setCurrentMonth((current) =>
+      new Date(current.getFullYear(), current.getMonth() + offset, 1)
+    )
+    setExpandedColumns({})
+  }
+
+  function goToToday() {
+    const today = new Date()
+
+    setCurrentMonth(
+      new Date(today.getFullYear(), today.getMonth(), 1)
+    )
+    setExpandedColumns({})
+  }
+
   const visibleTasks = useMemo(
     () =>
       tasks.filter(
@@ -159,36 +333,43 @@ export default function Board({
 
   const projects = useMemo(
     () =>
-      [
-        ...new Set(
-          visibleTasks.map((task) => task.project).filter(Boolean)
-        ),
-      ].sort(),
+      [...new Set(
+        visibleTasks.map((task) => task.project).filter(Boolean)
+      )].sort(),
     [visibleTasks]
   )
 
   const pics = useMemo(
     () =>
-      [
-        ...new Set(
-          visibleTasks.map((task) => task.pic).filter(Boolean)
-        ),
-      ].sort(),
+      [...new Set(
+        visibleTasks.map((task) => task.pic).filter(Boolean)
+      )].sort(),
     [visibleTasks]
   )
 
   const types = useMemo(
     () =>
-      [
-        ...new Set(
-          visibleTasks.map((task) => task.type).filter(Boolean)
-        ),
-      ].sort(),
+      [...new Set(
+        visibleTasks.map((task) => task.type).filter(Boolean)
+      )].sort(),
     [visibleTasks]
   )
 
+  const monthTasks = useMemo(() => {
+    return visibleTasks.filter((task) => {
+      const deadline = getDeadlineDate(task)
+
+      if (!deadline) return false
+
+      return (
+        deadline.getMonth() === currentMonth.getMonth() &&
+        deadline.getFullYear() === currentMonth.getFullYear()
+      )
+    })
+  }, [visibleTasks, currentMonth])
+
   const filteredTasks = useMemo(() => {
-    const result = visibleTasks.filter((task) => {
+    const result = monthTasks.filter((task) => {
       const matchesProject =
         projectFilter === 'ALL' || task.project === projectFilter
 
@@ -206,7 +387,8 @@ export default function Board({
         priorityFilter === 'ALL' ||
         normalizePriority(task.priority) === priorityFilter
 
-      const matchesDone = !hideDone || task.status !== 'DONE'
+      const matchesDone =
+        !hideDone || normalizeStatus(task.status) !== 'DONE'
 
       return (
         matchesProject &&
@@ -220,7 +402,7 @@ export default function Board({
 
     return sortTasksByPriority(result)
   }, [
-    visibleTasks,
+    monthTasks,
     projectFilter,
     picFilter,
     typeFilter,
@@ -261,7 +443,7 @@ export default function Board({
       return
     }
 
-    if (task.status !== status) {
+    if (normalizeStatus(task.status) !== status) {
       onChangeStatus?.(task.id, status)
     }
 
@@ -274,6 +456,13 @@ export default function Board({
     setDragOverStatus(null)
   }
 
+  function toggleColumnExpanded(status) {
+    setExpandedColumns((current) => ({
+      ...current,
+      [status]: !current[status],
+    }))
+  }
+
   function resetFilters() {
     setProjectFilter('ALL')
     setPicFilter('ALL')
@@ -281,6 +470,7 @@ export default function Board({
     setDeadlineFilter('ALL')
     setPriorityFilter('ALL')
     setHideDone(false)
+    setExpandedColumns({})
   }
 
   const hasActiveFilters =
@@ -291,33 +481,58 @@ export default function Board({
     priorityFilter !== 'ALL' ||
     hideDone
 
-  const completedCount = visibleTasks.filter(
-    (task) => task.status === 'DONE'
+  const completedCount = monthTasks.filter(
+    (task) => normalizeStatus(task.status) === 'DONE'
   ).length
 
   return (
-    <section className="page-content board-page">
+    <section className="page-content board-page calendar-panel">
       <div className="board-summary">
-        <div className="board-summary-icon">
-          <ClipboardList size={19} />
+        <div className="board-summary-main">
+          <div className="board-summary-icon">
+            <ClipboardList size={19} />
+          </div>
+
+          <div className="board-summary-info">
+            <strong>{filteredTasks.length} tasks displayed</strong>
+            <span>{visibleTasks.length} total tasks</span>
+          </div>
+
+          <div className="board-month-navigation">
+            <button
+              type="button"
+              className="board-month-arrow"
+              onClick={() => changeMonth(-1)}
+              aria-label="Previous month"
+            >
+              <ChevronLeft size={17} />
+            </button>
+
+            <strong>{monthLabel}</strong>
+
+            <button
+              type="button"
+              className="board-month-arrow"
+              onClick={() => changeMonth(1)}
+              aria-label="Next month"
+            >
+              <ChevronRight size={17} />
+            </button>
+
+            <button
+              type="button"
+              className="board-today-button"
+              onClick={goToToday}
+            >
+              Today
+            </button>
+          </div>
         </div>
 
-        <div>
-          <strong>{filteredTasks.length} tasks displayed</strong>
-          <span>{visibleTasks.length} total tasks</span>
-        </div>
-
-        <div className="board-summary-completed">
-          <Check size={15} />
-          {completedCount} completed
-        </div>
-      </div>
-
-      <section className="board-filters">
-        <div className="board-filters-heading">
-          <div>
-            <h3>Board Filters</h3>
-            <p>Choose which tasks you want to see.</p>
+        <div className="board-summary-bottom">
+          <div className="board-summary-completed">
+            <Check size={15} />
+            {completedCount} completed
           </div>
 
           <button
@@ -328,6 +543,15 @@ export default function Board({
             {hideDone ? <Eye size={14} /> : <EyeOff size={14} />}
             {hideDone ? 'Show Completed' : 'Hide Completed'}
           </button>
+        </div>
+      </div>
+
+      <section className="board-filters">
+        <div className="board-filters-heading">
+          <div>
+            <h3>Board Filters</h3>
+            <p>Choose which tasks you want to see.</p>
+          </div>
         </div>
 
         <div className="board-filter-grid">
@@ -428,8 +652,19 @@ export default function Board({
         {columns.map((column) => {
           const columnTasks = sortTasksByPriority(
             filteredTasks.filter(
-              (task) => task.status === column.status
+              (task) => normalizeStatus(task.status) === column.status
             )
+          )
+
+          const isExpanded = Boolean(expandedColumns[column.status])
+
+          const displayedTasks = isExpanded
+            ? columnTasks
+            : columnTasks.slice(0, INITIAL_VISIBLE_TASKS)
+
+          const remainingTasks = Math.max(
+            0,
+            columnTasks.length - INITIAL_VISIBLE_TASKS
           )
 
           const isOver = dragOverStatus === column.status
@@ -467,14 +702,21 @@ export default function Board({
               </div>
 
               <div className="kanban-column-body">
-                {columnTasks.map((task) => {
+                {displayedTasks.map((task) => {
+                  const status = normalizeStatus(task.status)
                   const isSelected =
                     String(selectedTaskId) === String(task.id)
 
                   const isDragging =
                     String(draggedTaskId) === String(task.id)
 
-                  const priority = getPriorityInfo(task.priority)
+                  const priority = normalizePriority(task.priority)
+                  const progress = getProgress(task)
+                  const isDone = status === 'DONE'
+                  const isOverdue = isTaskOverdue(task)
+                  const isCompletedLate = isTaskCompletedLate(task)
+
+                  const start = task.startDate || task.start
 
                   return (
                     <article
@@ -484,70 +726,105 @@ export default function Board({
                       onDragEnd={handleDragEnd}
                       onClick={() => onSelectTask?.(task)}
                       className={[
-                        'kanban-card',
-                        isSelected ? 'kanban-card-selected' : '',
-                        isDragging ? 'kanban-card-dragging' : '',
-                        task.status === 'DONE' ? 'task-done' : '',
+                        'task-chip',
+                        getPicColor(task.pic, pics),
+                        isDone ? 'task-done' : '',
+                        isOverdue ? 'task-overdue' : '',
+                        isCompletedLate ? 'task-completed-late' : '',
+                        task.overdueForgiven === true
+                          ? 'task-overdue-forgiven'
+                          : '',
+                        isSelected ? 'task-selected' : '',
+                        isDragging ? 'task-dragging' : '',
                       ]
                         .filter(Boolean)
                         .join(' ')}
                     >
-                      <div className="kanban-card-top">
-                        <span
-                          className={`kanban-type ${task.color || 'purple'}`}
-                        >
-                          {task.type || 'Task'}
+                      <span className="task-card-header">
+                        <span className="task-card-pic kanban-card-pic">
+                          {task.pic || 'UNASSIGNED'}
+                        </span>
+
+                        <span className="task-card-title">
+                          {task.title || 'Untitled Task'}
                         </span>
 
                         <GripVertical className="kanban-grip" size={16} />
-                      </div>
+                      </span>
 
-                      <div className="kanban-card-priority-row">
+                      <span className="task-card-tags">
                         <span
-                          className={`priority-badge priority-${priority.className}`}
+                          className={`task-card-project ${getProjectColor(task.project)}`}
+                        >
+                          {getProjectLabel(task.project)}
+                        </span>
+
+                        <span
+                          className={`task-card-type ${getTypeColor(task.type)}`}
+                        >
+                          {getTypeLabel(task.type)}
+                        </span>
+                      </span>
+
+                      <span className="task-card-priority-row">
+                        <span
+                          className={`priority-badge priority-${priority.toLowerCase()}`}
                         >
                           <Flag size={11} />
-                          {priority.label}
+                          {priority}
                         </span>
-                      </div>
+                      </span>
 
-                      <h4>{task.title || 'Untitled Task'}</h4>
+                      <span className="task-card-dates">
+                        {start && (
+                          <span className="task-date-start">
+                            START
+                          </span>
+                        )}
 
-                      <div className="kanban-card-code">
-                        {task.code}
-                      </div>
+                        {task.deadline && (
+                          <span className="task-date-deadline">
+                            DEADLINE
+                          </span>
+                        )}
 
-                      <div className="kanban-card-meta">
-                        <span className="kanban-pic">
-                          {(task.pic || '?').charAt(0)}
+                        <span className="task-card-deadline-date">
+                          {task.deadline ? formatDate(task.deadline) : ''}
+                        </span>
+                      </span>
+
+                      <span className="task-card-progress-info">
+                        <span className="task-card-status">
+                          {isOverdue
+                            ? 'OVERDUE'
+                            : isCompletedLate
+                              ? 'DONE · LATE'
+                              : getStatusLabel(task.status)}
                         </span>
 
-                        <span>{task.pic || 'Unassigned'}</span>
+                        <strong>{progress}%</strong>
+                      </span>
 
-                        <span className="kanban-deadline">
-                          {typeof task.deadline === 'number'
-                            ? `Oct ${task.deadline}`
-                            : task.deadline || 'No deadline'}
-                        </span>
-                      </div>
-
-                      <div className="kanban-progress-track">
-                        <div
-                          className="kanban-progress-fill"
-                          style={{
-                            width: `${Math.min(
-                              100,
-                              Math.max(0, task.progress || 0)
-                            )}%`,
-                          }}
+                      <span className="task-progress-track">
+                        <span
+                          className="task-progress-fill"
+                          style={{ width: `${progress}%` }}
                         />
-                      </div>
+                      </span>
 
-                      <div className="kanban-card-footer">
-                        <span>{task.progress || 0}% complete</span>
-
-                        {task.status === 'DONE' && <Check size={14} />}
-                      </div>
+                      <span className="task-card-footer">
+                        {isCompletedLate
+                          ? 'Completed Late'
+                          : isDone
+                            ? 'Completed'
+                            : task.overdueForgiven === true
+                              ? 'Overdue Forgiven'
+                              : isOverdue
+                                ? 'Overdue'
+                                : task.deadline
+                                  ? `Due ${formatDate(task.deadline)}`
+                                  : 'No Deadline Set'}
+                      </span>
                     </article>
                   )
                 })}
@@ -557,6 +834,23 @@ export default function Board({
                     <CircleDashed size={20} />
                     <span>Drop tasks here</span>
                   </div>
+                )}
+
+                {remainingTasks > 0 && (
+                  <button
+                    type="button"
+                    className="kanban-see-all"
+                    onClick={() => toggleColumnExpanded(column.status)}
+                  >
+                    <span>
+                      {isExpanded ? 'Show Less' : `See All (${columnTasks.length})`}
+                    </span>
+                    {isExpanded ? (
+                      <ChevronUp size={15} />
+                    ) : (
+                      <ChevronDown size={15} />
+                    )}
+                  </button>
                 )}
               </div>
             </section>

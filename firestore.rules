@@ -1,0 +1,205 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================
+    // AUTHENTICATION & ROLES
+    // =========================================
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userExists() {
+      return signedIn()
+        && exists(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        );
+    }
+
+    function activeUser() {
+      return userExists()
+        && get(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.active == true;
+    }
+
+    function userRole() {
+      return get(
+        /databases/$(database)/documents/users/$(request.auth.uid)
+      ).data.role;
+    }
+
+    function isAdmin() {
+      return activeUser() && userRole() == 'admin';
+    }
+
+    function isStrategic() {
+      return activeUser() && userRole() == 'strategic';
+    }
+
+    function isCreative() {
+      return activeUser() && userRole() == 'creative';
+    }
+
+    function canManageTasks() {
+      return isAdmin() || isStrategic();
+    }
+
+    function assignedToCurrentUser() {
+      return resource.data.picUid == request.auth.uid
+        || (
+          !('picUid' in resource.data)
+          && resource.data.pic == get(
+            /databases/$(database)/documents/users/$(request.auth.uid)
+          ).data.name
+        );
+    }
+
+    // =========================================
+    // OVERDUE FORGIVENESS SECURITY
+    // =========================================
+
+    function changesOverdueForgiveness() {
+      return request.resource.data
+        .diff(resource.data)
+        .affectedKeys()
+        .hasAny([
+          'overdueForgiven',
+          'overdueForgivenByUid',
+          'overdueForgivenByName',
+          'overdueForgivenAt'
+        ]);
+    }
+
+    function validOverdueForgivenessChange() {
+      return !changesOverdueForgiveness()
+        || (
+          isAdmin()
+          && (
+            // Admin memberikan pengampunan.
+            (
+              request.resource.data.overdueForgiven == true
+              && request.resource.data.overdueForgivenByUid
+                == request.auth.uid
+              && request.resource.data.overdueForgivenAt is timestamp
+              && request.resource.data.overdueForgivenByName is string
+            )
+
+            // Admin membatalkan pengampunan.
+            || (
+              request.resource.data.overdueForgiven == false
+              && request.resource.data.overdueForgivenByUid == null
+              && request.resource.data.overdueForgivenByName == null
+              && request.resource.data.overdueForgivenAt == null
+            )
+          )
+        );
+    }
+
+    // =========================================
+    // USERS
+    // =========================================
+
+    match /users/{userId} {
+
+      // User aktif dapat membaca data user.
+      allow read: if activeUser();
+
+      // Hanya Admin yang dapat membuat atau mengubah user.
+      allow create, update: if isAdmin()
+        && request.resource.data.role
+          in [
+            'admin',
+            'strategic',
+            'creative',
+            'digital_marketing'
+          ]
+        && request.resource.data.active is bool;
+
+      // Penghapusan user tidak diizinkan.
+      allow delete: if false;
+    }
+
+    // =========================================
+    // TASKS
+    // =========================================
+
+    match /tasks/{taskId} {
+
+      // Semua user aktif dapat membaca task.
+      allow read: if activeUser();
+
+      // Admin dan Strategic dapat membuat task.
+      allow create: if canManageTasks();
+
+      // Admin dan Strategic dapat mengelola task.
+      // Perubahan field overdue tetap divalidasi.
+      allow update: if (
+        canManageTasks()
+        && validOverdueForgivenessChange()
+      ) || (
+        // Creative hanya boleh mengubah field task
+        // yang diizinkan untuk task miliknya.
+        isCreative()
+        && assignedToCurrentUser()
+        && request.resource.data
+          .diff(resource.data)
+          .affectedKeys()
+          .hasOnly([
+            'status',
+            'progress',
+            'statusHistory',
+            'resultLink',
+            'updatedAt',
+            'completedAt'
+          ])
+      );
+
+      // Admin dan Strategic dapat menghapus task.
+      allow delete: if canManageTasks();
+    }
+
+    // =========================================
+    // NOTIFICATIONS
+    // =========================================
+
+    match /notifications/{notificationId} {
+
+      // User aktif hanya bisa membaca notifikasi miliknya.
+      allow read: if activeUser()
+        && resource.data.recipientUid == request.auth.uid;
+
+      // User aktif dapat membuat notifikasi untuk user aktif lain.
+      allow create: if activeUser()
+        && request.resource.data.actorUid == request.auth.uid
+        && request.resource.data.recipientUid is string
+        && request.resource.data.recipientUid != request.auth.uid
+        && request.resource.data.taskId is string
+        && request.resource.data.taskTitle is string
+        && request.resource.data.type is string
+        && request.resource.data.message is string
+        && request.resource.data.read == false
+        && exists(
+          /databases/$(database)/documents/users/$(request.resource.data.recipientUid)
+        )
+        && get(
+          /databases/$(database)/documents/users/$(request.resource.data.recipientUid)
+        ).data.active == true;
+
+      // User hanya boleh mengubah status baca notifikasinya.
+      allow update: if activeUser()
+        && resource.data.recipientUid == request.auth.uid
+        && request.resource.data
+          .diff(resource.data)
+          .affectedKeys()
+          .hasOnly(['read'])
+        && request.resource.data.read is bool;
+
+      // Penghapusan notifikasi tidak diizinkan.
+      allow delete: if false;
+    }
+  }
+}

@@ -1,8 +1,6 @@
-
 {
   "functions": [
     {
-      "source": "functions",
       "codebase": "default",
       "disallowLegacyRuntimeConfig": true,
       "ignore": [
@@ -11,11 +9,28 @@
         "firebase-debug.log",
         "firebase-debug.*.log",
         "*.local"
+      ],
+      "source": "functions"
+    },
+    {
+      "source": "dashboard",
+      "codebase": "dashboard",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
       ]
     }
   ],
+
   "hosting": {
-    "site": "dashboard-creative",
+    "site": "creative-dashboard",
     "public": "dist",
     "ignore": [
       "firebase.json",
@@ -28,5 +43,11 @@
         "destination": "/index.html"
       }
     ]
+  },  
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-southeast2",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   }
 }
