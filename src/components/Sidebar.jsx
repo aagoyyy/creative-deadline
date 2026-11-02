@@ -151,9 +151,9 @@ export default function Sidebar({
       >
         {/* Brand */}
         <div className="brand">
-          <div className="brand-mark">
-            <Zap size={21} fill="currentColor" />
-          </div>
+  <div className="brand-mark">
+    <span style={{ fontWeight: 900 }}>C</span>
+  </div>
 
           <div className="brand-copy">
             <div className="brand-name">
