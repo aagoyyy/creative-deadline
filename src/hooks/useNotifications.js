@@ -104,13 +104,15 @@ export function useNotifications(currentUser) {
     }) => {
       if (!currentUser?.uid) return
 
-      // Ambil semua anggota aktif, bukan cuma Creative.
-      const usersSnapshot = await getDocs(
-        query(
-          collection(db, 'users'),
-          where('active', '==', true)
-        )
-      )
+
+
+const usersSnapshot = await getDocs(
+  query(
+    collection(db, 'users'),
+    where('active', '==', true)
+  )
+)
+
 
       const recipients = usersSnapshot.docs.filter(
         (item) => item.id !== currentUser.uid
@@ -118,9 +120,9 @@ export function useNotifications(currentUser) {
 
       if (recipients.length === 0) return
 
-      for (let start = 0; start < recipients.length; start += 500) {
-        const batch = writeBatch(db)
-        const chunk = recipients.slice(start, start + 500)
+      for (let start = 0; start < recipients.length; start += 5) {
+  const batch = writeBatch(db)
+  const chunk = recipients.slice(start, start + 5)
 
         chunk.forEach((recipient) => {
           const notificationRef = doc(
