@@ -1286,10 +1286,14 @@
   .dashboard-period-caption {
     flex: 1 1 auto;
     flex-wrap: nowrap;
-    align-items: flex-start;
+    align-items: center;
     gap: 7px;
     font-size: 10px;
-    line-height: 1.55;
+    line-height: 1.4;
+  }
+
+  .dashboard-period-match-note {
+    display: none;
   }
 
   .dashboard-period-caption span {
@@ -1308,16 +1312,28 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-height: 39px;
-    padding: 0 13px;
-    border: 1px solid rgba(139, 124, 255, 0.35);
-    border-radius: 10px;
-    background: rgba(139, 124, 255, 0.1);
-    color: #c9c1ff;
-    font-size: 12px;
-    font-weight: 700;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 10px;
+    border: 1px solid #303d53;
+    border-radius: 8px;
+    background: #151f30;
+    color: #c2ccdc;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
     cursor: pointer;
+    transition: border-color 160ms ease, background 160ms ease;
+  }
+
+  .dashboard-overview-filter-open:hover {
+    border-color: #7165c9;
+    background: #1b2740;
+  }
+
+  .dashboard-overview-filter-open svg {
+    width: 14px;
+    height: 14px;
   }
 
   .dashboard-filter-active-dot {

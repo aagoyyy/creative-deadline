@@ -541,6 +541,34 @@ svg {
    MY TASKS FILTERS
 ======================================== */
 
+.page-content > .my-tasks-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-flow: row;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.page-content > .my-tasks-stats-grid > .stat-card {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+
+.my-tasks-mobile-filter-trigger,
+.my-tasks-mobile-filter-heading {
+  display: none;
+}
+
+.my-tasks-filter-overlay {
+  min-width: 0;
+}
+
+
 .my-tasks-filters {
   margin: 0 0 18px;
   padding: 16px;
@@ -1540,6 +1568,10 @@ svg {
 ======================================== */
 
 @media (max-width: 600px) {
+  .page-content > .my-tasks-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
    .my-tasks-mobile-filter-trigger {
      display: inline-flex;
      align-items: center;

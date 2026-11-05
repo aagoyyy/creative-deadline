@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import {
   CheckCircle2,
   Clock3,
+  AlertTriangle,
   ListTodo,
   SlidersHorizontal,
   RotateCcw,
@@ -178,7 +179,7 @@ export default function MyTasks({
 
   return (
 <section className="page-content">
-  <section className="stats-grid">
+  <section className="stats-grid my-tasks-stats-grid">
     <div className="stat-card purple">
       <div className="stat-card-top">
         <div className="stat-card-heading">
@@ -256,18 +257,35 @@ export default function MyTasks({
 
       <div className="stat-card-accent" />
     </div>
-  </section>
 
-      <section className="dashboard-panel my-tasks-panel">
-        <div className="panel-heading">
-          <div>
-            <h2>Assigned to Me</h2>
-            <p>
-              {pending} not started · {overdue} overdue
-            </p>
+    <div className="stat-card red">
+      <div className="stat-card-top">
+        <div className="stat-card-heading">
+          <div className="stat-card-label">OVERDUE</div>
+          <div className="stat-card-trend">
+            Past deadline
           </div>
         </div>
 
+        <div className="stat-card-icon">
+          <AlertTriangle size={18} />
+        </div>
+      </div>
+
+      <div className="stat-card-value">{overdue}</div>
+
+      <div className="stat-card-bottom">
+        <span className="stat-card-status-dot" />
+        <span className="stat-card-caption">
+          Tasks past deadline
+        </span>
+      </div>
+
+      <div className="stat-card-accent" />
+    </div>
+  </section>
+
+      <section className="dashboard-panel my-tasks-panel">
         <button
           type="button"
           className={`my-tasks-mobile-filter-trigger ${hasActiveFilters ? 'has-active-filters' : ''}`}
