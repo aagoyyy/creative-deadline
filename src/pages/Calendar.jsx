@@ -696,9 +696,13 @@ export default function Calendar({
         </div>
       </div>
 
-      <div className="calendar-grid">
-        {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((day) => (
-          <div className="weekday" key={day}>
+      <div className="calendar-grid-scroll">
+        <div className="calendar-grid">
+        {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((day, dayIndex) => (
+          <div
+            className={`weekday ${dayIndex >= 5 ? 'weekend-weekday' : ''}`}
+            key={day}
+          >
             {day}
           </div>
         ))}
@@ -722,6 +726,7 @@ export default function Calendar({
               key={`${year}-${month}-${index}`}
               className={[
                 'day-cell',
+                index % 7 >= 5 ? 'weekend-day' : '',
                 !day ? 'empty-day' : '',
                 isToday ? 'today-cell' : '',
                 day && dragOverDay === day ? 'drag-over' : '',
@@ -947,6 +952,7 @@ export default function Calendar({
             </div>
           )
         })}
+        </div>
       </div>
 
       <div className="calendar-footer">

@@ -502,8 +502,6 @@ const [isMobileOpen, setIsMobileOpen] = useState(false)
       return
     }
   
-    console.log('Task diklik:', task)
-    console.log('Workflow state:', task.workflowState)
   
     if (task.workflowState === 'DRAFT') {
       if (

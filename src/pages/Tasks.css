@@ -7,6 +7,7 @@
    .page-content {
     width: 100%;
     min-width: 0;
+    max-width: 100%;
     color: #e2e8f0;
   }
   
@@ -1166,6 +1167,10 @@
      ========================================================================== */
   
   @media (max-width: 1100px) {
+    .all-tasks-panel {
+      max-width: 100%;
+    }
+
     .dashboard-task-list .list-task {
       grid-template-columns: 48px minmax(0, 1fr);
       column-gap: 11px;
@@ -1426,6 +1431,10 @@
      ========================================================================== */
   
   @media (max-width: 380px) {
+    .all-tasks-panel {
+      border-radius: 9px;
+    }
+
     .task-export-panel,
     .task-archive-panel {
       margin: 7px;

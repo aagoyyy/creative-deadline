@@ -206,6 +206,11 @@
    CALENDAR GRID
 ========================================================= */
 
+.calendar-grid-scroll {
+  width: 100%;
+  min-width: 0;
+}
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -235,8 +240,22 @@
   border-right: 0;
 }
 
+/* Weekend dibuat sedikit berbeda dari weekday, tetap subtle. */
+.calendar-panel .weekend-weekday {
+  color: #c0b8ff;
+  background: #151d30;
+}
+
+.calendar-panel .day-cell.weekend-day {
+  background: #141e2e;
+}
+
 .calendar-panel .day-cell.empty-day {
   background: #0d1522;
+}
+
+.calendar-panel .day-cell.empty-day.weekend-day {
+  background: #111b2b;
 }
 
 .calendar-panel .day-cell.today-cell {
@@ -934,7 +953,7 @@
 
 @media (max-width: 1100px) {
   .calendar-panel .day-cell {
-    min-height: 135px;
+    min-height: 125px;
     padding: 7px 5px;
   }
 
@@ -951,15 +970,23 @@
   .calendar-panel .task-card-pic {
     max-width: 100%;
   }
+
+  .calendar-panel .task-card-title {
+    overflow-wrap: anywhere;
+  }
 }
 
 @media (max-width: 900px) {
   .calendar-toolbar {
+    align-items: flex-start;
     flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px;
   }
 
   .calendar-controls {
     flex-wrap: wrap;
+    max-width: 100%;
   }
 
   .calendar-filter-grid {
@@ -967,7 +994,7 @@
   }
 
   .calendar-panel .day-cell {
-    min-height: 115px;
+    min-height: 112px;
     padding: 6px 4px;
   }
 
@@ -983,48 +1010,135 @@
 
 @media (max-width: 600px) {
   .calendar-toolbar {
-    padding: 14px;
+    align-items: flex-start;
+    padding: 13px 12px;
+    gap: 12px;
+  }
+
+  .calendar-heading {
+    gap: 9px;
   }
 
   .calendar-heading h2 {
     font-size: 14px;
   }
 
+  .calendar-heading p {
+    font-size: 10px;
+  }
+
+  .calendar-icon {
+    width: 34px;
+    height: 34px;
+  }
+
   .calendar-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
     width: 100%;
+  }
+
+  .calendar-panel .today-button,
+  .calendar-panel .filter-button {
+    min-height: 38px;
+    padding: 8px 9px;
+    font-size: 10px;
+  }
+
+  .calendar-filters {
+    padding: 12px;
+  }
+
+  .calendar-filters-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
   }
 
   .calendar-filter-grid {
     grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  .calendar-filter-grid select {
+    min-height: 40px;
+  }
+
+  .calendar-filter-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  /* Hanya kalender yang bisa di-scroll horizontal.
+     Toolbar dan filter tetap berada di posisi normal di atasnya. */
+  .calendar-grid-scroll {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
   }
 
   .calendar-panel .calendar-grid {
-    grid-template-columns: repeat(7, minmax(70px, 1fr));
-  }
-
-  .calendar-panel {
-    overflow-x: auto;
+    display: grid;
+    width: 574px;
+    min-width: 574px;
+    grid-template-columns: repeat(7, minmax(82px, 1fr));
   }
 
   .calendar-panel .weekday {
+    min-width: 82px;
     padding: 10px 3px;
     font-size: 9px;
   }
 
   .calendar-panel .day-cell {
-    min-height: 100px;
+    min-width: 82px;
+    min-height: 105px;
+    padding: 6px 4px;
+  }
+
+  .calendar-panel .task-chip {
+    padding: 6px;
+    gap: 5px;
   }
 
   .calendar-panel .task-card-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 4px;
+  }
+
+  .calendar-panel .task-card-pic {
+    max-width: 100%;
+    font-size: 8px;
   }
 
   .calendar-panel .task-card-title {
     font-size: 10px;
   }
 
+  .calendar-panel .task-card-tags {
+    gap: 3px;
+  }
+
+  .calendar-panel .task-card-project,
+  .calendar-panel .task-card-type,
+  .calendar-panel .priority-badge {
+    font-size: 7px;
+  }
+
   .calendar-footer {
+    align-items: flex-start;
     flex-direction: column;
+    padding: 12px;
+  }
+
+  .calendar-footer > div {
+    row-gap: 8px;
   }
 }

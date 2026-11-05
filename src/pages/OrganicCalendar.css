@@ -960,12 +960,17 @@
 }
 
 /* =========================================
-   TABLET
+   RESPONSIVE — TABLET
 ========================================= */
 
 @media (max-width: 1100px) {
   .organic-stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .organic-calendar-toolbar {
+    gap: 14px;
+    padding: 18px;
   }
 
   .organic-day-cell {
@@ -987,11 +992,13 @@
 }
 
 /* =========================================
-   MOBILE
+   RESPONSIVE — MOBILE
 ========================================= */
 
 @media (max-width: 700px) {
   .organic-calendar-page {
+    width: 100%;
+    min-width: 0;
     gap: 17px;
   }
 
@@ -1000,12 +1007,19 @@
     gap: 12px;
   }
 
+  .organic-calendar-header > div:first-child {
+    min-width: 0;
+  }
+
   .organic-calendar-header h1 {
-    font-size: 27px;
+    font-size: clamp(23px, 6vw, 27px);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
   }
 
   .organic-calendar-header p {
     font-size: 12px;
+    line-height: 1.55;
   }
 
   .organic-header-icon {
@@ -1015,12 +1029,14 @@
   }
 
   .organic-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 9px;
   }
 
   .organic-stat-card {
+    align-items: flex-start;
     gap: 9px;
-    padding: 13px;
+    padding: 12px;
   }
 
   .organic-stat-icon {
@@ -1030,22 +1046,33 @@
   }
 
   .organic-stat-card strong {
-    font-size: 22px;
+    font-size: 21px;
   }
 
   .organic-stat-card > div > span {
     font-size: 10px;
+    line-height: 1.35;
   }
 
   .organic-stat-card small {
     font-size: 9px;
   }
 
+  .organic-calendar-card {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
   .organic-calendar-toolbar {
     align-items: flex-start;
     flex-direction: column;
-    padding: 16px 12px;
     gap: 13px;
+    padding: 16px 12px;
+  }
+
+  .organic-month-heading {
+    width: 100%;
   }
 
   .organic-month-heading h2 {
@@ -1057,6 +1084,9 @@
   }
 
   .organic-calendar-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     width: 100%;
     gap: 6px;
   }
@@ -1068,7 +1098,7 @@
   }
 
   .organic-calendar-controls button {
-    height: 32px;
+    height: 34px;
   }
 
   .organic-calendar-controls .organic-today-button {
@@ -1076,20 +1106,72 @@
   }
 
   .organic-calendar-controls .organic-arrow-button {
-    width: 32px;
+    width: 34px;
   }
 
+  /* Scroll horizontal hanya terjadi di grid kalender. */
   .organic-calendar-grid {
-    min-width: 560px;
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(7, minmax(80px, 1fr));
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
   }
 
-  .organic-calendar-card {
-    overflow-x: auto;
+  .organic-weekday {
+    position: sticky;
+    top: 0;
+    padding: 11px 5px;
+    font-size: 9px;
+  }
+
+  .organic-day-cell {
+    min-height: 100px;
+    padding: 7px 5px;
+  }
+
+  .organic-day-number {
+    margin-bottom: 6px;
+    font-size: 10px;
+  }
+
+  .organic-task-chip {
+    padding: 5px;
+  }
+
+  .organic-task-chip-title {
+    font-size: 9px;
+  }
+
+  .organic-task-chip-state {
+    font-size: 7px;
   }
 
   .organic-calendar-legend {
-    gap: 12px;
+    gap: 10px 12px;
     padding: 13px;
+    font-size: 9px;
+  }
+
+  .organic-deadline-section {
+    gap: 12px;
+  }
+
+  .organic-section-heading {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .organic-section-heading h2 {
+    font-size: 16px;
+  }
+
+  .organic-section-heading p {
+    font-size: 10px;
   }
 
   .organic-deadline-row {
@@ -1103,51 +1185,110 @@
     height: 46px;
   }
 
+  .organic-deadline-info {
+    flex: 1 1 0;
+  }
+
   .organic-deadline-info > strong {
     white-space: normal;
     line-height: 1.5;
+    overflow-wrap: anywhere;
   }
 
   .organic-deadline-badges {
-    max-width: 100px;
+    flex: 0 1 auto;
+    max-width: 120px;
   }
 
   .organic-workflow-badge,
   .organic-status-badge,
   .organic-overdue-badge,
-  .organic-done-late-badge {
+  .organic-done-late-badge,
+  .organic-forgiven-badge {
     padding: 5px 6px;
     font-size: 8px;
+    white-space: normal;
   }
 }
 
 /* =========================================
-   SMALL MOBILE
+   RESPONSIVE — SMALL MOBILE
 ========================================= */
 
 @media (max-width: 420px) {
+  .organic-calendar-page {
+    gap: 15px;
+  }
+
+  .organic-calendar-header h1 {
+    font-size: 23px;
+  }
+
+  .organic-header-icon {
+    width: 38px;
+    height: 38px;
+  }
+
   .organic-stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .organic-stat-card {
-    align-items: center;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 112px;
+    padding: 11px;
   }
 
-  .organic-section-heading {
-    align-items: flex-start;
+  .organic-stat-card strong {
+    font-size: 20px;
   }
 
-  .organic-section-heading h2 {
-    font-size: 16px;
+  .organic-stat-card small {
+    overflow-wrap: anywhere;
   }
 
-  .organic-section-heading > span {
-    font-size: 9px;
+  .organic-calendar-toolbar {
+    padding: 14px 10px;
+  }
+
+  .organic-calendar-controls {
+    gap: 5px;
+  }
+
+  .organic-calendar-controls .organic-new-brief-button {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .organic-calendar-controls .organic-arrow-button {
+    flex: 1 1 0;
+  }
+
+  .organic-calendar-controls .organic-today-button {
+    flex: 2 1 0;
+  }
+
+  .organic-calendar-grid {
+    grid-template-columns: repeat(7, minmax(76px, 1fr));
+  }
+
+  .organic-day-cell {
+    min-height: 92px;
+    padding: 6px 4px;
+  }
+
+  .organic-task-chip-title {
+    font-size: 8px;
   }
 
   .organic-deadline-row {
     flex-wrap: wrap;
+  }
+
+  .organic-deadline-info {
+    flex: 1 1 calc(100% - 60px);
   }
 
   .organic-deadline-badges {
@@ -1156,7 +1297,12 @@
     padding-left: 52px;
     justify-content: flex-start;
   }
+
+  .organic-section-heading > span {
+    font-size: 9px;
+  }
 }
+
 /* =========================================
    FORGIVEN — OVERDUE DIABAIKAN
 ========================================= */

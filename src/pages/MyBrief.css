@@ -19,7 +19,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 26px;
-  min-width: 100%;
+  width: 100%;
+  min-width: 0;
 }
 
 .my-brief-header > div {
@@ -130,7 +131,8 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
   padding: 24px;
   box-sizing: border-box;
   background: rgba(5, 8, 17, 0.78);
@@ -963,15 +965,55 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   .brief-list-toolbar {
     align-items: flex-start;
   }
+
+  .brief-list-header,
+  .brief-row {
+    gap: 12px;
+    padding-right: 15px;
+    padding-left: 15px;
+  }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .my-brief-page {
     gap: 20px;
   }
 
+  .brief-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .brief-list-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .brief-toolbar-controls {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+
+  .brief-search {
+    flex: 1 1 220px;
+    width: auto;
+  }
+
+  .brief-status-filter {
+    flex: 0 1 210px;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .my-brief-page {
+    gap: 18px;
+    width: 100%;
+    min-width: 0;
+  }
+
   .my-brief-header {
     align-items: flex-start;
+    gap: 14px;
+    width: 100%;
   }
 
   .my-brief-header h2 {
@@ -1004,30 +1046,79 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 
   .brief-list-toolbar {
     flex-direction: column;
+    align-items: stretch;
     gap: 12px;
+    width: 100%;
   }
 
   .brief-toolbar-controls {
-    justify-content: flex-start;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(130px, 0.8fr);
+    justify-content: stretch;
+    gap: 8px;
     width: 100%;
   }
 
   .brief-search {
-    flex: 1 1 180px;
-    width: auto;
+    width: 100%;
+    min-width: 0;
   }
 
   .brief-status-filter {
-    flex: 1 1 140px;
+    width: 100%;
+    min-width: 0;
     max-width: none;
+  }
+
+  .brief-list-wrapper {
+    max-width: 100%;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .brief-list-header,
+  .brief-row {
+    min-width: 1000px;
   }
 }
 
 @media (max-width: 600px) {
+  .my-brief-header {
+    flex-wrap: wrap;
+  }
+
+  .my-brief-header > div {
+    flex: 1 1 100%;
+  }
+
+  .my-brief-header .primary-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .brief-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .brief-summary-card {
+    align-items: flex-start;
+    gap: 8px;
+    padding: 11px;
+  }
+
+  .brief-summary-card span {
+    font-size: 11px;
+  }
+
+  .brief-summary-card strong {
+    font-size: 21px;
+  }
+
   .brief-modal-overlay {
     align-items: flex-start;
-    padding: 12px;
+    padding: 10px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .brief-modal-overlay > form.brief-form-modal {
@@ -1035,8 +1126,10 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
     grid-template-columns: minmax(0, 1fr);
     gap: 15px;
     width: 100%;
-    max-height: calc(100dvh - 24px);
-    padding: 20px;
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
+    padding: 17px;
+    margin: 0 auto;
     border-radius: 14px;
   }
 
@@ -1044,22 +1137,75 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
     grid-column: 1 / -1;
   }
 
+  .brief-modal-overlay .brief-form-heading {
+    gap: 10px;
+  }
+
   .brief-modal-overlay .brief-form-heading h3 {
-    font-size: 21px;
+    font-size: 20px;
+  }
+
+  .brief-modal-overlay > form.brief-form-modal .brief-form-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .brief-modal-overlay .brief-form-actions button {
+    width: 100%;
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .brief-modal-overlay .brief-form-actions .primary-button {
+    grid-column: 1 / -1;
+  }
+
+  .brief-list-toolbar h3 {
+    font-size: 16px;
   }
 }
 
 @media (max-width: 420px) {
   .brief-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .brief-summary-card {
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: 108px;
+    padding: 10px;
+  }
+
+  .brief-summary-card strong {
+    font-size: 20px;
+  }
+
+  .brief-summary-icon {
+    flex-basis: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .brief-toolbar-controls {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .my-brief-header {
-    flex-wrap: wrap;
+  .brief-status-filter {
+    min-height: 42px;
   }
 
-  .my-brief-header .primary-button {
-    width: 100%;
-    justify-content: center;
+  .brief-modal-overlay > form.brief-form-modal {
+    padding: 15px;
+  }
+
+  .brief-modal-overlay > form.brief-form-modal .brief-form-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .brief-modal-overlay .brief-form-actions .primary-button {
+    grid-column: auto;
   }
 }
