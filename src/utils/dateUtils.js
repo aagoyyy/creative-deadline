@@ -48,10 +48,20 @@ export function getMonthName(year, month) {
       return null
     }
   
-    // Angka saja tidak cukup untuk menentukan bulan dan tahun.
-    // Jangan menebak tanggal lengkap dari angka legacy.
+    // Mendukung Firestore Timestamp
+    if (typeof value.toDate === 'function') {
+      return value.toDate()
+    }
+  
+    // Mendukung JavaScript Date
+    if (value instanceof Date) {
+      return Number.isNaN(value.getTime()) ? null : value
+    }
+  
+    // Mendukung timestamp angka (milliseconds)
     if (typeof value === 'number') {
-      return null
+      const date = new Date(value)
+      return Number.isNaN(date.getTime()) ? null : date
     }
   
     const parsed = new Date(value)

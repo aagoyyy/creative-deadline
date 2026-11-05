@@ -133,10 +133,7 @@ function isTaskLate(task, now = new Date()) {
 
   const deadline = parseDate(task.deadline)
 
-  if (
-    !(deadline instanceof Date) ||
-    Number.isNaN(deadline.getTime())
-  ) {
+  if (!deadline || normalizeStatus(task.status) === 'DONE') {
     return false
   }
 
@@ -156,23 +153,18 @@ function isTaskLate(task, now = new Date()) {
 }
 
 function isTaskOverdue(task, now = new Date()) {
-  if (!task?.deadline) return false
+  return isTaskLate(task, now)
+}
+
+function isTaskCompletedLate(task) {
+  if (normalizeStatus(task?.status) !== 'DONE') return false
   if (task.overdueForgiven === true) return false
+  if (!task?.deadline || !task?.completedAt) return false
 
   const deadline = parseDate(task.deadline)
+  const completedAt = parseDate(task.completedAt)
 
-  if (
-    !(deadline instanceof Date) ||
-    Number.isNaN(deadline.getTime())
-  ) {
-    return false
-  }
-
-  const todayDate = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate()
-  )
+  if (!deadline || !completedAt) return false
 
   const deadlineDate = new Date(
     deadline.getFullYear(),
@@ -180,16 +172,14 @@ function isTaskOverdue(task, now = new Date()) {
     deadline.getDate()
   )
 
-  return deadlineDate < todayDate
-}
-
-function isTaskCompletedLate(task, now = new Date()) {
-  return (
-    normalizeStatus(task?.status) === 'DONE' &&
-    isTaskLate(task, now)
+  const completedDate = new Date(
+    completedAt.getFullYear(),
+    completedAt.getMonth(),
+    completedAt.getDate()
   )
-}
 
+  return completedDate > deadlineDate
+}
 
 function getTaskDateMatch(task, day, year, month, dateFilter) {
   if (!day) return false
