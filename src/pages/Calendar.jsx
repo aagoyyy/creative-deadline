@@ -11,6 +11,7 @@ import {
   Plus,
   ChevronDown,
   ChevronUp,
+  X,
 } from 'lucide-react'
 import './Calendar.css'
 import {
@@ -348,6 +349,7 @@ export default function Calendar({
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [dateFilter, setDateFilter] = useState('ALL')
   const [priorityFilter, setPriorityFilter] = useState('ALL')
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
   const [dragTaskId, setDragTaskId] = useState(null)
   const [dragOverDay, setDragOverDay] = useState(null)
@@ -466,6 +468,7 @@ export default function Calendar({
     setStatusFilter('ALL')
     setDateFilter('ALL')
     setPriorityFilter('ALL')
+    setIsFiltersOpen(false)
   }
 
   const hasActiveFilters =
@@ -579,16 +582,44 @@ export default function Calendar({
           >
             Today
           </button>
+          <button
+            type="button"
+            className="calendar-mobile-filter-trigger"
+            onClick={() => setIsFiltersOpen(true)}
+            aria-label="Open calendar filters"
+          >
+            <SlidersHorizontal size={15} />
+            Filters
+            {hasActiveFilters && <span className="calendar-filter-active-dot" />}
+          </button>
         </div>
       </div>
 
-      <div className="calendar-filters">
+      <div
+        className={`calendar-filters ${isFiltersOpen ? 'is-mobile-open' : ''}`}
+        aria-label="Calendar filters"
+        onClick={(event) => {
+          if (event.target === event.currentTarget) {
+            setIsFiltersOpen(false)
+          }
+        }}
+      >
+        <div className="calendar-filter-dialog">
         <div className="calendar-filters-heading">
           <div>
             <h3>Calendar Filters</h3>
             <p>Filter tasks based on your needs.</p>
           </div>
         </div>
+
+        <button
+          type="button"
+          className="calendar-filter-close"
+          aria-label="Close calendar filters"
+          onClick={() => setIsFiltersOpen(false)}
+        >
+          <X size={18} />
+        </button>
 
         <div className="calendar-filter-grid">
           <label>
@@ -693,6 +724,7 @@ export default function Calendar({
             <RotateCcw size={13} />
             Reset Filters
           </button>
+        </div>
         </div>
       </div>
 

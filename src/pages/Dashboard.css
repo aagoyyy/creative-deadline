@@ -117,6 +117,15 @@
    FILTER PANEL
 ========================================= */
 
+.dashboard-overview-filter-mobile-trigger,
+.dashboard-overview-filter-close {
+  display: none;
+}
+
+.dashboard-overview-filter-dialog {
+  min-width: 0;
+}
+
 .dashboard-overview-filters {
   margin-bottom: 18px;
   padding: 19px;
@@ -228,12 +237,22 @@
    PERIOD CAPTION
 ========================================= */
 
+.dashboard-period-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-width: 0;
+  margin: 20px 0 14px;
+}
+
 .dashboard-period-caption {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 9px;
-  margin: 20px 0 14px;
+  min-width: 0;
+  margin: 0;
   color: var(--dash-muted);
   font-size: 12px;
 }
@@ -1236,6 +1255,10 @@
   }
 
   .dashboard-welcome {
+    display: none;
+  }
+
+  .dashboard-welcome {
     align-items: flex-start;
     flex-direction: column;
     gap: 17px;
@@ -1254,9 +1277,121 @@
     width: 100%;
   }
 
+  .dashboard-period-toolbar {
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 14px;
+  }
+
+  .dashboard-period-caption {
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: 7px;
+    font-size: 10px;
+    line-height: 1.55;
+  }
+
+  .dashboard-period-caption span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard-overview-filter-mobile-trigger {
+    display: flex;
+    flex: 0 0 auto;
+    justify-content: flex-end;
+    margin: 0;
+  }
+
+  .dashboard-overview-filter-open {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 39px;
+    padding: 0 13px;
+    border: 1px solid rgba(139, 124, 255, 0.35);
+    border-radius: 10px;
+    background: rgba(139, 124, 255, 0.1);
+    color: #c9c1ff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .dashboard-filter-active-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--dash-green);
+  }
+
   .dashboard-overview-filters {
-    padding: 15px;
-    border-radius: 14px;
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 18px;
+    overflow-y: auto;
+    background: rgba(3, 7, 15, 0.78);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+
+  .dashboard-overview-filters.is-mobile-open {
+    display: flex;
+  }
+
+  .dashboard-overview-filter-dialog {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    max-height: min(82dvh, 680px);
+    padding: 18px;
+    overflow-y: auto;
+    border: 1px solid var(--dash-border);
+    border-radius: 16px;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(139, 124, 255, 0.075), transparent 35%),
+      var(--dash-card);
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.45);
+  }
+
+  .dashboard-overview-filter-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--dash-border);
+    border-radius: 9px;
+    background: #172235;
+    color: #cbd5e1;
+    cursor: pointer;
+  }
+
+  .dashboard-overview-filter-title {
+    padding-right: 38px;
+  }
+
+  .dashboard-overview-filter-controls {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 13px;
+  }
+
+  .dashboard-overview-filter-controls select {
+    height: 43px;
+  }
+
+  .dashboard-overview-reset {
+    width: 100%;
   }
 
   .dashboard-overview-filter-controls {

@@ -7,6 +7,7 @@ import {
   ListTodo,
   CalendarDays,
   Flag,
+  X,
 } from 'lucide-react'
 
 import TaskCard from '../components/TaskCard'
@@ -279,6 +280,7 @@ export default function Tasks({
   const [monthFilter, setMonthFilter] = useState('ALL')
   const [yearFilter, setYearFilter] = useState('ALL')
   const [priorityFilter, setPriorityFilter] = useState('ALL')
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
   // Draft tidak ditampilkan di daftar All Tasks.
   const activeTasks = useMemo(
@@ -430,6 +432,7 @@ export default function Tasks({
     priorityFilter !== 'ALL'
 
   function resetFilters() {
+    setIsFiltersOpen(false)
     setProjectFilter('ALL')
     setPicFilter('ALL')
     setStatusFilter('ALL')
@@ -444,8 +447,37 @@ export default function Tasks({
   return (
     <section className="page-content">
       <section className="dashboard-panel all-tasks-panel">
+        {/* MOBILE FILTER TRIGGER */}
+        <button
+          type="button"
+          className={`all-tasks-mobile-filter-trigger ${hasActiveFilters ? 'has-active-filters' : ''}`}
+          onClick={() => setIsFiltersOpen(true)}
+          aria-label="Open task filters"
+        >
+          <SlidersHorizontal size={15} />
+          Filters
+          {hasActiveFilters && <span className="all-tasks-filter-active-dot" />}
+        </button>
+
         {/* TASK FILTERS */}
-        <div className="all-tasks-filters">
+        <div
+          className={`all-tasks-filter-overlay ${isFiltersOpen ? 'is-mobile-open' : ''}`}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setIsFiltersOpen(false)
+          }}
+        >
+          <div className="all-tasks-filters">
+            <div className="all-tasks-filter-dialog-heading">
+              <strong>Filters</strong>
+              <button
+                type="button"
+                className="all-tasks-filter-close"
+                onClick={() => setIsFiltersOpen(false)}
+                aria-label="Close filters"
+              >
+                <X size={18} />
+              </button>
+            </div>
           <label className="all-tasks-search">
             <Search size={16} />
 
@@ -640,6 +672,7 @@ export default function Tasks({
               <RotateCcw size={13} />
               Reset Filters
             </button>
+          </div>
           </div>
         </div>
 

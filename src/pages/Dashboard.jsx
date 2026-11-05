@@ -13,6 +13,7 @@ import {
   Users,
   Target,
   CircleDashed,
+  X,
 } from 'lucide-react'
 
 import StatCard from '../components/StatCard'
@@ -312,6 +313,7 @@ export default function Dashboard({
   const [contentFilter, setContentFilter] = useState('ALL')
   const [picFilter, setPicFilter] = useState('ALL')
   const [statusFilter, setStatusFilter] = useState('ALL')
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
   const monthOptions = useMemo(() => getMonthOptions(), [])
 
@@ -526,6 +528,7 @@ export default function Dashboard({
     setContentFilter('ALL')
     setPicFilter('ALL')
     setStatusFilter('ALL')
+    setIsFiltersOpen(false)
   }
 
   const hasFilters =
@@ -552,8 +555,19 @@ export default function Dashboard({
 
       </section>
 
-      {/* FILTERS */}
-      <section className="dashboard-overview-filters">
+      {/* FILTER POPUP */}
+      <section
+        className={`dashboard-overview-filters ${
+          isFiltersOpen ? 'is-mobile-open' : ''
+        }`}
+        aria-label="Overview filters"
+        onClick={(event) => {
+          if (event.target === event.currentTarget) {
+            setIsFiltersOpen(false)
+          }
+        }}
+      >
+        <div className="dashboard-overview-filter-dialog">
         <div className="dashboard-overview-filter-title">
           <SlidersHorizontal size={18} />
 
@@ -564,6 +578,15 @@ export default function Dashboard({
             </small>
           </div>
         </div>
+
+        <button
+          type="button"
+          className="dashboard-overview-filter-close"
+          aria-label="Close filters"
+          onClick={() => setIsFiltersOpen(false)}
+        >
+          <X size={18} />
+        </button>
 
         <div className="dashboard-overview-filter-controls">
           <label>
@@ -662,17 +685,32 @@ export default function Dashboard({
             </button>
           )}
         </div>
+        </div>
       </section>
 
-      {/* PERIOD */}
-      <div className="dashboard-period-caption">
-        <CalendarDays size={16} />
+      {/* PERIOD + MOBILE FILTER BUTTON */}
+      <div className="dashboard-period-toolbar">
+        <div className="dashboard-period-caption">
+          <CalendarDays size={16} />
 
-        <span>
-          Evaluation Period: <strong>{formatMonth(monthFilter)}</strong>
-          {' · '}
-          <strong>{totalTasks} tasks</strong> match the selected filters
-        </span>
+          <span>
+            Evaluation Period: <strong>{formatMonth(monthFilter)}</strong>
+            {' · '}
+            <strong>{totalTasks} tasks</strong> match the selected filters
+          </span>
+        </div>
+
+        <div className="dashboard-overview-filter-mobile-trigger">
+          <button
+            type="button"
+            className="dashboard-overview-filter-open"
+            onClick={() => setIsFiltersOpen(true)}
+          >
+            <SlidersHorizontal size={16} />
+            Filters
+            {hasFilters && <span className="dashboard-filter-active-dot" />}
+          </button>
+        </div>
       </div>
 
       {/* STAT CARDS */}

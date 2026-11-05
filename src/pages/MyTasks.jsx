@@ -8,6 +8,7 @@ import {
   RotateCcw,
   Eye,
   EyeOff,
+  X,
 } from 'lucide-react'
 import TaskCard from '../components/TaskCard'
 
@@ -83,6 +84,7 @@ export default function MyTasks({
   const [typeFilter, setTypeFilter] = useState('ALL')
   const [deadlineFilter, setDeadlineFilter] = useState('ALL')
   const [hideDone, setHideDone] = useState(false)
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
   const myTasks = useMemo(
     () => tasks.filter((task) => task.pic === currentUser),
@@ -159,6 +161,7 @@ export default function MyTasks({
   ).length
 
   function resetFilters() {
+    setIsFiltersOpen(false)
     setStatusFilter('ALL')
     setProjectFilter('ALL')
     setTypeFilter('ALL')
@@ -265,7 +268,35 @@ export default function MyTasks({
           </div>
         </div>
 
-        <div className="my-tasks-filters">
+        <button
+          type="button"
+          className={`my-tasks-mobile-filter-trigger ${hasActiveFilters ? 'has-active-filters' : ''}`}
+          onClick={() => setIsFiltersOpen(true)}
+          aria-label="Open task filters"
+        >
+          <SlidersHorizontal size={15} />
+          Filters
+          {hasActiveFilters && <span className="my-tasks-filter-active-dot" />}
+        </button>
+
+        <div
+          className={`my-tasks-filter-overlay ${isFiltersOpen ? 'is-mobile-open' : ''}`}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setIsFiltersOpen(false)
+          }}
+        >
+          <div className="my-tasks-filters">
+            <div className="my-tasks-mobile-filter-heading">
+              <strong>Filter Tasks</strong>
+              <button
+                type="button"
+                className="my-tasks-filter-close"
+                onClick={() => setIsFiltersOpen(false)}
+                aria-label="Close filters"
+              >
+                <X size={18} />
+              </button>
+            </div>
           <div className="my-tasks-filter-heading">
             <div>
               <SlidersHorizontal size={15} />
@@ -359,6 +390,7 @@ export default function MyTasks({
                 Reset Filters
               </button>
             )}
+          </div>
           </div>
         </div>
 

@@ -417,6 +417,15 @@ svg {
    BOARD FILTERS
 ======================================== */
 
+.board-mobile-filter-trigger,
+.board-filter-close {
+  display: none;
+}
+
+.board-filter-dialog {
+  min-width: 0;
+}
+
 .board-filters {
   margin-bottom: 18px;
   padding: 16px;
@@ -1531,6 +1540,92 @@ svg {
 ======================================== */
 
 @media (max-width: 600px) {
+   .my-tasks-mobile-filter-trigger {
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     gap: 7px;
+     min-height: 38px;
+     margin: 0 0 12px;
+     padding: 0 13px;
+     color: #d8d2ff;
+     background: rgba(139, 124, 255, 0.12);
+     border: 1px solid rgba(139, 124, 255, 0.3);
+     border-radius: 8px;
+     font-size: 11px;
+     font-weight: 700;
+     cursor: pointer;
+   }
+
+   .my-tasks-mobile-filter-trigger.has-active-filters {
+     border-color: #8b7cff;
+   }
+
+   .my-tasks-filter-active-dot {
+     width: 6px;
+     height: 6px;
+     border-radius: 50%;
+     background: #8b7cff;
+   }
+
+   .my-tasks-filter-overlay {
+     position: fixed;
+     inset: 0;
+     z-index: 1300;
+     display: none;
+     align-items: center;
+     justify-content: center;
+     overflow-y: auto;
+     padding: 18px 12px;
+     background: rgba(3, 7, 18, 0.78);
+     backdrop-filter: blur(5px);
+     -webkit-backdrop-filter: blur(5px);
+   }
+
+   .my-tasks-filter-overlay.is-mobile-open {
+     display: flex;
+   }
+
+   .my-tasks-filter-overlay .my-tasks-filters {
+     position: relative;
+     width: 100%;
+     max-width: 460px;
+     max-height: calc(100dvh - 36px);
+     overflow-y: auto;
+     margin: auto;
+     padding: 14px;
+     border: 1px solid #35435c;
+     border-radius: 13px;
+     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+   }
+
+   .my-tasks-mobile-filter-heading {
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     gap: 12px;
+     margin-bottom: 13px;
+     color: #f0f2fa;
+     font-size: 13px;
+   }
+
+   .my-tasks-filter-close {
+     display: grid;
+     width: 32px;
+     height: 32px;
+     place-items: center;
+     color: #aebbd0;
+     background: #172337;
+     border: 1px solid #35435c;
+     border-radius: 8px;
+     cursor: pointer;
+   }
+
+   .my-tasks-filter-overlay .my-tasks-filter-heading {
+     display: none;
+   }
+
+
   .workspace-layout {
     padding: 12px;
   }
@@ -1582,6 +1677,116 @@ svg {
   .board-filter-footer {
     align-items: flex-start;
     flex-wrap: wrap;
+  }
+
+  .board-mobile-filter-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    gap: 7px;
+    min-height: 36px;
+    padding: 8px 10px;
+    color: #d8e1f2;
+    background: #172235;
+    border: 1px solid #35435c;
+    border-radius: 7px;
+    font-size: 10px;
+    cursor: pointer;
+  }
+
+  .board-mobile-filter-trigger:hover {
+    color: #fff;
+    background: #222541;
+    border-color: #8b7cff;
+  }
+
+  .board-filter-active-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #5bd6a1;
+  }
+
+  .board-page .board-filters {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1300;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 18px;
+    overflow-y: auto;
+    background: rgba(3, 7, 15, 0.78);
+    border: 0;
+    border-radius: 0;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+
+  .board-page .board-filters.is-mobile-open {
+    display: flex;
+  }
+
+  .board-filter-dialog {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    max-height: min(82dvh, 680px);
+    padding: 18px;
+    overflow-y: auto;
+    border: 1px solid #29364b;
+    border-radius: 16px;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(139, 124, 255, 0.075), transparent 35%),
+      #101827;
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.45);
+  }
+
+  .board-filter-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    color: #cbd5e1;
+    background: #172235;
+    border: 1px solid #35435c;
+    border-radius: 9px;
+    cursor: pointer;
+  }
+
+  .board-filter-dialog .board-filters-heading {
+    padding-right: 38px;
+    margin-bottom: 16px;
+  }
+
+  .board-filter-dialog .board-filters-heading p {
+    max-width: 260px;
+  }
+
+  .board-filter-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 11px;
+  }
+
+  .board-filter-grid select {
+    min-height: 42px;
+  }
+
+  .board-filter-footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 11px;
+  }
+
+  .board-filter-footer button {
+    justify-content: center;
+    min-height: 38px;
   }
 
   .board-filters {
@@ -1649,6 +1854,32 @@ svg {
 }
 
 @media (max-width: 420px) {
+  .board-page .board-filters {
+    padding: 12px;
+  }
+
+  .board-filter-dialog {
+    padding: 15px;
+  }
+
+  .board-summary-bottom {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .board-summary-completed {
+    flex: 0 0 100%;
+  }
+  .board-summary-bottom
+  .board-summary-bottom .board-mobile-filter-trigger {
+    flex: 1 1 0;
+    justify-content: center;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
   .workspace-layout {
     padding: 10px;
   }

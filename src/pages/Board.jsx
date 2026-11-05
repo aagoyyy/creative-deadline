@@ -9,12 +9,11 @@ import {
   Plus,
   SlidersHorizontal,
   RotateCcw,
-  Eye,
-  EyeOff,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
   ChevronUp,
+  X,
 } from 'lucide-react'
 
 import './Calendar.css'
@@ -293,7 +292,7 @@ export default function Board({
   const [typeFilter, setTypeFilter] = useState('ALL')
   const [deadlineFilter, setDeadlineFilter] = useState('ALL')
   const [priorityFilter, setPriorityFilter] = useState('ALL')
-  const [hideDone, setHideDone] = useState(false)
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
   const [expandedColumns, setExpandedColumns] = useState({})
 
@@ -386,17 +385,12 @@ export default function Board({
       const matchesPriority =
         priorityFilter === 'ALL' ||
         normalizePriority(task.priority) === priorityFilter
-
-      const matchesDone =
-        !hideDone || normalizeStatus(task.status) !== 'DONE'
-
       return (
         matchesProject &&
         matchesPic &&
         matchesType &&
         matchesDeadline &&
-        matchesPriority &&
-        matchesDone
+        matchesPriority
       )
     })
 
@@ -408,7 +402,6 @@ export default function Board({
     typeFilter,
     deadlineFilter,
     priorityFilter,
-    hideDone,
   ])
 
   function handleDragStart(event, task) {
@@ -469,8 +462,8 @@ export default function Board({
     setTypeFilter('ALL')
     setDeadlineFilter('ALL')
     setPriorityFilter('ALL')
-    setHideDone(false)
     setExpandedColumns({})
+    setIsFiltersOpen(false)
   }
 
   const hasActiveFilters =
@@ -478,8 +471,7 @@ export default function Board({
     picFilter !== 'ALL' ||
     typeFilter !== 'ALL' ||
     deadlineFilter !== 'ALL' ||
-    priorityFilter !== 'ALL' ||
-    hideDone
+    priorityFilter !== 'ALL'
 
   const completedCount = monthTasks.filter(
     (task) => normalizeStatus(task.status) === 'DONE'
@@ -537,22 +529,42 @@ export default function Board({
 
           <button
             type="button"
-            className={`board-hide-done ${hideDone ? 'active' : ''}`}
-            onClick={() => setHideDone((value) => !value)}
+            className="board-mobile-filter-trigger"
+            onClick={() => setIsFiltersOpen(true)}
+            aria-label="Open board filters"
           >
-            {hideDone ? <Eye size={14} /> : <EyeOff size={14} />}
-            {hideDone ? 'Show Completed' : 'Hide Completed'}
+            <SlidersHorizontal size={14} />
+            Filters
+            {hasActiveFilters && <span className="board-filter-active-dot" />}
           </button>
         </div>
       </div>
 
-      <section className="board-filters">
+      <section
+        className={`board-filters ${isFiltersOpen ? 'is-mobile-open' : ''}`}
+        aria-label="Board filters"
+        onClick={(event) => {
+          if (event.target === event.currentTarget) {
+            setIsFiltersOpen(false)
+          }
+        }}
+      >
+        <div className="board-filter-dialog">
         <div className="board-filters-heading">
           <div>
             <h3>Board Filters</h3>
             <p>Choose which tasks you want to see.</p>
           </div>
         </div>
+
+        <button
+          type="button"
+          className="board-filter-close"
+          aria-label="Close board filters"
+          onClick={() => setIsFiltersOpen(false)}
+        >
+          <X size={18} />
+        </button>
 
         <div className="board-filter-grid">
           <label>
@@ -645,6 +657,7 @@ export default function Board({
             <RotateCcw size={13} />
             Reset Filters
           </button>
+        </div>
         </div>
       </section>
 
