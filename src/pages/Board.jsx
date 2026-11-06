@@ -254,6 +254,9 @@ function getTypeColor(type) {
 }
 
 function isTaskOverdue(task, now = new Date()) {
+  // Task yang sudah DONE tidak boleh berwarna merah.
+  if (normalizeStatus(task?.status) === 'DONE') return false
+
   if (!task?.deadline) return false
   if (task.overdueForgiven === true) return false
 
@@ -270,11 +273,9 @@ function isTaskOverdue(task, now = new Date()) {
   return deadline < today
 }
 
-function isTaskCompletedLate(task, now = new Date()) {
-  return (
-    normalizeStatus(task.status) === 'DONE' &&
-    isTaskOverdue(task, now)
-  )
+function isTaskCompletedLate() {
+  // Completed selalu menggunakan visual Completed.
+  return false
 }
 
 export default function Board({
