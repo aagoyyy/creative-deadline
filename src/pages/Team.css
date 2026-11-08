@@ -355,7 +355,7 @@
   --team-border: rgba(168, 240, 0, 0.14);
   --team-text: #e8ede5;
   --team-muted: #929b8d;
-  --team-purple: #a8f000;
+  --team-purple: #86B817;
 
   color: var(--team-text);
 }
@@ -607,7 +607,7 @@
 .team-form select:focus,
 .team-password-field:focus-within {
   outline: none;
-  border-color: #a8f000;
+  border-color: #86B817;
   box-shadow: 0 0 0 3px rgba(168, 240, 0, 0.10);
 }
 
@@ -707,8 +707,8 @@
 }
 
 .team-submit-button {
-  border: 1px solid #a8f000;
-  background: #a8f000;
+  border: 1px solid #86B817;
+  background: #86B817;
   color: #fff;
 }
 
@@ -725,7 +725,7 @@
 
 .team-form button:focus-visible,
 .team-modal-close:focus-visible {
-  outline: 2px solid #a8f000;
+  outline: 2px solid #86B817;
   outline-offset: 3px;
 }
 
