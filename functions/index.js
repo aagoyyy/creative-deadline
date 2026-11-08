@@ -196,3 +196,114 @@ exports.deleteTeamMember = onCall({ region: REGION }, async (request) => {
     throw new HttpsError("internal", "Gagal menghapus anggota.");
   }
 });
+
+
+exports.updateTeamMember = onCall({ region: REGION }, async (request) => {
+  const callerUid = await requireAdmin(request);
+
+  const uid = String(request.data?.uid || "").trim();
+  const name = String(request.data?.name || "").trim();
+  const email = String(request.data?.email || "").trim().toLowerCase();
+  const role = String(request.data?.role || "").toLowerCase();
+  const password = request.data?.password;
+
+  if (!uid || !name || name.length > 100) {
+    throw new HttpsError("invalid-argument", "Nama tidak valid.");
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new HttpsError("invalid-argument", "Email tidak valid.");
+  }
+
+  if (!["creative", "strategic", "admin"].includes(role)) {
+    throw new HttpsError("invalid-argument", "Role tidak valid.");
+  }
+
+  if (
+    password !== undefined &&
+    (typeof password !== "string" || password.length < 6)
+  ) {
+    throw new HttpsError(
+      "invalid-argument",
+      "Password minimal 6 karakter."
+    );
+  }
+
+  const ref = db.collection("users").doc(uid);
+  const snap = await ref.get();
+
+  if (!snap.exists) {
+    throw new HttpsError("not-found", "Anggota tidak ditemukan.");
+  }
+
+  const member = snap.data();
+
+  // Lindungi agar admin tidak menghapus akses admin miliknya sendiri.
+  if (uid === callerUid && role !== "admin") {
+    throw new HttpsError(
+      "failed-precondition",
+      "Tidak bisa mengubah role admin sendiri."
+    );
+  }
+
+  // Pastikan selalu ada minimal satu admin aktif.
+  if (member.role === "admin" && member.active === true && role !== "admin") {
+    const admins = await db.collection("users")
+      .where("role", "==", "admin")
+      .where("active", "==", true)
+      .get();
+
+    if (admins.size <= 1) {
+      throw new HttpsError(
+        "failed-precondition",
+        "Admin aktif terakhir tidak bisa diubah rolenya."
+      );
+    }
+  }
+
+  try {
+    const authUpdates = {
+      displayName: name,
+      email,
+    };
+
+    if (password) {
+      authUpdates.password = password;
+    }
+
+    await auth.updateUser(uid, authUpdates);
+
+    await ref.update({
+      name,
+      email,
+      role,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    return { uid, name, email, role, updated: true };
+
+  } catch (error) {
+    if (error instanceof HttpsError) throw error;
+
+    if (error.code === "auth/email-already-exists") {
+      throw new HttpsError(
+        "already-exists",
+        "Email sudah digunakan anggota lain."
+      );
+    }
+
+    if (error.code === "auth/user-not-found") {
+      throw new HttpsError(
+        "not-found",
+        "Akun Authentication tidak ditemukan."
+      );
+    }
+
+    console.error("Update team member gagal:", error);
+
+    throw new HttpsError(
+      "internal",
+      "Gagal memperbarui data anggota."
+    );
+  }
+});

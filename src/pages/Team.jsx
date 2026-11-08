@@ -7,6 +7,11 @@ import {
   updateProfile,
   signOut,
   deleteUser,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
+  verifyBeforeUpdateEmail,
+  reload,
 } from 'firebase/auth'
 import {
   collection,
@@ -14,6 +19,7 @@ import {
   doc,
   setDoc,
   updateDoc,
+  getDoc,
   serverTimestamp,
 } from 'firebase/firestore'
 import {
@@ -40,7 +46,11 @@ export default function Team({ currentUser, onRequestConfirm }) {
   const [search, setSearch] = useState('')
 
   const [showModal, setShowModal] = useState(false)
+  const [editingMember, setEditingMember] = useState(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newEmail, setNewEmail] = useState('')
+  const [newPassword, setNewPassword] = useState('')
   const [saving, setSaving] = useState(false)
   const [processingUid, setProcessingUid] = useState('')
   const [formError, setFormError] = useState('')
@@ -78,6 +88,43 @@ export default function Team({ currentUser, onRequestConfirm }) {
     return unsubscribe
   }, [])
 
+  // After a user verifies an email-change link, sync the verified Auth email
+  // into their Firestore profile the next time they open Team Management.
+  useEffect(() => {
+    let cancelled = false
+
+    async function syncVerifiedEmail() {
+      const signedInUser = auth.currentUser
+      if (!signedInUser) return
+
+      try {
+        await reload(signedInUser)
+        if (cancelled || !signedInUser.email) return
+
+        const profileRef = doc(db, 'users', signedInUser.uid)
+        const profileSnap = await getDoc(profileRef)
+
+        if (
+          !cancelled &&
+          profileSnap.exists() &&
+          profileSnap.data().email !== signedInUser.email
+        ) {
+          await updateDoc(profileRef, {
+            email: signedInUser.email,
+            updatedAt: serverTimestamp(),
+          })
+        }
+      } catch (syncError) {
+        console.error('Failed to sync verified email:', syncError)
+      }
+    }
+
+    syncVerifiedEmail()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const activeCount = members.filter(
     (member) => member.active === true
   ).length
@@ -100,12 +147,33 @@ export default function Team({ currentUser, onRequestConfirm }) {
     }))
   }
 
+  function openEditModal(member) {
+    setEditingMember(member)
+    setFormError('')
+    setNotice('')
+    setShowPassword(false)
+    setCurrentPassword('')
+    setNewEmail(member.email || '')
+    setNewPassword('')
+    setForm({
+      name: member.name || '',
+      email: member.email || '',
+      password: '',
+      role: member.role || 'creative',
+    })
+    setShowModal(true)
+  }
+
   function closeModal() {
     if (saving) return
 
     setShowModal(false)
+    setEditingMember(null)
     setFormError('')
     setShowPassword(false)
+    setCurrentPassword('')
+    setNewEmail('')
+    setNewPassword('')
     setForm({
       name: '',
       email: '',
@@ -238,6 +306,116 @@ export default function Team({ currentUser, onRequestConfirm }) {
     }
   }
 
+  async function handleEditMember(event) {
+    event.preventDefault()
+    if (!editingMember) return
+
+    const isSelf = editingMember.uid === auth.currentUser?.uid
+    if (!isAdmin && !isSelf) return
+
+    const name = form.name.trim()
+    const role = form.role
+    const requestedEmail = newEmail.trim().toLowerCase()
+    const emailChanged = isSelf && requestedEmail !== String(auth.currentUser?.email || '').toLowerCase()
+    const passwordChanged = isSelf && Boolean(newPassword)
+
+    if (isAdmin && !name) {
+      setFormError('Name is required.')
+      return
+    }
+
+    if (isAdmin && isSelf && role !== 'admin') {
+      setFormError('You cannot change your own admin role.')
+      return
+    }
+
+    if (emailChanged && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(requestedEmail)) {
+      setFormError('Please enter a valid email address.')
+      return
+    }
+
+    if (passwordChanged && newPassword.length < 6) {
+      setFormError('New password must be at least 6 characters long.')
+      return
+    }
+
+    if ((emailChanged || passwordChanged) && !currentPassword) {
+      setFormError('Enter your current password to verify your identity.')
+      return
+    }
+
+    setSaving(true)
+    setFormError('')
+    setNotice('')
+
+    try {
+      if (isSelf && auth.currentUser) {
+        const signedInUser = auth.currentUser
+
+        if (emailChanged || passwordChanged) {
+          const credential = EmailAuthProvider.credential(
+            signedInUser.email,
+            currentPassword
+          )
+          await reauthenticateWithCredential(signedInUser, credential)
+        }
+
+        if (emailChanged) {
+          await verifyBeforeUpdateEmail(signedInUser, requestedEmail)
+        }
+
+        if (passwordChanged) {
+          await updatePassword(signedInUser, newPassword)
+        }
+      }
+
+      // Only admins can edit profile names and roles.
+      if (isAdmin) {
+        await updateDoc(doc(db, 'users', editingMember.uid), {
+          name,
+          role,
+          updatedAt: serverTimestamp(),
+        })
+      }
+
+      const messages = []
+      if (isAdmin) {
+        messages.push(`${name}'s profile has been updated.`)
+      }
+      if (emailChanged) {
+        messages.push(`A verification link has been sent to ${requestedEmail}.`)
+      }
+      if (passwordChanged) {
+        messages.push('Your password has been changed.')
+      }
+
+      setNotice(messages.join(' '))
+      setShowModal(false)
+      setEditingMember(null)
+      setCurrentPassword('')
+      setNewEmail('')
+      setNewPassword('')
+    } catch (err) {
+      console.error('Failed to edit team member:', err)
+
+      const messages = {
+        'auth/wrong-password': 'Current password is incorrect.',
+        'auth/invalid-credential': 'Current password is incorrect. Please try again.',
+        'auth/requires-recent-login': 'Please sign in again before changing account security details.',
+        'auth/email-already-in-use': 'That email address is already in use.',
+        'auth/invalid-email': 'Please enter a valid email address.',
+        'auth/weak-password': 'New password is too weak. Use at least 6 characters.',
+        'permission-denied': 'You do not have permission to edit this profile. Check your Firestore Rules.',
+      }
+
+      setFormError(
+        messages[err.code] || err.message || 'Failed to update team member.'
+      )
+    } finally {
+      setSaving(false)
+    }
+  }
+
   async function handleToggleMember(member) {
     if (!isAdmin || processingUid) return
 
@@ -287,6 +465,26 @@ export default function Team({ currentUser, onRequestConfirm }) {
   return (
     <section className="team-page">
       <header className="team-header">
+        {currentUser?.uid && (
+          <button
+            type="button"
+            className="team-account-button"
+            onClick={() => {
+              const ownMember = members.find(
+                (member) => member.uid === currentUser.uid
+              ) || {
+                uid: currentUser.uid,
+                name: currentUser.name || '',
+                email: currentUser.email || auth.currentUser?.email || '',
+                role: currentUser.role || 'creative',
+              }
+              openEditModal(ownMember)
+            }}
+          >
+            <ShieldCheck size={17} />
+            My Account
+          </button>
+        )}
         {isAdmin && (
           <button
             type="button"
@@ -304,7 +502,7 @@ export default function Team({ currentUser, onRequestConfirm }) {
       </header>
 
       {notice && (
-        <div className="team-notice" role="status">
+        <div className="team-form-note" role="status">
           {notice}
         </div>
       )}
@@ -428,6 +626,16 @@ export default function Team({ currentUser, onRequestConfirm }) {
                         <td>
                           <button
                             type="button"
+                            className="team-edit-button"
+                            onClick={() => openEditModal(member)}
+                            disabled={Boolean(processingUid)}
+                            title="Edit team member"
+                          >
+                            <UserPlus size={17} />
+                            <span>Edit</span>
+                          </button>
+                          <button
+                            type="button"
                             className="team-toggle-button"
                             onClick={() => handleToggleMember(member)}
                             disabled={
@@ -473,9 +681,8 @@ export default function Team({ currentUser, onRequestConfirm }) {
       </section>
 
       <p className="team-footnote">
-        Deactivation changes application access through the Firestore
-        profile. Firebase Authentication accounts must still be deleted
-        through the Firebase Console.
+        Admins can edit member names and roles. Each member manages their own
+        email and password changes using account verification.
       </p>
 
       {showModal && (
@@ -494,8 +701,14 @@ export default function Team({ currentUser, onRequestConfirm }) {
             <header className="team-modal-header">
               <div>
                 <span className="team-eyebrow">TEAM MANAGEMENT</span>
-                <h2 id="team-modal-title">Add Team Member</h2>
-                <p>Create a new account for your team.</p>
+                <h2 id="team-modal-title">
+                  {editingMember ? 'Edit Team Member' : 'Add Team Member'}
+                </h2>
+                <p>
+                  {editingMember
+                    ? 'Update member details and account settings.'
+                    : 'Create a new account for your team.'}
+                </p>
               </div>
 
               <button
@@ -509,76 +722,139 @@ export default function Team({ currentUser, onRequestConfirm }) {
               </button>
             </header>
 
-            <form className="team-form" onSubmit={handleAddMember}>
-              <label>
-                Full Name
-                <input
-                  name="name"
-                  value={form.name}
-                  onChange={updateForm}
-                  placeholder="e.g. John Smith"
-                  autoComplete="name"
-                  required
-                />
-              </label>
-
-              <label>
-                Email Address
-                <input
-                  name="email"
-                  type="email"
-                  value={form.email}
-                  onChange={updateForm}
-                  placeholder="name@company.com"
-                  autoComplete="email"
-                  required
-                />
-              </label>
-
-              <label>
-                Initial Password
-                <div className="team-password-field">
+            <form
+              className="team-form"
+              onSubmit={editingMember ? handleEditMember : handleAddMember}
+            >
+              {isAdmin && (
+                <label>
+                  Full Name
                   <input
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={form.password}
+                    name="name"
+                    value={form.name}
                     onChange={updateForm}
-                    placeholder="At least 6 characters"
-                    autoComplete="new-password"
-                    minLength={6}
+                    placeholder="e.g. John Smith"
+                    autoComplete="name"
                     required
                   />
+                </label>
+              )}
 
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((value) => !value)}
-                    aria-label={
-                      showPassword ? 'Hide password' : 'Show password'
-                    }
-                  >
-                    {showPassword ? (
-                      <EyeOff size={17} />
-                    ) : (
-                      <Eye size={17} />
-                    )}
-                  </button>
+              {isAdmin && (
+                <label>
+                  Email Address
+                  <input
+                    name="email"
+                    type="email"
+                    value={form.email}
+                    onChange={updateForm}
+                    placeholder="name@company.com"
+                    autoComplete="email"
+                    readOnly={Boolean(editingMember)}
+                    required
+                  />
+                </label>
+              )}
+
+              {editingMember && editingMember.uid !== auth.currentUser?.uid && (
+                <div className="team-form-note">
+                  Email and password are managed by the account owner through
+                  their own verified account settings.
                 </div>
-              </label>
+              )}
 
-              <label>
-                Member Role
-                <select
-                  name="role"
-                  value={form.role}
-                  onChange={updateForm}
-                  required
-                >
-                  <option value="creative">Creative</option>
-                  <option value="strategic">Strategic</option>
-                  <option value="admin">Admin</option>
-                  <option value="digital_marketing">Digital Marketing</option>
-                </select>
-              </label>
+              {!editingMember && (
+                <label>
+                  Initial Password
+                  <div className="team-password-field">
+                    <input
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={form.password}
+                      onChange={updateForm}
+                      placeholder="At least 6 characters"
+                      autoComplete="new-password"
+                      minLength={6}
+                      required
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((value) => !value)}
+                      aria-label={
+                        showPassword ? 'Hide password' : 'Show password'
+                      }
+                    >
+                      {showPassword ? (
+                        <EyeOff size={17} />
+                      ) : (
+                        <Eye size={17} />
+                      )}
+                    </button>
+                  </div>
+                </label>
+              )}
+
+              {editingMember && editingMember.uid === auth.currentUser?.uid && (
+                <>
+                  <div className="team-form-note">
+                    Email and password changes apply only to your own account.
+                    Email changes require opening a verification link sent to
+                    the new address.
+                  </div>
+
+                  <label>
+                    New Email Address
+                    <input
+                      type="email"
+                      value={newEmail}
+                      onChange={(event) => setNewEmail(event.target.value)}
+                      placeholder="name@company.com"
+                      autoComplete="email"
+                    />
+                  </label>
+
+                  <label>
+                    Current Password
+                    <input
+                      type="password"
+                      value={currentPassword}
+                      onChange={(event) => setCurrentPassword(event.target.value)}
+                      placeholder="Enter current password to verify"
+                      autoComplete="current-password"
+                    />
+                  </label>
+
+                  <label>
+                    New Password
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(event) => setNewPassword(event.target.value)}
+                      placeholder="Leave blank to keep current password"
+                      autoComplete="new-password"
+                      minLength={6}
+                    />
+                  </label>
+                </>
+              )}
+
+              {isAdmin && (
+                <label>
+                  Member Role
+                  <select
+                    name="role"
+                    value={form.role}
+                    onChange={updateForm}
+                    required
+                  >
+                    <option value="creative">Creative</option>
+                    <option value="strategic">Strategic</option>
+                    <option value="admin">Admin</option>
+                    <option value="digital_marketing">Digital Marketing</option>
+                  </select>
+                </label>
+              )}
 
               {formError && (
                 <div className="team-form-error" role="alert">
@@ -586,11 +862,13 @@ export default function Team({ currentUser, onRequestConfirm }) {
                 </div>
               )}
 
-              <div className="team-form-note">
-                The new account will be activated immediately. Store the
-                initial password securely and share it with the team member
-                privately.
-              </div>
+              {!editingMember && (
+                <div className="team-form-note">
+                  The new account will be activated immediately. Store the
+                  initial password securely and share it with the team member
+                  privately.
+                </div>
+              )}
 
               <footer className="team-form-actions">
                 <button
@@ -613,12 +891,12 @@ export default function Team({ currentUser, onRequestConfirm }) {
                         size={17}
                         className="team-spinner"
                       />
-                      Creating Account...
+                      {editingMember ? 'Saving Changes...' : 'Creating Account...'}
                     </>
                   ) : (
                     <>
                       <UserPlus size={17} />
-                      Save Member
+                      {editingMember ? 'Save Changes' : 'Save Member'}
                     </>
                   )}
                 </button>

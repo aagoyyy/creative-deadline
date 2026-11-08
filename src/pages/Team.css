@@ -219,7 +219,6 @@
   color: var(--text-secondary, #858585);
   font-size: 11px;
 }
-
 .team-role {
   display: inline-flex;
   padding: 5px 8px;
@@ -231,20 +230,30 @@
   text-transform: capitalize;
 }
 
+/* Purple */
 .role-admin {
   background: #f0e9ff;
   color: #7041b8;
 }
 
+/* Blue */
 .role-strategic {
   background: #e8f1ff;
   color: #245eb3;
 }
 
+/* Green */
 .role-creative {
   background: #e5f6eb;
   color: #16834a;
 }
+
+/* Orange */
+.role-digital_marketing {
+  background: rgba(249, 115, 22, 0.14);
+  color: #fdba74;
+}
+
 
 .team-status {
   display: inline-flex;
@@ -752,4 +761,59 @@
   .team-submit-button {
     width: 100%;
   }
+}
+
+.team-edit-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid rgba(134, 184, 23, 0.25);
+  border-radius: 8px;
+  background: rgba(134, 184, 23, 0.08);
+  color: #86B817;
+  cursor: pointer;
+  font: inherit;
+}
+
+.team-edit-button:hover {
+  background: rgba(134, 184, 23, 0.16);
+}
+
+.team-edit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* My Account — clearly interactive, using the existing Team dark palette */
+.team-account-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 13px;
+  border: 1px solid rgba(190, 220, 170, 0.24);
+  border-radius: 9px;
+  background: rgba(31, 47, 34, 0.82);
+  color: #dce5d6;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.team-account-button:hover {
+  background: rgba(55, 75, 49, 0.9);
+  border-color: rgba(190, 220, 170, 0.38);
+}
+
+.team-account-button:active {
+  transform: translateY(1px);
+}
+
+.team-account-button:focus-visible {
+  outline: 2px solid #86B817;
+  outline-offset: 3px;
 }

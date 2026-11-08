@@ -1143,7 +1143,7 @@ svg {
   max-width: calc(100vw - 32px);
   overflow: hidden;
   color: #edf3ed;
-  background: rgba(20, 28, 20, 0.94);
+  background: rgba(20, 28, 20, 0.98);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   box-shadow: 0 18px 55px rgba(0, 0, 0, 0.42);
@@ -1363,13 +1363,12 @@ svg {
 .task-detail-sidebar .detail-card,
 .task-modal,
 .notification-panel,
-.board-filter-dialog,
 .my-tasks-filter-overlay .my-tasks-filters {
   background: linear-gradient(
     145deg,
-    rgba(34, 49, 36, 0.76) 0%,
-    rgba(17, 27, 20, 0.84) 52%,
-    rgba(23, 36, 26, 0.72) 100%
+    rgba(34, 49, 36, 0.96) 0%,
+    rgba(17, 27, 20, 0.98) 52%,
+    rgba(23, 36, 26, 0.96) 100%
   );
   border-color: rgba(190, 220, 170, 0.16);
   box-shadow:
@@ -1420,8 +1419,7 @@ svg {
 }
 
 .task-modal,
-.notification-panel,
-.board-filter-dialog {
+.notification-panel{
   border: 1px solid rgba(190, 220, 170, 0.18);
 }
 
@@ -1429,8 +1427,8 @@ svg {
 .logout-confirm-modal {
   background: linear-gradient(
     145deg,
-    rgba(34, 49, 36, 0.88),
-    rgba(15, 24, 18, 0.94)
+    rgba(34, 49, 36, 0.96),
+    rgba(15, 24, 18, 0.98)
   );
   border-color: rgba(190, 220, 170, 0.18);
   box-shadow:

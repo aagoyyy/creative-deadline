@@ -744,20 +744,41 @@ export default function Calendar({
           const dayKey = day ? getDayKey(day) : ''
           const isExpanded = day ? expandedDays.has(dayKey) : false
 
-          // All unfinished tasks are visible by default, whether overdue or not.
-          // DONE tasks are tucked away and can be shown with See All.
+          // Keep every unfinished task visible, including overdue tasks.
+          // Completed-late tasks also stay visible.
+          // If fewer than 3 tasks are visible, fill the remaining slots
+          // with on-time completed tasks. Any remaining completed tasks
+          // are available through See All.
           const unfinishedDayTasks = dayTasks.filter(
             (task) => normalizeStatus(task.status) !== 'DONE'
           )
-          const doneDayTasks = dayTasks.filter(
-            (task) => normalizeStatus(task.status) === 'DONE'
+          const completedLateDayTasks = dayTasks.filter(
+            (task) => isTaskCompletedLate(task)
+          )
+          const completedOnTimeDayTasks = dayTasks.filter(
+            (task) =>
+              normalizeStatus(task.status) === 'DONE' &&
+              !isTaskCompletedLate(task)
+          )
+
+          const alwaysVisibleDayTasks = sortTasksByPriority([
+            ...unfinishedDayTasks,
+            ...completedLateDayTasks,
+          ])
+
+          const completedTasksNeeded = Math.max(
+            0,
+            3 - alwaysVisibleDayTasks.length
           )
 
           const visibleDayTasks = isExpanded
             ? dayTasks
-            : unfinishedDayTasks
+            : sortTasksByPriority([
+                ...alwaysVisibleDayTasks,
+                ...completedOnTimeDayTasks.slice(0, completedTasksNeeded),
+              ])
 
-          const hiddenTaskCount = doneDayTasks.length
+          const hiddenTaskCount = dayTasks.length - visibleDayTasks.length
 
           const isToday =
             Boolean(day) &&
