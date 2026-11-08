@@ -744,9 +744,20 @@ export default function Calendar({
           const dayKey = day ? getDayKey(day) : ''
           const isExpanded = day ? expandedDays.has(dayKey) : false
 
+          // All unfinished tasks are visible by default, whether overdue or not.
+          // DONE tasks are tucked away and can be shown with See All.
+          const unfinishedDayTasks = dayTasks.filter(
+            (task) => normalizeStatus(task.status) !== 'DONE'
+          )
+          const doneDayTasks = dayTasks.filter(
+            (task) => normalizeStatus(task.status) === 'DONE'
+          )
+
           const visibleDayTasks = isExpanded
             ? dayTasks
-            : dayTasks.slice(0, 3)
+            : unfinishedDayTasks
+
+          const hiddenTaskCount = doneDayTasks.length
 
           const isToday =
             Boolean(day) &&
@@ -938,7 +949,7 @@ export default function Calendar({
                       )
                     })}
 
-                    {dayTasks.length > 3 && (
+                    {(hiddenTaskCount > 0 || isExpanded) && (
                       <button
                         type="button"
                         className="more-tasks"
@@ -955,7 +966,7 @@ export default function Calendar({
                           </>
                         ) : (
                           <>
-                            +{dayTasks.length - 3} more
+                            +{hiddenTaskCount} completed
                             <ChevronDown size={13} />
                             See All
                           </>
