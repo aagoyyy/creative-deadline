@@ -9,7 +9,7 @@
   gap: 24px;
   width: 100%;
   min-width: 0;
-  color: var(--text-primary, #f2f4fa);
+  color: var(--text-primary, #e8ede5);
 }
 
 /* HEADER */
@@ -35,7 +35,7 @@
 
 .my-brief-header p {
   margin: 0;
-  color: var(--text-secondary, #9298aa);
+  color: var(--text-secondary, #929b8d);
   font-size: 13px;
   line-height: 1.6;
 }
@@ -62,9 +62,12 @@
   gap: 12px;
   min-width: 0;
   padding: 16px;
-  border: 1px solid var(--border-color, #293246);
+  border: 1px solid rgba(210, 235, 190, 0.12);
   border-radius: 14px;
-  background: var(--surface-color, #151a27);
+  background: linear-gradient(145deg, rgba(35, 48, 32, 0.78), rgba(17, 26, 17, 0.88));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 10px 28px rgba(0, 0, 0, 0.16);
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
 }
 
 .brief-summary-icon {
@@ -75,7 +78,7 @@
   place-items: center;
   border-radius: 11px;
   background: #252b3b;
-  color: #c4b5fd;
+  color: #b7ff32;
 }
 
 .brief-summary-icon.draft {
@@ -87,7 +90,7 @@
 }
 
 .brief-summary-icon.progress {
-  color: #c4b5fd;
+  color: #b7ff32;
 }
 
 .brief-summary-icon.done {
@@ -102,19 +105,19 @@
 }
 
 .brief-summary-card span {
-  color: var(--text-secondary, #9298aa);
+  color: var(--text-secondary, #929b8d);
   font-size: 12px;
   line-height: 1.4;
 }
 
 .brief-summary-card strong {
-  color: var(--text-primary, #f2f4fa);
+  color: var(--text-primary, #e8ede5);
   font-size: 25px;
   line-height: 1.2;
 }
 
 .brief-summary-card small {
-  color: var(--text-secondary, #9298aa);
+  color: var(--text-secondary, #929b8d);
   font-size: 11px;
   line-height: 1.5;
 }
@@ -158,18 +161,20 @@
   box-sizing: border-box;
   overflow-y: auto;
   overscroll-behavior: contain;
-  border: 1px solid #293246;
+  border: 1px solid rgba(168, 240, 0, 0.14);
   border-radius: 16px;
-  background: #151a27;
-  color: #f1f3fa;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+  background: linear-gradient(145deg, rgba(31, 43, 29, 0.97), rgba(12, 19, 12, 0.98));
+  color: #e8ede5;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 28px 80px rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
 }
 
 /* CUSTOM SCROLLBAR POPUP */
 
 .brief-modal-overlay > form.brief-form-modal {
   scrollbar-width: thin;
-  scrollbar-color: #343b50 transparent;
+  scrollbar-color: #3a4634 transparent;
 }
 
 .brief-modal-overlay > form.brief-form-modal::-webkit-scrollbar {
@@ -182,7 +187,7 @@
 
 .brief-modal-overlay > form.brief-form-modal::-webkit-scrollbar-thumb {
   border-radius: 99px;
-  background: #343b50;
+  background: #3a4634;
 }
 
 /* POPUP HEADING */
@@ -198,7 +203,7 @@
 
 .brief-modal-overlay .brief-form-heading h3 {
   margin: 6px 0;
-  color: #f1f3fa;
+  color: #e8ede5;
   font-size: 23px;
   font-weight: 700;
   letter-spacing: -0.4px;
@@ -206,7 +211,7 @@
 
 .brief-modal-overlay .brief-form-heading p {
   margin: 0;
-  color: #8993a8;
+  color: #929b8d;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -219,7 +224,7 @@
   gap: 8px;
   min-width: 0;
   margin: 0;
-  color: #b9c1d2;
+  color: #c3cdbb;
   font-size: 12px;
   font-weight: 600;
 }
@@ -243,11 +248,12 @@
   min-height: 42px;
   box-sizing: border-box;
   padding: 10px 12px;
-  border: 1px solid #293246;
+  border: 1px solid rgba(205, 230, 185, 0.13);
   border-radius: 9px;
   outline: none;
-  background: #111625;
-  color: #f1f3fa;
+  background: rgba(8, 14, 8, 0.62);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.24);
+  color: #e8ede5;
   font-family: inherit;
   font-size: 13px;
   font-weight: 400;
@@ -259,7 +265,7 @@
 
 .brief-modal-overlay > form.brief-form-modal input::placeholder,
 .brief-modal-overlay > form.brief-form-modal textarea::placeholder {
-  color: #737e94;
+  color: #778271;
 }
 
 /* FOCUS */
@@ -267,8 +273,9 @@
 .brief-modal-overlay > form.brief-form-modal input:focus,
 .brief-modal-overlay > form.brief-form-modal select:focus,
 .brief-modal-overlay > form.brief-form-modal textarea:focus {
-  border-color: #8065f5;
-  box-shadow: 0 0 0 3px rgba(128, 101, 245, 0.14);
+  border-color: #a8f000;
+  background: rgba(18, 28, 14, 0.82);
+  box-shadow: 0 0 0 3px rgba(168, 240, 0, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.035);
   outline: none;
 }
 
@@ -281,8 +288,8 @@
 /* SELECT OPTIONS */
 
 .brief-modal-overlay > form.brief-form-modal select option {
-  background: #151a27;
-  color: #f1f3fa;
+  background: #141c14;
+  color: #e8ede5;
 }
 
 /* TEXTAREA */
@@ -324,7 +331,7 @@
   gap: 10px;
   margin-top: 4px;
   padding-top: 18px;
-  border-top: 1px solid #293246;
+  border-top: 1px solid rgba(168, 240, 0, 0.14);
 }
 
 /* BUTTON BASE */
@@ -360,25 +367,26 @@
 
 .brief-modal-overlay .brief-form-actions .primary-button {
   border: 1px solid transparent;
-  background: #8065f5;
-  color: #ffffff;
+  background: linear-gradient(135deg, #b7ef35, #91d900);
+  color: #17210d;
+  box-shadow: 0 5px 16px rgba(168, 240, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.32);
 }
 
 .brief-modal-overlay .brief-form-actions .primary-button:hover:not(:disabled) {
-  background: #7155e8;
+  background: #91d900;
 }
 
 /* SECONDARY BUTTON */
 
 .brief-modal-overlay .brief-form-actions .secondary-button {
-  border: 1px solid #293246;
-  background: #1b2130;
-  color: #c3cada;
+  border: 1px solid rgba(168, 240, 0, 0.14);
+  background: #1b2519;
+  color: #cbd5c4;
 }
 
 .brief-modal-overlay .brief-form-actions .secondary-button:hover:not(:disabled) {
-  background: #252d40;
-  border-color: #3a4560;
+  background: #202b19;
+  border-color: #46543d;
 }
 
 /* FALLBACK BUTTONS
@@ -388,15 +396,15 @@
 .brief-modal-overlay
 .brief-form-actions
 button:not(.primary-button):not(.secondary-button):not(.brief-assign-button) {
-  border: 1px solid #293246;
-  background: #1b2130;
-  color: #c3cada;
+  border: 1px solid rgba(168, 240, 0, 0.14);
+  background: #1b2519;
+  color: #cbd5c4;
 }
 
 .brief-modal-overlay
 .brief-form-actions
 button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hover:not(:disabled) {
-  background: #252d40;
+  background: #202b19;
 }
 
 /* ASSIGN BUTTON — MATCH MY BRIEF PAGE */
@@ -408,10 +416,10 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   gap: 5px;
   min-height: 36px;
   padding: 7px 10px;
-  border: 1px solid rgba(128, 101, 245, 0.3);
+  border: 1px solid rgba(168, 240, 0, 0.28);
   border-radius: 7px;
-  background: rgba(128, 101, 245, 0.13);
-  color: #b8aaff;
+  background: rgba(168, 240, 0, 0.10);
+  color: #b7ff32;
   font-family: inherit;
   font-size: 11px;
   font-weight: 600;
@@ -423,7 +431,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 .brief-modal-overlay
 .brief-form-actions
 .brief-assign-button:hover:not(:disabled) {
-  background: rgba(128, 101, 245, 0.23);
+  background: rgba(168, 240, 0, 0.17);
 }
 
 .brief-modal-overlay
@@ -459,7 +467,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 .brief-list-toolbar > div:first-child > span {
   display: inline-block;
   margin-top: 5px;
-  color: var(--text-secondary, #9298aa);
+  color: var(--text-secondary, #929b8d);
   font-size: 12px;
 }
 
@@ -480,10 +488,13 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   min-width: 0;
   min-height: 42px;
   padding: 0 12px;
-  border: 1px solid var(--border-color, #293246);
+  border: 1px solid rgba(205, 230, 185, 0.13);
   border-radius: 9px;
-  background: var(--surface-color, #151a27);
-  color: var(--text-secondary, #9298aa);
+  background: linear-gradient(145deg, rgba(35, 48, 32, 0.68), rgba(17, 26, 17, 0.78));
+  color: var(--text-secondary, #929b8d);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035), 0 6px 18px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(14px) saturate(125%);
+  -webkit-backdrop-filter: blur(14px) saturate(125%);
 }
 
 .brief-search > svg {
@@ -497,7 +508,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   border: 0;
   outline: 0;
   background: transparent;
-  color: var(--text-primary, #f2f4fa);
+  color: var(--text-primary, #e8ede5);
   font: inherit;
   font-size: 12px;
 }
@@ -511,10 +522,13 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   min-height: 42px;
   max-width: 180px;
   padding: 0 12px;
-  border: 1px solid var(--border-color, #293246);
+  border: 1px solid rgba(205, 230, 185, 0.13);
   border-radius: 9px;
-  background: var(--surface-color, #151a27);
-  color: var(--text-primary, #f2f4fa);
+  background: linear-gradient(145deg, rgba(35, 48, 32, 0.68), rgba(17, 26, 17, 0.78));
+  color: var(--text-primary, #e8ede5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035), 0 6px 18px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(14px) saturate(125%);
+  -webkit-backdrop-filter: blur(14px) saturate(125%);
   font-family: inherit;
   font-size: 12px;
 }
@@ -527,11 +541,14 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   width: 100%;
   min-width: 0;
   overflow-x: auto;
-  border: 1px solid var(--border-color, #293246);
+  border: 1px solid rgba(205, 230, 185, 0.12);
   border-radius: 13px;
-  background: var(--surface-color, #151a27);
+  background: linear-gradient(145deg, rgba(31, 43, 29, 0.76), rgba(13, 21, 13, 0.88));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 12px 30px rgba(0, 0, 0, 0.16);
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
   scrollbar-width: thin;
-  scrollbar-color: #343b50 transparent;
+  scrollbar-color: #3a4634 transparent;
 }
 
 .brief-list-header,
@@ -553,13 +570,16 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 }
 
 .brief-list-header {
-  border-bottom: 1px solid var(--border-color, #293246);
-  background: var(--header-background, #111625);
+  border-bottom: 1px solid rgba(205, 230, 185, 0.11);
+  background: rgba(8, 14, 8, 0.52);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .brief-list-header > span {
   min-width: 0;
-  color: var(--text-secondary, #9298aa);
+  color: var(--text-secondary, #929b8d);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.07em;
@@ -568,7 +588,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 
 .brief-row {
   min-height: 92px;
-  border-bottom: 1px solid var(--border-color, #293246);
+  border-bottom: 1px solid var(--border-color, rgba(168, 240, 0, 0.14));
   transition: background 0.15s ease;
 }
 
@@ -577,7 +597,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 }
 
 .brief-row:hover {
-  background: var(--hover-background, #1b2130);
+  background: linear-gradient(90deg, rgba(168, 240, 0, 0.055), rgba(168, 240, 0, 0.018));
 }
 
 /* BRIEF NAME */
@@ -595,10 +615,10 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   width: 34px;
   height: 34px;
   place-items: center;
-  border: 1px solid rgba(145, 125, 255, 0.22);
+  border: 1px solid rgba(168, 240, 0, 0.20);
   border-radius: 9px;
-  background: rgba(125, 103, 255, 0.12);
-  color: #a99aff;
+  background: rgba(168, 240, 0, 0.09);
+  color: #b7ff32;
 }
 
 .brief-name-content {
@@ -611,7 +631,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 .brief-name-content > strong {
   display: -webkit-box;
   overflow: hidden;
-  color: var(--text-primary, #f2f4fa);
+  color: var(--text-primary, #e8ede5);
   font-size: 12px;
   font-weight: 600;
   line-height: 1.5;
@@ -625,7 +645,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   align-items: center;
   gap: 5px;
   width: fit-content;
-  color: #a99aff;
+  color: #b7ff32;
   font-size: 11px;
   text-decoration: none;
 }
@@ -637,7 +657,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 .brief-row-notes {
   display: -webkit-box;
   overflow: hidden;
-  color: var(--text-secondary, #9298aa);
+  color: var(--text-secondary, #929b8d);
   font-size: 11px;
   line-height: 1.45;
   overflow-wrap: anywhere;
@@ -656,13 +676,13 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 }
 
 .brief-project-cell > span {
-  color: var(--text-primary, #f2f4fa);
+  color: var(--text-primary, #e8ede5);
   font-size: 12px;
   overflow-wrap: anywhere;
 }
 
 .brief-project-cell > small {
-  color: var(--text-secondary, #9298aa);
+  color: var(--text-secondary, #929b8d);
   font-size: 11px;
 }
 
@@ -673,7 +693,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   align-items: center;
   gap: 8px;
   min-width: 0;
-  color: var(--text-primary, #f2f4fa);
+  color: var(--text-primary, #e8ede5);
   font-size: 11px;
 }
 
@@ -698,7 +718,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 }
 
 .brief-unassigned {
-  color: var(--text-secondary, #9298aa);
+  color: var(--text-secondary, #929b8d);
   overflow-wrap: anywhere;
 }
 
@@ -709,7 +729,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   align-items: flex-start;
   gap: 7px;
   min-width: 0;
-  color: var(--text-secondary, #a5abbb);
+  color: var(--text-secondary, #aab4a1);
   font-size: 11px;
   line-height: 1.5;
 }
@@ -717,7 +737,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 .brief-date-cell > svg {
   flex: 0 0 auto;
   margin-top: 1px;
-  color: #9298aa;
+  color: #929b8d;
 }
 
 .brief-date-cell > span {
@@ -767,7 +787,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 
 .brief-status-in-progress {
   background: #30234d;
-  color: #c4b5fd;
+  color: #b7ff32;
 }
 
 .brief-status-done {
@@ -780,13 +800,13 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   height: 5px;
   overflow: hidden;
   border-radius: 99px;
-  background: var(--border-color, #293246);
+  background: var(--border-color, rgba(168, 240, 0, 0.14));
 }
 
 .brief-progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: #8065f5;
+  background: #a8f000;
   transition: width 0.25s ease;
 }
 
@@ -799,7 +819,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 }
 
 .brief-status-cell > small {
-  color: var(--text-secondary, #9298aa);
+  color: var(--text-secondary, #929b8d);
   font-size: 10px;
   line-height: 1.5;
   overflow-wrap: anywhere;
@@ -831,10 +851,10 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   gap: 5px;
   min-height: 36px;
   padding: 7px 10px;
-  border: 1px solid rgba(128, 101, 245, 0.3);
+  border: 1px solid rgba(168, 240, 0, 0.28);
   border-radius: 7px;
-  background: rgba(128, 101, 245, 0.13);
-  color: #b8aaff;
+  background: rgba(168, 240, 0, 0.10);
+  color: #b7ff32;
   cursor: pointer;
   font-family: inherit;
   font-size: 11px;
@@ -844,7 +864,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 }
 
 .brief-assign-button:hover:not(:disabled) {
-  background: rgba(128, 101, 245, 0.23);
+  background: rgba(168, 240, 0, 0.17);
 }
 
 .brief-assign-button:disabled {
@@ -856,7 +876,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--text-secondary, #9298aa);
+  color: var(--text-secondary, #929b8d);
   font-size: 11px;
   line-height: 1.5;
   white-space: normal;
@@ -873,13 +893,13 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   justify-content: center;
   gap: 8px;
   padding: 48px 20px;
-  border: 1px dashed var(--border-color, #343b50);
+  border: 1px dashed var(--border-color, #3a4634);
   border-radius: 12px;
   text-align: center;
 }
 
 .my-brief-page .empty-state > svg {
-  color: var(--text-secondary, #9298aa);
+  color: var(--text-secondary, #929b8d);
 }
 
 .my-brief-page .empty-state h3 {
@@ -888,7 +908,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 
 .my-brief-page .empty-state p {
   margin: 0;
-  color: var(--text-secondary, #9298aa);
+  color: var(--text-secondary, #929b8d);
   font-size: 12px;
   line-height: 1.6;
 }
@@ -903,7 +923,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--text-primary, #f2f4fa);
+  color: var(--text-primary, #e8ede5);
   font: inherit;
   font-size: 12px;
   font-weight: 600;
@@ -917,7 +937,7 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 }
 
 .brief-task-title.is-clickable:hover {
-  color: #a99aff;
+  color: #b7ff32;
 }
 
 .brief-task-title:disabled {
@@ -932,10 +952,10 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
   align-items: center;
   justify-content: center;
   padding: 6px 12px;
-  border: 1px solid rgba(128, 101, 245, 0.35);
+  border: 1px solid rgba(168, 240, 0, 0.28);
   border-radius: 8px;
-  background: rgba(128, 101, 245, 0.12);
-  color: #b9a5ff;
+  background: rgba(168, 240, 0, 0.10);
+  color: #b7ff32;
   font: inherit;
   font-size: 12px;
   font-weight: 600;
@@ -944,12 +964,12 @@ button:not(.primary-button):not(.secondary-button):not(.brief-assign-button):hov
 }
 
 .brief-monitor-button:hover {
-  background: rgba(128, 101, 245, 0.22);
-  border-color: rgba(128, 101, 245, 0.6);
+  background: rgba(168, 240, 0, 0.17);
+  border-color: rgba(168, 240, 0, 0.5);
 }
 
 .brief-monitor-button:focus-visible {
-  outline: 2px solid #a99aff;
+  outline: 2px solid #b7ff32;
   outline-offset: 2px;
 }
 

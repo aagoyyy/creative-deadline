@@ -5,19 +5,21 @@
 ========================================= */
 
 .organic-calendar-page {
-  --organic-bg: #0b1120;
-  --organic-card: #111b2d;
-  --organic-card-hover: #172337;
-  --organic-border: #26344b;
-  --organic-text: #e2e8f0;
-  --organic-muted: #8492aa;
-  --organic-purple: #8b7cff;
+  --organic-bg: #0b0f0b;
+  --organic-card: rgba(20, 28, 20, 0.88);
+  --organic-card-hover: #202b19;
+  --organic-border: rgba(168, 240, 0, 0.14);
+  --organic-text: #e8ede5;
+  --organic-muted: #929b8d;
+  --organic-purple: #a8f000;
 
   display: flex;
   flex-direction: column;
   gap: 24px;
   min-width: 0;
   color: var(--organic-text);
+  background: radial-gradient(ellipse at 50% 0%, rgba(75, 105, 57, 0.10), transparent 58%);
+  border-radius: 18px;
 }
 
 .organic-calendar-page * {
@@ -69,9 +71,9 @@
   height: 54px;
   flex: 0 0 auto;
   place-items: center;
-  color: #b7aaff;
-  background: rgba(139, 124, 255, 0.12);
-  border: 1px solid rgba(139, 124, 255, 0.22);
+  color: #b7d96b;
+  background: rgba(168, 240, 0, 0.08);
+  border: 1px solid rgba(168, 240, 0, 0.16);
   border-radius: 15px;
 }
 
@@ -91,9 +93,15 @@
   gap: 13px;
   min-width: 0;
   padding: 19px;
-  background: var(--organic-card);
+  background: linear-gradient(145deg, rgba(36, 52, 39, 0.78), rgba(15, 25, 17, 0.88));
+  border-color: rgba(190, 220, 170, 0.18);
+  box-shadow: 0 14px 34px rgba(0,0,0,.18), inset 0 1px 0 rgba(235,255,220,.07);
+  backdrop-filter: blur(20px) saturate(135%);
+  -webkit-backdrop-filter: blur(20px) saturate(135%);
   border: 1px solid var(--organic-border);
   border-radius: 15px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   transition:
     background 0.2s ease,
     border-color 0.2s ease,
@@ -101,8 +109,8 @@
 }
 
 .organic-stat-card:hover {
-  background: var(--organic-card-hover);
-  border-color: #35445e;
+  background: linear-gradient(145deg, rgba(48, 67, 43, 0.84), rgba(22, 36, 24, 0.92));
+  border-color: #46563a;
   transform: translateY(-2px);
 }
 
@@ -116,8 +124,8 @@
 }
 
 .organic-stat-icon.purple {
-  color: #b7aaff;
-  background: rgba(139, 124, 255, 0.15);
+  color: #b7d96b;
+  background: rgba(168, 240, 0, 0.10);
 }
 
 .organic-stat-icon.blue {
@@ -169,9 +177,15 @@
 .organic-calendar-card {
   min-width: 0;
   overflow: hidden;
-  background: var(--organic-card);
+  background: linear-gradient(145deg, rgba(30, 45, 33, 0.78), rgba(10, 18, 12, 0.90));
+  border-color: rgba(190, 220, 170, 0.18);
+  box-shadow: 0 20px 48px rgba(0,0,0,.20), inset 0 1px 0 rgba(235,255,220,.06);
+  backdrop-filter: blur(22px) saturate(135%);
+  -webkit-backdrop-filter: blur(22px) saturate(135%);
   border: 1px solid var(--organic-border);
   border-radius: 16px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 /* =========================================
@@ -184,7 +198,9 @@
   align-items: center;
   gap: 16px;
   padding: 21px 22px;
-  background: var(--organic-card);
+  background: linear-gradient(135deg, rgba(40, 57, 42, 0.66), rgba(17, 28, 20, 0.76));
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
   border-bottom: 1px solid var(--organic-border);
 }
 
@@ -224,7 +240,11 @@
   height: 36px;
   padding: 0 11px;
   color: #cbd5e1;
-  background: #172337;
+  background: linear-gradient(145deg, rgba(48, 65, 47, 0.70), rgba(19, 31, 21, 0.82));
+  border-color: rgba(190, 220, 170, 0.20);
+  box-shadow: inset 0 1px 0 rgba(235,255,220,.06);
+  backdrop-filter: blur(12px) saturate(125%);
+  -webkit-backdrop-filter: blur(12px) saturate(125%);
   border: 1px solid #2b3a52;
   border-radius: 9px;
   font-family: inherit;
@@ -242,12 +262,12 @@
 
 .organic-calendar-controls button:hover {
   color: #ffffff;
-  background: #202d43;
-  border-color: rgba(139, 124, 255, 0.5);
+  background: linear-gradient(145deg, rgba(61, 81, 52, 0.82), rgba(27, 43, 28, 0.90));
+  border-color: rgba(168, 240, 0, 0.35);
 }
 
 .organic-calendar-controls button:focus-visible {
-  outline: 2px solid #a99cff;
+  outline: 2px solid #b7ff32;
   outline-offset: 3px;
 }
 
@@ -263,31 +283,31 @@
   padding: 0 17px;
   gap: 8px;
   color: #ffffff;
-  background: linear-gradient(135deg, #8b78ff 0%, #6f50e8 100%);
-  border: 1px solid rgba(173, 155, 255, 0.28);
+  background: linear-gradient(135deg, #83c900 0%, #6f9e1b 100%);
+  border: 1px solid rgba(168, 240, 0, 0.25);
   border-radius: 11px;
   font-family: inherit;
   font-size: 12px;
   font-weight: 750;
   letter-spacing: 0.1px;
   box-shadow:
-    0 5px 14px rgba(111, 80, 232, 0.18),
+    0 5px 14px rgba(131, 201, 0, 0.14),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .organic-calendar-controls .organic-new-brief-button:hover {
   color: #ffffff;
-  background: linear-gradient(135deg, #9b8aff 0%, #7b5bf0 100%);
-  border-color: rgba(190, 177, 255, 0.55);
+  background: linear-gradient(135deg, #b7ff32 0%, #96d900 100%);
+  border-color: rgba(183, 255, 50, 0.5);
   box-shadow:
-    0 7px 19px rgba(111, 80, 232, 0.3),
+    0 7px 19px rgba(131, 201, 0, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.16);
   transform: translateY(-1px);
 }
 
 .organic-calendar-controls .organic-new-brief-button:active {
   transform: translateY(0);
-  box-shadow: 0 2px 7px rgba(111, 80, 232, 0.2);
+  box-shadow: 0 2px 7px rgba(131, 201, 0, 0.16);
 }
 
 .organic-calendar-controls .organic-new-brief-button svg {
@@ -298,14 +318,14 @@
 
 .organic-calendar-controls .organic-today-button {
   padding: 0 13px;
-  color: #c3baff;
+  color: #c9e99a;
   font-size: 11px;
   font-weight: 700;
 }
 
 .organic-calendar-controls .organic-today-button:hover {
   color: #ffffff;
-  background: rgba(139, 124, 255, 0.17);
+  background: rgba(168, 240, 0, 0.10);
 }
 
 /* Previous / next month */
@@ -329,7 +349,7 @@
 .organic-weekday {
   padding: 13px 6px;
   color: #94a3b8;
-  background: #111b2d;
+  background: rgba(25, 39, 27, 0.82);
   border-bottom: 1px solid var(--organic-border);
   text-align: center;
   font-size: 10px;
@@ -354,7 +374,7 @@
 
 .organic-day-cell.is-today {
   background: rgba(139, 124, 255, 0.07);
-  box-shadow: inset 0 0 0 1px rgba(139, 124, 255, 0.15);
+  box-shadow: inset 0 0 0 1px rgba(168, 240, 0, 0.10);
 }
 
 .organic-day-number {
@@ -375,7 +395,7 @@
   flex: 0 0 auto;
   place-items: center;
   color: #ffffff;
-  background: #7666e8;
+  background: #83c900;
   border-radius: 50%;
 }
 
@@ -401,9 +421,12 @@
   width: 100%;
   min-width: 0;
   padding: 7px;
-  color: #eae8ff;
+  color: #e8ede5;
   border: 1px solid transparent;
   border-radius: 7px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
   text-align: left;
   cursor: pointer;
   transition:
@@ -417,12 +440,12 @@
 }
 
 .organic-task-chip:focus-visible {
-  outline: 2px solid #a99cff;
+  outline: 2px solid #b7ff32;
   outline-offset: 2px;
 }
 
 .organic-task-chip.is-selected {
-  border-color: #b0a5ff;
+  border-color: #b7ff32;
 }
 
 .organic-task-chip-title {
@@ -438,7 +461,7 @@
 
 .organic-task-chip-state {
   overflow: hidden;
-  color: #b7b1e9;
+  color: #b7d96b;
   font-size: 8px;
   font-weight: 750;
   text-overflow: ellipsis;
@@ -487,14 +510,14 @@
 ========================================= */
 
 .organic-task-assigned {
-  color: #e1d9ff;
-  background: rgba(139, 124, 255, 0.15);
-  border: 1px solid rgba(139, 124, 255, 0.22);
+  color: #dce8ca;
+  background: rgba(168, 240, 0, 0.10);
+  border: 1px solid rgba(168, 240, 0, 0.16);
   border-left: 3px solid #9a86ff;
 }
 
 .organic-task-assigned:hover {
-  background: rgba(139, 124, 255, 0.25);
+  background: rgba(168, 240, 0, 0.15);
 }
 
 /* =========================================
@@ -604,7 +627,10 @@
   gap: 20px;
   padding: 15px 21px;
   color: var(--organic-muted);
-  background: var(--organic-card);
+  background: linear-gradient(135deg, rgba(34, 49, 36, 0.62), rgba(15, 25, 17, 0.76));
+  border-top: 1px solid rgba(190, 220, 170, 0.10);
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
   font-size: 10px;
 }
 
@@ -673,9 +699,9 @@
 .organic-section-heading > span {
   flex: 0 0 auto;
   padding: 6px 10px;
-  color: #c3bbff;
-  background: rgba(139, 124, 255, 0.1);
-  border: 1px solid rgba(139, 124, 255, 0.2);
+  color: #c9e99a;
+  background: rgba(168, 240, 0, 0.07);
+  border: 1px solid rgba(168, 240, 0, 0.12);
   border-radius: 8px;
   font-size: 10px;
   font-weight: 700;
@@ -683,9 +709,15 @@
 
 .organic-deadline-list {
   overflow: hidden;
-  background: var(--organic-card);
+  background: linear-gradient(145deg, rgba(30, 45, 33, 0.78), rgba(10, 18, 12, 0.90));
+  border-color: rgba(190, 220, 170, 0.18);
+  box-shadow: 0 18px 42px rgba(0,0,0,.18), inset 0 1px 0 rgba(235,255,220,.06);
+  backdrop-filter: blur(20px) saturate(130%);
+  -webkit-backdrop-filter: blur(20px) saturate(130%);
   border: 1px solid var(--organic-border);
   border-radius: 15px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .organic-deadline-row {
@@ -695,7 +727,9 @@
   width: 100%;
   padding: 15px 18px;
   color: var(--organic-text);
-  background: transparent;
+  background: linear-gradient(110deg, rgba(35, 51, 37, 0.30), rgba(12, 21, 14, 0.16));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 0;
   border-bottom: 1px solid var(--organic-border);
   text-align: left;
@@ -711,11 +745,11 @@
 
 .organic-deadline-row:hover,
 .organic-deadline-row.is-selected {
-  background: var(--organic-card-hover);
+  background: linear-gradient(110deg, rgba(52, 72, 45, 0.62), rgba(23, 38, 25, 0.72));
 }
 
 .organic-deadline-row:focus-visible {
-  outline: 2px solid #a99cff;
+  outline: 2px solid #b7ff32;
   outline-offset: -2px;
 }
 
@@ -727,7 +761,11 @@
   width: 49px;
   height: 51px;
   flex: 0 0 auto;
-  background: #172337;
+  background: linear-gradient(145deg, rgba(49, 67, 47, 0.76), rgba(18, 30, 20, 0.86));
+  border-color: rgba(190, 220, 170, 0.20);
+  box-shadow: inset 0 1px 0 rgba(235,255,220,.07);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid #2b3a52;
   border-radius: 11px;
 }
@@ -740,7 +778,7 @@
 
 .organic-deadline-date span {
   margin-top: 4px;
-  color: #a7a0ec;
+  color: #b7d96b;
   font-size: 9px;
   font-weight: 800;
 }
@@ -803,9 +841,9 @@
 }
 
 .organic-workflow-badge.assigned {
-  color: #c4baff;
-  background: rgba(139, 124, 255, 0.12);
-  border-color: rgba(139, 124, 255, 0.2);
+  color: #c9e99a;
+  background: rgba(168, 240, 0, 0.08);
+  border-color: rgba(168, 240, 0, 0.12);
 }
 
 .organic-status-pending {
@@ -935,7 +973,11 @@
   align-items: center;
   padding: 45px 20px;
   color: var(--organic-muted);
-  background: var(--organic-card);
+  background: linear-gradient(145deg, rgba(36, 52, 39, 0.72), rgba(17, 28, 21, 0.84));
+  border-color: rgba(190, 220, 170, 0.22);
+  box-shadow: inset 0 1px 0 rgba(235,255,220,.06);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
   border: 1px dashed #34435a;
   border-radius: 15px;
   text-align: center;

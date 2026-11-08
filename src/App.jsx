@@ -1374,9 +1374,9 @@ const [isMobileOpen, setIsMobileOpen] = useState(false)
                     />
                   </div>
 
-                  <label className="detail-field-label">
-                    Update status
-                  </label>
+                  <label className="detail-field-label detail-status-label">
+  Update status
+</label>
 
                   {(CAN_MANAGE_TASKS || role === 'creative') && (
                     <div className="detail-status-options">

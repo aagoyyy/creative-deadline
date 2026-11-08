@@ -744,28 +744,9 @@ export default function Calendar({
           const dayKey = day ? getDayKey(day) : ''
           const isExpanded = day ? expandedDays.has(dayKey) : false
 
-          const activeDayTasks = dayTasks.filter(
-  (task) => normalizeStatus(task.status) !== 'DONE'
-)
-
-const completedDayTasks = dayTasks.filter(
-  (task) => normalizeStatus(task.status) === 'DONE'
-)
-
-const defaultVisibleDayTasks =
-  activeDayTasks.length >= 3
-    ? activeDayTasks
-    : [
-        ...activeDayTasks,
-        ...completedDayTasks.slice(
-          0,
-          3 - activeDayTasks.length
-        ),
-      ]
-
-const visibleDayTasks = isExpanded
-  ? dayTasks
-  : defaultVisibleDayTasks
+          const visibleDayTasks = isExpanded
+            ? dayTasks
+            : dayTasks.slice(0, 3)
 
           const isToday =
             Boolean(day) &&
@@ -916,19 +897,21 @@ const visibleDayTasks = isExpanded
                           <span className="task-card-dates">
                             {isStart && (
                               <span className="task-date-start">
-                                START
+                                <CalendarDays size={11} />
+                                <span>START</span>
                               </span>
+                            )}
+
+                            {isStart && isDeadline && (
+                              <span className="task-date-separator" aria-hidden="true">→</span>
                             )}
 
                             {isDeadline && (
                               <span className="task-date-deadline">
-                                DEADLINE
+                                <Flag size={11} />
+                                <span>DUEDATE</span>
                               </span>
                             )}
-
-                            <span className="task-card-deadline-date">
-                              {isDeadline ? formatDate(task.deadline) : ''}
-                            </span>
                           </span>
 
                           <span className="task-card-progress-info">
@@ -951,52 +934,34 @@ const visibleDayTasks = isExpanded
                             />
                           </span>
 
-<span className="task-card-footer">
-  {isCompletedLate
-    ? 'Completed Late'
-    : isDone
-      ? 'Completed'
-      : task.overdueForgiven === true
-        ? 'Overdue Forgiven'
-        : isOverdue
-          ? 'Overdue'
-          : isDeadline
-            ? 'Deadline Day'
-            : isStart
-              ? 'Start Day'
-              : task.deadline
-                ? `Due ${formatDate(task.deadline)}`
-                : 'No Deadline Set'}
-</span>
-
                         </button>
                       )
                     })}
 
-                    {(dayTasks.length > defaultVisibleDayTasks.length || isExpanded) && (
-                    <button
-                      type="button"
-                      className="more-tasks"
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        toggleDay(day)
-                      }}
-                      aria-expanded={isExpanded}
-                    >
-                      {isExpanded ? (
-                        <>
-                          <ChevronUp size={13} />
-                          See Less
-                        </>
-                      ) : (
-                        <>
-                          +{dayTasks.length - defaultVisibleDayTasks.length} more
-                          <ChevronDown size={13} />
-                          See All
-                        </>
-                      )}
-  </button>
-)}
+                    {dayTasks.length > 3 && (
+                      <button
+                        type="button"
+                        className="more-tasks"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          toggleDay(day)
+                        }}
+                        aria-expanded={isExpanded}
+                      >
+                        {isExpanded ? (
+                          <>
+                            <ChevronUp size={13} />
+                            See Less
+                          </>
+                        ) : (
+                          <>
+                            +{dayTasks.length - 3} more
+                            <ChevronDown size={13} />
+                            See All
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
                 </>
               )}

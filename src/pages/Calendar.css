@@ -4,19 +4,20 @@
 ========================================================= */
 
 .calendar-panel {
-  --calendar-bg: #101827;
-  --calendar-surface: #141e2e;
-  --calendar-border: #29364b;
-  --calendar-text: #f3f6ff;
-  --calendar-muted: #a5b3ca;
-  --calendar-purple: #a99aff;
+  --calendar-bg: #0d1411;
+  --calendar-surface: #17221a;
+  --calendar-border: #29382d;
+  --calendar-text: #f0f4ef;
+  --calendar-muted: #91a095;
+  --calendar-purple: #a8f000;
 
   min-width: 0;
   overflow: hidden;
   color: var(--calendar-text);
-  background: var(--calendar-bg);
-  border: 1px solid var(--calendar-border);
+  background: linear-gradient(145deg, rgba(20, 31, 23, 0.96), rgba(10, 18, 13, 0.98));
+  border: 1px solid rgba(168, 240, 0, 0.13);
   border-radius: 12px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 /* =========================================================
@@ -29,6 +30,8 @@
   justify-content: space-between;
   gap: 16px;
   padding: 18px 20px;
+  background: linear-gradient(115deg, rgba(24, 37, 27, 0.72), rgba(13, 22, 16, 0.42));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
 }
 
 .calendar-heading {
@@ -40,7 +43,7 @@
 
 .calendar-heading h2 {
   margin: 0;
-  color: #f4f6ff;
+  color: #e8ede5;
   font: 600 16px 'Space Grotesk', sans-serif;
 }
 
@@ -57,9 +60,9 @@
   width: 38px;
   height: 38px;
   flex-shrink: 0;
-  color: #c4baff;
-  background: #242343;
-  border: 1px solid #494477;
+  color: #b7e95a;
+  background: rgba(168, 240, 0, 0.09);
+  border: 1px solid rgba(168, 240, 0, 0.22);
   border-radius: 10px;
 }
 
@@ -76,10 +79,11 @@
   justify-content: center;
   gap: 6px;
   padding: 9px 11px;
-  color: #d8e1f2;
-  background: #172235;
-  border: 1px solid #35435c;
+  color: #dce5dc;
+  background: linear-gradient(145deg, rgba(39, 56, 42, 0.82), rgba(22, 36, 26, 0.88));
+  border: 1px solid rgba(180, 205, 178, 0.16);
   border-radius: 7px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
   font-size: 11px;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
@@ -88,8 +92,8 @@
 .calendar-panel .today-button:hover,
 .calendar-panel .filter-button:hover {
   color: #fff;
-  background: #222541;
-  border-color: #8b7cff;
+  background: #26382a;
+  border-color: #a8f000;
 }
 
 /* =========================================================
@@ -107,9 +111,9 @@
 
 .calendar-filters {
   padding: 15px 19px 12px;
-  background: #0e1624;
-  border-top: 1px solid #29364b;
-  border-bottom: 1px solid #29364b;
+  background: linear-gradient(120deg, rgba(18, 30, 21, 0.9), rgba(12, 21, 15, 0.94));
+  border-top: 1px solid rgba(255, 255, 255, 0.045);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
 }
 
 .calendar-filters-heading {
@@ -122,14 +126,14 @@
 
 .calendar-filters-heading h3 {
   margin: 0;
-  color: #edf1ff;
+  color: #e8ede5;
   font-size: 12px;
   font-weight: 700;
 }
 
 .calendar-filters-heading p {
   margin: 4px 0 0;
-  color: #a0aec5;
+  color: #91a095;
   font-size: 11px;
 }
 
@@ -147,7 +151,7 @@
 }
 
 .calendar-filter-grid label > span {
-  color: #b1bfd5;
+  color: #b4c0b5;
   font-size: 11px;
   font-weight: 600;
 }
@@ -156,23 +160,24 @@
   width: 100%;
   min-width: 0;
   padding: 9px 10px;
-  color: #f0f4ff;
-  background: #172235;
-  border: 1px solid #35435c;
+  color: #e8ede5;
+  background: rgba(29, 44, 33, 0.88);
+  border: 1px solid rgba(180, 205, 178, 0.17);
   border-radius: 7px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.18);
   outline: none;
   font: inherit;
   font-size: 12px;
 }
 
 .calendar-filter-grid select:focus {
-  border-color: #a99aff;
-  box-shadow: 0 0 0 2px rgba(139, 124, 255, 0.18);
+  border-color: #a8f000;
+  box-shadow: 0 0 0 2px rgba(168, 240, 0, 0.16);
 }
 
 .calendar-filter-grid select option {
-  color: #f0f4ff;
-  background: #172235;
+  color: #e8ede5;
+  background: #1b2920;
 }
 
 .calendar-filter-footer {
@@ -189,21 +194,21 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #a5b3ca;
+  color: #929b8d;
   font-size: 11px;
 }
 
 .calendar-filter-footer button {
   padding: 7px 10px;
-  background: #172235;
-  border: 1px solid #35435c;
+  background: #1b2920;
+  border: 1px solid #354638;
   border-radius: 6px;
   cursor: pointer;
 }
 
 .calendar-filter-footer button:hover:not(:disabled) {
   color: #fff;
-  border-color: #8b7cff;
+  border-color: #a8f000;
 }
 
 .calendar-filter-footer button:disabled {
@@ -227,9 +232,9 @@
 
 .calendar-panel .weekday {
   padding: 12px 6px;
-  color: #a5b3ca;
+  color: #929b8d;
   text-align: center;
-  border-bottom: 1px solid #2b3850;
+  border-bottom: 1px solid #29382d;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.7px;
@@ -240,9 +245,9 @@
   min-width: 0;
   min-height: 145px;
   padding: 8px 6px;
-  background: #101827;
-  border-right: 1px solid #29364b;
-  border-bottom: 1px solid #29364b;
+  background: linear-gradient(145deg, rgba(18, 29, 21, 0.94), rgba(13, 22, 16, 0.96));
+  border-right: 1px solid rgba(255, 255, 255, 0.045);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
 }
 
 .calendar-panel .day-cell:nth-child(7n) {
@@ -251,28 +256,28 @@
 
 /* Weekend dibuat sedikit berbeda dari weekday, tetap subtle. */
 .calendar-panel .weekend-weekday {
-  color: #c0b8ff;
-  background: #151d30;
+  color: #b7e95a;
+  background: #18231a;
 }
 
 .calendar-panel .day-cell.weekend-day {
-  background: #141e2e;
+  background: #17221a;
 }
 
 .calendar-panel .day-cell.empty-day {
-  background: #0d1522;
+  background: #0b130e;
 }
 
 .calendar-panel .day-cell.empty-day.weekend-day {
-  background: #111b2b;
+  background: #111b14;
 }
 
 .calendar-panel .day-cell.today-cell {
-  background: linear-gradient(180deg, #191d37, #111827);
+  background: linear-gradient(180deg, #1b2a1b, #101810);
 }
 
 .calendar-panel .day-cell.drag-over {
-  outline: 2px dashed #a99aff;
+  outline: 2px dashed #a8f000;
   outline-offset: -3px;
 }
 
@@ -282,7 +287,7 @@
   justify-content: space-between;
   min-height: 22px;
   padding: 0 3px 7px;
-  color: #b1bfd5;
+  color: #b4c0b5;
   font-size: 11px;
 }
 
@@ -293,14 +298,14 @@
   height: 23px;
   margin: -3px 0;
   color: #fff;
-  background: #7667ef;
+  background: #a8f000;
   border-radius: 7px;
-  box-shadow: 0 3px 10px rgba(116, 101, 255, 0.25);
+  box-shadow: 0 3px 10px rgba(168, 240, 0, 0.16);
   font-weight: 700;
 }
 
 .day-task-count {
-  color: #a5b3ca;
+  color: #929b8d;
   font-size: 10px;
 }
 
@@ -319,15 +324,17 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 7px;
+  gap: 6px;
   width: 100%;
   min-width: 0;
   padding: 9px;
+  min-height: 0;
 
-  color: #f3f4ff;
-  background: #282448;
-  border: 1px solid #494174;
+  color: #e8eee8;
+  background: linear-gradient(145deg, rgba(34, 49, 36, 0.94), rgba(22, 34, 25, 0.96));
+  border: 1px solid rgba(190, 214, 185, 0.16);
   border-radius: 8px;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.045);
 
   text-align: left;
   overflow: hidden;
@@ -346,51 +353,52 @@
 }
 
 .calendar-panel .task-chip:focus-visible {
-  outline: 2px solid #c4baff;
+  outline: 2px solid #a8f000;
   outline-offset: 2px;
 }
 
 /* =========================================================
-   PIC COLORS — SIX DISTINCT COLOR FAMILIES
+   PIC COLORS — SIX DISTINCT MUTED COLOR FAMILIES
 
-   Purple, Blue, Cyan, Green, Orange, Yellow.
+   Purple, Blue, Teal, Green, Orange, Yellow.
    No pink or red PIC colors.
 ========================================================= */
 
 .calendar-panel .task-chip.purple {
-  color: #F0E7FF;
-  background: #382060;
-  border-color: #B18AFF;
+  color: #E1D3F0;
+  background: #382B4B;
+  border-color: #A58AC7;
 }
 
 .calendar-panel .task-chip.blue {
-  color: #E1EEFF;
-  background: #193B72;
-  border-color: #70A9FF;
+  color: #D1E1F2;
+  background: #243A55;
+  border-color: #779FCB;
 }
 
+/* Keep the existing .cyan class for compatibility with task data. */
 .calendar-panel .task-chip.cyan {
-  color: #D9FFFF;
-  background: #10464D;
-  border-color: #42E5E0;
+  color: #C6E2DF;
+  background: #1D4142;
+  border-color: #69A7A5;
 }
 
 .calendar-panel .task-chip.green {
-  color: #DFFFF0;
-  background: #174B2C;
-  border-color: #55E58B;
+  color: #D5E5C9;
+  background: #29432F;
+  border-color: #83A66F;
 }
 
 .calendar-panel .task-chip.orange {
-  color: #FFF0D6;
-  background: #593600;
-  border-color: #FFBE55;
+  color: #F0D6B9;
+  background: #513525;
+  border-color: #C18B5D;
 }
 
 .calendar-panel .task-chip.yellow {
-  color: #FFFFD9;
-  background: #505000;
-  border-color: #E8F05A;
+  color: #EDE3B5;
+  background: #494323;
+  border-color: #B5A64F;
 }
 
 /* =========================================================
@@ -399,17 +407,18 @@
 
 .calendar-panel .task-card-header {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+  gap: 5px;
   min-width: 0;
+  order: 1;
 }
 
 .calendar-panel .task-card-pic {
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
-  max-width: 48%;
+  max-width: 100%;
   padding: 3px 6px;
   overflow: hidden;
 
@@ -427,15 +436,16 @@
 
 .calendar-panel .task-card-title {
   display: -webkit-box;
-  flex: 1;
+  flex: 0 1 auto;
+  width: 100%;
   min-width: 0;
   max-height: 2.7em;
   overflow: hidden;
 
   color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1.35;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.3;
   overflow-wrap: anywhere;
 
   -webkit-box-orient: vertical;
@@ -450,8 +460,9 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 5px;
   min-width: 0;
+  order: 3;
 }
 
 .calendar-panel .task-card-project,
@@ -459,10 +470,10 @@
   display: inline-flex;
   align-items: center;
   max-width: 100%;
-  padding: 2px 5px;
+  padding: 3px 6px;
   border: 1px solid transparent;
   border-radius: 4px;
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 600;
   line-height: 1.2;
 }
@@ -524,9 +535,12 @@
 ========================================================= */
 
 .calendar-panel .task-card-priority-row {
-  display: flex;
-  align-items: center;
-  min-width: 0;
+  display: contents;
+}
+
+.calendar-panel .task-card-priority-row .priority-badge {
+  order: 3;
+  align-self: flex-start;
 }
 
 .calendar-panel .priority-badge {
@@ -555,7 +569,7 @@
 }
 
 .calendar-panel .priority-medium {
-  color: #d5d0ff;
+  color: #d8e7b7;
 }
 
 .calendar-panel .priority-low {
@@ -572,9 +586,11 @@
   flex-wrap: wrap;
   gap: 5px;
   min-width: 0;
-  min-height: 14px;
+  min-height: 18px;
+  order: 2;
+  flex-wrap: nowrap;
 
-  color: #e3eaff;
+  color: #dce5dc;
   font-size: 9px;
 }
 
@@ -582,27 +598,47 @@
 .calendar-panel .task-date-deadline {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   padding: 3px 5px;
   border-radius: 4px;
   font-size: 8px;
   font-weight: 700;
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 .calendar-panel .task-date-start {
-  color: #d8e8ff;
-  background: rgba(96, 165, 250, 0.2);
+  color: #c8dfc1;
+  background: rgba(131, 166, 111, 0.16);
 }
 
 .calendar-panel .task-date-deadline {
-  color: #f0f4ff;
-  background: rgba(255, 255, 255, 0.1);
+  color: #e5c9aa;
+  background: rgba(193, 139, 93, 0.16);
 }
 
 .calendar-panel .task-card-deadline-date {
-  color: #e3eaff;
+  color: #dce5dc;
   font-size: 9px;
   font-weight: 700;
+}
+
+.calendar-panel .task-date-start strong,
+.calendar-panel .task-date-deadline strong {
+  color: inherit;
+  font-size: 9px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar-panel .task-date-separator {
+  flex: 0 0 auto;
+  color: rgba(220, 229, 220, 0.55);
+  font-size: 10px;
+}
+
+.calendar-panel .task-card-footer {
+  display: none;
 }
 
 /* =========================================================
@@ -615,13 +651,14 @@
   justify-content: space-between;
   gap: 6px;
   min-width: 0;
-  margin-top: 1px;
+  margin-top: 0;
+  order: 4;
 }
 
 .calendar-panel .task-card-status {
   min-width: 0;
   overflow: hidden;
-  color: #f0f2ff;
+  color: #edf2ed;
   font-size: 9px;
   font-weight: 700;
   line-height: 1.3;
@@ -639,7 +676,8 @@
 
 .calendar-panel .task-progress-track {
   width: 100%;
-  height: 3px;
+  height: 4px;
+  order: 5;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 99px;
@@ -654,6 +692,7 @@
 }
 
 .calendar-panel .task-card-footer {
+  order: 6;
   color: #e1e7f7;
   font-size: 9px;
   font-weight: 500;
@@ -668,9 +707,9 @@
 .calendar-panel .task-chip.task-selected {
   position: relative;
   z-index: 1;
-  outline: 2px solid #c0b4ff;
+  outline: 2px solid #a8f000;
   outline-offset: 1px;
-  box-shadow: 0 0 0 3px rgba(139, 124, 255, 0.16);
+  box-shadow: 0 0 0 3px rgba(168, 240, 0, 0.14);
 }
 
 /* =========================================================
@@ -681,35 +720,35 @@
 ========================================================= */
 
 .calendar-panel .task-chip.task-done {
-  color: #A0A3AE;
-  background: #202127;
-  border: 1px solid #393A43;
+  color: #a2ada4;
+  background: #202922;
+  border: 1px solid #39453b;
   opacity: 1;
   filter: saturate(0.25);
   box-shadow: none;
 }
 
 .calendar-panel .task-chip.task-done .task-card-title {
-  color: #B8BAC4;
+  color: #c0c9c1;
 }
 
 .calendar-panel .task-chip.task-done .task-card-pic {
-  color: #A7A9B3;
-  background: #292A31;
-  border-color: #41424B;
+  color: #aab5ac;
+  background: #29332b;
+  border-color: #414d43;
 }
 
 .calendar-panel .task-chip.task-done .task-card-project,
 .calendar-panel .task-chip.task-done .task-card-type {
-  color: #A8AAB4;
-  background: #292A31;
-  border-color: #41424B;
+  color: #aab5ac;
+  background: #29332b;
+  border-color: #414d43;
 }
 
 .calendar-panel .task-chip.task-done .priority-badge,
 .calendar-panel .task-chip.task-done .task-card-status,
 .calendar-panel .task-chip.task-done .task-card-progress-info strong {
-  color: #A8AAB4;
+  color: #aab5ac;
 }
 
 .calendar-panel .task-chip.task-done .task-card-dates,
@@ -717,32 +756,33 @@
 .calendar-panel .task-chip.task-done .task-date-deadline,
 .calendar-panel .task-chip.task-done .task-card-deadline-date,
 .calendar-panel .task-chip.task-done .task-card-footer {
-  color: #999BA6;
+  color: #9aa69c;
 }
 
 .calendar-panel .task-chip.task-done .task-date-start,
 .calendar-panel .task-chip.task-done .task-date-deadline {
-  background: #2A2B32;
+  color: #9aa69c;
+  background: #2b352d;
 }
 
 .calendar-panel .task-chip.task-done .task-progress-track {
-  background: #34353D;
+  background: #39443b;
 }
 
 .calendar-panel .task-chip.task-done .task-progress-fill {
-  background: #858793;
+  background: #89948b;
 }
 
 .calendar-panel .task-chip.task-done:hover {
-  background: #292A31;
-  border-color: #555762;
+  background: #29332b;
+  border-color: #566357;
   filter: saturate(0.25);
 }
 
 .calendar-panel .task-chip.task-done.task-selected {
-  outline: 2px solid #8E8AAB;
+  outline: 2px solid #7f8b80;
   outline-offset: 1px;
-  box-shadow: 0 0 0 3px rgba(142, 138, 171, 0.12);
+  box-shadow: 0 0 0 3px rgba(127, 139, 128, 0.12);
 }
 
 /* =========================================================
@@ -753,10 +793,10 @@
 .calendar-panel .task-chip.task-overdue:not(.task-done) {
   opacity: 1;
   filter: none;
-  color: #ffd8dc;
-  background: #471923;
-  border: 2px solid #ff454f;
-  box-shadow: 0 0 8px rgba(255, 69, 79, 0.16);
+  color: #e6c2c5;
+  background: #321f23;
+  border: 2px solid #b85c65;
+  box-shadow: 0 0 6px rgba(184, 106, 114, 0.10);
 }
 
 .calendar-panel .task-chip.task-overdue:not(.task-done) .task-card-title,
@@ -768,32 +808,32 @@
 .calendar-panel .task-chip.task-overdue:not(.task-done) .task-card-status,
 .calendar-panel .task-chip.task-overdue:not(.task-done) .task-card-footer,
 .calendar-panel .task-chip.task-overdue:not(.task-done) .task-card-deadline-date {
-  color: #ffc2c7;
+  color: #d9aeb2;
 }
 
 .calendar-panel .task-chip.task-overdue:not(.task-done) .task-card-project,
 .calendar-panel .task-chip.task-overdue:not(.task-done) .task-card-type {
   color: #ffe4e6;
-  border-color: #d76b78;
+  border-color: #a95d66;
 }
 
 .calendar-panel .task-chip.task-overdue:not(.task-done) .task-date-deadline {
   color: #fff;
-  background: #8b2735;
+  background: #59343a;
 }
 
 .calendar-panel .task-chip.task-overdue:not(.task-done) .task-progress-track {
-  background: #792532;
+  background: #512f35;
 }
 
 .calendar-panel .task-chip.task-overdue:not(.task-done) .task-progress-fill {
-  background: #ff454f;
+  background: #b85c65;
 }
 
 .calendar-panel .task-chip.task-overdue:not(.task-done):hover {
-  background: #571d29;
-  border-color: #ff737b;
-  box-shadow: 0 0 12px rgba(255, 69, 79, 0.24);
+  background: #3b252a;
+  border-color: #c9787f;
+  box-shadow: 0 0 10px rgba(184, 92, 101, 0.16);
 }
 
 /* =========================================================
@@ -804,57 +844,57 @@
 
 /* COMPLETED LATE — RED BORDER */
 .calendar-panel .task-chip.task-completed-late {
-  border: 2px solid #ff454f !important;
-  box-shadow: 0 0 8px rgba(255, 69, 79, 0.16);
+  border: 2px solid #b86a72 !important;
+  box-shadow: 0 0 6px rgba(184, 106, 114, 0.10);
   filter: none;
 }
 .calendar-panel .task-chip.task-completed-late:hover {
-  border-color: #ff737b !important;
-  box-shadow: 0 0 12px rgba(255, 69, 79, 0.24);
+  border-color: #c17a82 !important;
+  box-shadow: 0 0 10px rgba(184, 92, 101, 0.16);
 }
 
 
 .calendar-panel .task-chip.task-done.task-overdue .task-card-title,
 .calendar-panel .task-chip.task-done.task-overdue .task-card-pic,
 .calendar-panel .task-chip.task-done.task-overdue .task-card-progress-info strong {
-  color: #f1dfe2;
+  color: #e2c9cc;
 }
 
 .calendar-panel .task-chip.task-done.task-overdue .task-card-status,
 .calendar-panel .task-chip.task-done.task-overdue .task-card-footer,
 .calendar-panel .task-chip.task-done.task-overdue .task-card-deadline-date {
-  color: #d9a1a9;
+  color: #c99ba0;
 }
 
 .calendar-panel .task-chip.task-done.task-overdue .task-card-project,
 .calendar-panel .task-chip.task-done.task-overdue .task-card-type {
-  color: #e5c2c7;
-  background: #39282D;
-  border-color: #80505A;
+  color: #d6b4b8;
+  background: #34282b;
+  border-color: #76545a;
 }
 
 .calendar-panel .task-chip.task-done.task-overdue .task-date-deadline {
-  color: #f1dfe2;
-  background: #58303a;
+  color: #e2c9cc;
+  background: #4b3035;
 }
 
 .calendar-panel .task-chip.task-done.task-overdue .task-progress-track {
-  background: #512b34;
+  background: #493137;
 }
 
 .calendar-panel .task-chip.task-done.task-overdue .task-progress-fill {
-  background: #bd5969;
+  background: #a86670;
 }
 
 .calendar-panel .task-chip.task-done.task-overdue:hover {
-  background: #432730;
-  border-color: #ff454f;
-  box-shadow: 0 0 12px rgba(255, 69, 79, 0.24);
+  background: #3a292d;
+  border-color: #b86a72;
+  box-shadow: 0 0 10px rgba(184, 92, 101, 0.16);
 }
 
 .calendar-panel .task-chip.task-completed-late .task-card-status,
 .calendar-panel .task-chip.task-completed-late .task-card-footer {
-  color: #d9a1a9;
+  color: #c99ba0;
   font-weight: 700;
 }
 
@@ -888,9 +928,9 @@
   padding: 7px 5px;
   margin-top: 2px;
 
-  color: #bdc8dc;
+  color: #c0cbc1;
   background: transparent;
-  border: 1px dashed #45516a;
+  border: 1px dashed #46564a;
   border-radius: 6px;
 
   font-size: 10px;
@@ -900,7 +940,7 @@
 
 .calendar-panel .more-tasks:hover {
   color: #fff;
-  border-color: #a99aff;
+  border-color: #a8f000;
 }
 
 /* =========================================================
@@ -913,7 +953,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 12px 10px;
-  color: #a5b3ca;
+  color: #929b8d;
   font-size: 10px;
 }
 
@@ -952,7 +992,7 @@
 }
 
 .calendar-panel .red-dot {
-  background: #ff454f;
+  background: #b85c65;
   box-shadow: 0 0 8px rgba(255, 69, 79, 0.3);
 }
 
@@ -966,8 +1006,9 @@
   gap: 12px;
   min-width: 0;
   padding: 16px 18px;
-  background: #141e2e;
-  border-bottom: 1px solid #29364b;
+  background: linear-gradient(115deg, rgba(27, 42, 30, 0.92), rgba(17, 28, 20, 0.96));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 .board-summary-main {
@@ -984,9 +1025,9 @@
   flex: 0 0 38px;
   width: 38px;
   height: 38px;
-  color: #c4baff;
-  background: #242343;
-  border: 1px solid #494477;
+  color: #b7e95a;
+  background: rgba(168, 240, 0, 0.09);
+  border: 1px solid rgba(168, 240, 0, 0.22);
   border-radius: 10px;
 }
 
@@ -999,14 +1040,14 @@
 }
 
 .board-summary-info strong {
-  color: #f3f6ff;
+  color: #e8ede5;
   font-size: 13px;
   line-height: 1.35;
   overflow-wrap: anywhere;
 }
 
 .board-summary-info span {
-  color: #a5b3ca;
+  color: #929b8d;
   font-size: 11px;
 }
 
@@ -1021,7 +1062,7 @@
 
 .board-month-navigation > strong {
   min-width: 125px;
-  color: #f3f6ff;
+  color: #e8ede5;
   font-size: 13px;
   text-align: center;
   white-space: nowrap;
@@ -1045,40 +1086,40 @@
 .calendar-panel .board-month-navigation .board-month-arrow {
   width: 34px;
   padding: 7px;
-  color: #a5b3ca;
-  background: #172235;
-  border: 1px solid #35435c;
+  color: #929b8d;
+  background: #1b2920;
+  border: 1px solid #354638;
 }
 
 .calendar-panel .board-month-navigation .board-month-arrow:hover {
   color: #fff;
-  background: #222541;
-  border-color: #8b7cff;
+  background: #26382a;
+  border-color: #a8f000;
 }
 
 .calendar-panel .board-month-navigation .board-today-button {
-  color: #d8e1f2;
-  background: #172235;
-  border: 1px solid #35435c;
+  color: #dce5dc;
+  background: #1b2920;
+  border: 1px solid #354638;
   font-weight: 500;
 }
 
 .calendar-panel .board-month-navigation .board-today-button:hover {
   color: #fff;
-  background: #222541;
-  border-color: #8b7cff;
+  background: #26382a;
+  border-color: #a8f000;
 }
 
 .board-hide-done {
-  color: #d8e1f2;
-  background: #172235;
-  border: 1px solid #35435c;
+  color: #dce5dc;
+  background: #1b2920;
+  border: 1px solid #354638;
 }
 
 .board-hide-done:hover {
   color: #fff;
-  background: #222541;
-  border-color: #8b7cff;
+  background: #26382a;
+  border-color: #a8f000;
 }
 
 .board-summary-bottom {
@@ -1098,9 +1139,9 @@
 }
 
 .board-hide-done.active {
-  color: #c4baff;
-  border-color: #7568c9;
-  background: #242343;
+  color: #b7e95a;
+  border-color: rgba(168, 240, 0, 0.45);
+  background: rgba(168, 240, 0, 0.09);
 }
 
 /* =========================================================
@@ -1285,9 +1326,9 @@
     position: relative;
     min-height: 38px;
     padding: 8px 11px;
-    color: #d8e1f2;
-    background: #172235;
-    border: 1px solid #35435c;
+    color: #dce5dc;
+    background: #1b2920;
+    border: 1px solid #354638;
     border-radius: 7px;
     font-size: 10px;
     cursor: pointer;
@@ -1295,8 +1336,8 @@
 
   .calendar-mobile-filter-trigger:hover {
     color: #fff;
-    background: #222541;
-    border-color: #8b7cff;
+    background: #26382a;
+    border-color: #a8f000;
   }
 
   .calendar-filter-active-dot {
@@ -1316,7 +1357,7 @@
     margin: 0;
     padding: 18px;
     overflow-y: auto;
-    background: rgba(3, 7, 15, 0.78);
+    background: rgba(3, 9, 6, 0.8);
     border: 0;
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
@@ -1333,12 +1374,12 @@
     max-height: min(82dvh, 680px);
     padding: 18px;
     overflow-y: auto;
-    border: 1px solid #29364b;
+    border: 1px solid #29382d;
     border-radius: 16px;
     background:
-      radial-gradient(circle at 0% 0%, rgba(139, 124, 255, 0.075), transparent 35%),
-      #101827;
-    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.45);
+      radial-gradient(circle at 0% 0%, rgba(168, 240, 0, 0.07), transparent 38%),
+      linear-gradient(145deg, rgba(22, 34, 25, 0.98), rgba(10, 18, 13, 0.99));
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.055);
   }
 
   .calendar-filters-heading {
@@ -1356,9 +1397,9 @@
     justify-content: center;
     width: 32px;
     height: 32px;
-    color: #cbd5e1;
-    background: #172235;
-    border: 1px solid #35435c;
+    color: #c5d0c6;
+    background: #1b2920;
+    border: 1px solid #354638;
     border-radius: 9px;
     cursor: pointer;
   }
