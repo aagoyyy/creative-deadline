@@ -69,6 +69,14 @@ function normalizePriority(priority) {
 
 function sortTasksByPriority(tasks) {
   return [...tasks].sort((a, b) => {
+    // UNASSIGNED selalu di urutan paling atas
+    const unassignedA = !String(a.pic || '').trim()
+    const unassignedB = !String(b.pic || '').trim()
+
+    if (unassignedA !== unassignedB) {
+      return unassignedA ? -1 : 1
+    }
+
     const doneA = normalizeStatus(a.status) === 'DONE'
     const doneB = normalizeStatus(b.status) === 'DONE'
 
@@ -87,7 +95,6 @@ function sortTasksByPriority(tasks) {
       return priorityA - priorityB
     }
 
-    // Jika prioritas sama, deadline yang lebih dekat didahulukan.
     const deadlineA = String(a.deadline || '9999-12-31')
     const deadlineB = String(b.deadline || '9999-12-31')
 
@@ -95,7 +102,6 @@ function sortTasksByPriority(tasks) {
       return deadlineA.localeCompare(deadlineB)
     }
 
-    // Jika masih sama, urutkan berdasarkan judul.
     return String(a.title || '').localeCompare(
       String(b.title || '')
     )

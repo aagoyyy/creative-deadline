@@ -1530,8 +1530,8 @@
 }
 
 .task-chip.unassigned {
-  background: #162e26;
-  border: 2px solid #00A756;
+  background: #202020;
+  border: 2.5px solid #00A756;
   color: #D0DED7;
 }
 
