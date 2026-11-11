@@ -150,17 +150,12 @@ export default function TaskModal({
       return
     }
 
-    if (!selectedCreative) {
-      showToast?.('Pilih PIC creative yang aktif terlebih dahulu.', 'error')
-      return
-    }
-
     setSubmitting(true)
 
     const taskData = {
       title: title.trim(),
-      pic: selectedCreative.name,
-      picUid: selectedCreative.uid,
+      pic: selectedCreative?.name || '',
+      picUid: selectedCreative?.uid || '',
       start,
       startDate: start,
       deadline,
@@ -274,7 +269,6 @@ export default function TaskModal({
           <select
             value={picUid}
             onChange={(event) => setPicUid(event.target.value)}
-            required
             disabled={creativesLoading || Boolean(creativesError)}
           >
             <option value="">
@@ -382,8 +376,7 @@ export default function TaskModal({
             disabled={
               submitting ||
               creativesLoading ||
-              Boolean(creativesError) ||
-              creatives.length === 0
+              Boolean(creativesError)
             }
           >
             {isEditing ? <Save size={16} /> : <Plus size={16} />}

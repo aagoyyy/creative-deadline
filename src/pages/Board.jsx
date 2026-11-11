@@ -35,13 +35,13 @@ const PIC_COLORS = [
 const getPicColor = (pic, pics) => {
   const normalizedPic = String(pic || '').trim().toLowerCase()
 
-  if (!normalizedPic) return 'purple'
+  if (!normalizedPic) return 'unassigned'
 
   const index = pics.findIndex(
     (item) => String(item).trim().toLowerCase() === normalizedPic
   )
 
-  if (index === -1) return 'purple'
+  if (index === -1) return 'unassigned'
 
   return PIC_COLORS[index % PIC_COLORS.length]
 }

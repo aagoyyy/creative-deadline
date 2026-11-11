@@ -1528,3 +1528,13 @@
     align-items: flex-start;
   }
 }
+
+.task-chip.unassigned {
+  background: #162e26;
+  border: 2px solid #00A756;
+  color: #D0DED7;
+}
+
+.task-chip.unassigned .task-card-pic {
+  color: #D0DED7;
+}

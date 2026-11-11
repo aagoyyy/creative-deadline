@@ -291,7 +291,7 @@ const PIC_COLORS = [
 function getPicColor(pic, pics) {
   const name = String(pic || '').trim().toLowerCase()
 
-  if (!name) return 'purple'
+  if (!name) return 'unassigned'
 
   const index = pics.findIndex(
     (item) => String(item).trim().toLowerCase() === name

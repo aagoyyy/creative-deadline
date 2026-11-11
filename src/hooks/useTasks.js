@@ -288,9 +288,6 @@ export function useTasks(currentUser = null) {
       throw new Error('Nama task wajib diisi.')
     }
 
-    if (!pic || !picUid) {
-      throw new Error('PIC creative wajib dipilih.')
-    }
 
     const status = normalizeStatus(taskData.status)
 
@@ -346,15 +343,6 @@ export function useTasks(currentUser = null) {
 
     if (!task) {
       throw new Error('Task tidak ditemukan. Coba muat ulang data.')
-    }
-
-    if (safeChanges.picUid !== undefined) {
-      if (
-        !String(safeChanges.picUid || '').trim() ||
-        !String(safeChanges.pic || '').trim()
-      ) {
-        throw new Error('PIC creative wajib dipilih.')
-      }
     }
 
     if (safeChanges.priority !== undefined) {
