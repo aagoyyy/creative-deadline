@@ -404,13 +404,28 @@ select:focus-visible {
   }
 
   /* Right-side controls */
-  .top-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 13px;
-    flex-shrink: 0;
-  }
+ .top-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 13px;
+  flex-shrink: 0;
+}
+/* HEADER TASK ACTIONS */
+.header-task-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.header-new-task-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
 
   .command-search {
     display: flex;
@@ -492,7 +507,45 @@ select:focus-visible {
     border: 1px solid #17241a;
   }
 
- 
+ /* NEW TASK BUTTON */
+.header-new-task-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 13px;
+
+  color: #11170b;
+  background: linear-gradient(135deg, #a8f000, #83c900);
+  border: 1px solid #a8f000;
+  border-radius: 8px;
+
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+
+  box-shadow: 0 5px 14px rgba(168, 240, 0, 0.12);
+  transition: all 0.2s ease;
+}
+
+.header-new-task-button:hover {
+  background: #b7ff32;
+  border-color: #b7ff32;
+  box-shadow: 0 5px 18px rgba(168, 240, 0, 0.22);
+  transform: translateY(-1px);
+}
+
+.header-new-task-button:active {
+  transform: translateY(0);
+}
+
+.header-new-task-button svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
 /* ========================================
    ACCOUNT AVATAR
 ======================================== */

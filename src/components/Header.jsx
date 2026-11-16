@@ -4,6 +4,7 @@ import {
   Menu,
   Bell,
   Search,
+  Plus,
   CheckCheck,
   Check,
   ClipboardList,
@@ -96,6 +97,7 @@ export default function Header({
   activeNav,
   search,
   onSearchChange,
+  onNewTask,
   currentUser,
   onLogout,
   onOpenSidebar,
@@ -230,208 +232,226 @@ export default function Header({
           <h1>{pageInfo.title}</h1>
           <p>{pageInfo.description}</p>
         </div>
+<div className="top-actions">
 
-        <div className="top-actions">
-          {/* Search */}
-          <div className="command-search">
-            <Search size={16} />
+  {/* New Task + Search */}
+  <div className="header-task-actions">
 
-            <input
-              type="text"
-              value={search ?? ''}
-              onChange={(event) =>
-                onSearchChange?.(event.target.value)
-              }
-              placeholder="Search tasks..."
-              aria-label="Search tasks"
-            />
+    {/* New Task Button */}
+    {onNewTask && (
+      <button
+        type="button"
+        className="header-new-task-button"
+        onClick={onNewTask}
+      >
+        <Plus size={17} />
+        <span>New Task</span>
+      </button>
+    )}
+
+    {/* Search */}
+    <div className="command-search">
+      <Search size={16} />
+
+      <input
+        type="text"
+        value={search ?? ''}
+        onChange={(event) =>
+          onSearchChange?.(event.target.value)
+        }
+        placeholder="Search tasks..."
+        aria-label="Search tasks"
+      />
+    </div>
+
+  </div>
+
+  {/* Notifications */}
+  <div
+    className="notification-wrapper"
+    ref={notificationRef}
+  >
+    <button
+      type="button"
+      className={`icon-button notification-button ${
+        showNotifications ? 'is-active' : ''
+      }`}
+      aria-label={`Notifications, ${unreadCount} unread`}
+      aria-expanded={showNotifications}
+      onClick={toggleNotifications}
+    >
+      <Bell size={18} />
+
+      {unreadCount > 0 && (
+        <span className="notification-badge">
+          {unreadCount > 99 ? '99+' : unreadCount}
+        </span>
+      )}
+    </button>
+
+    {showNotifications && (
+      <section
+        className="notification-panel"
+        aria-label="Notifications"
+      >
+        <div className="notification-panel-header">
+          <div>
+            <h3>Notifications</h3>
+            <p>
+              {unreadCount > 0
+                ? `${unreadCount} unread`
+                : 'All caught up'}
+            </p>
           </div>
 
-          {/* Notifications */}
-          <div
-            className="notification-wrapper"
-            ref={notificationRef}
-          >
+          {unreadCount > 0 && (
             <button
               type="button"
-              className={`icon-button notification-button ${
-                showNotifications ? 'is-active' : ''
-              }`}
-              aria-label={`Notifications, ${unreadCount} unread`}
-              aria-expanded={showNotifications}
-              onClick={toggleNotifications}
+              className="notification-mark-all"
+              onClick={handleMarkAll}
+              title="Mark all as read"
             >
-              <Bell size={18} />
-
-              {unreadCount > 0 && (
-                <span className="notification-badge">
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
-              )}
+              <CheckCheck size={15} />
+              <span>Read all</span>
             </button>
+          )}
+        </div>
 
-            {showNotifications && (
-              <section
-                className="notification-panel"
-                aria-label="Notifications"
-              >
-                <div className="notification-panel-header">
-                  <div>
-                    <h3>Notifications</h3>
-                    <p>
-                      {unreadCount > 0
-                        ? `${unreadCount} unread`
-                        : 'All caught up'}
-                    </p>
-                  </div>
-
-                  {unreadCount > 0 && (
-                    <button
-                      type="button"
-                      className="notification-mark-all"
-                      onClick={handleMarkAll}
-                      title="Mark all as read"
-                    >
-                      <CheckCheck size={15} />
-                      <span>Read all</span>
-                    </button>
-                  )}
-                </div>
-
-                <div className="notification-list">
-                  {notificationsLoading ? (
-                    <div className="notification-empty">
-                      Loading notifications...
-                    </div>
-                  ) : notificationsError ? (
-                    <div className="notification-empty notification-error">
-                      Failed to load notifications. Check your connection
-                      and Firestore Rules.
-                    </div>
-                  ) : notifications.length === 0 ? (
-                    <div className="notification-empty">
-                      <span className="notification-empty-icon">
-                        <Bell size={22} />
-                      </span>
-
-                      <strong>No notifications yet</strong>
-
-                      <p>
-                        Recent task activity will appear here.
-                      </p>
-                    </div>
-                  ) : (
-                    notifications.map((notification) => (
-                      <button
-                        type="button"
-                        key={notification.id}
-                        className={`notification-item ${
-                          notification.read ? '' : 'unread'
-                        }`}
-                        onClick={() =>
-                          handleNotificationClick(notification)
-                        }
-                      >
-                        <span className="notification-item-icon">
-                          <ClipboardList size={17} />
-                        </span>
-
-                        <span className="notification-item-content">
-                          <strong>
-                            {notification.taskTitle || 'Task'}
-                          </strong>
-
-                          <span className="notification-message">
-                            {notification.message ||
-                              'There is new task activity.'}
-                          </span>
-
-                          <span className="notification-time">
-                            <Clock size={12} />
-                            {formatNotificationTime(
-                              notification.createdAt
-                            )}
-                          </span>
-                        </span>
-
-                        <span className="notification-item-indicator">
-                          {notification.read ? (
-                            <Check size={14} />
-                          ) : (
-                            <i />
-                          )}
-                        </span>
-                      </button>
-                    ))
-                  )}
-                </div>
-
-                <div className="notification-panel-footer">
-                  <span>Creative Deadline</span>
-                  <span>In-app notifications</span>
-                </div>
-              </section>
-            )}
-          </div>
-
-          {/* Account Menu */}
-          <div className="account-wrapper" ref={accountRef}>
-            <button
-              type="button"
-              className={`account-trigger ${
-                showAccountMenu ? 'is-active' : ''
-              }`}
-              onClick={toggleAccountMenu}
-              aria-label="Account menu"
-              aria-expanded={showAccountMenu}
-            >
-              <span className="top-avatar">{avatarLetter}</span>
-
-              <span className="account-trigger-copy">
-                <strong>{displayName}</strong>
-                <span>{displayRole}</span>
+        <div className="notification-list">
+          {notificationsLoading ? (
+            <div className="notification-empty">
+              Loading notifications...
+            </div>
+          ) : notificationsError ? (
+            <div className="notification-empty notification-error">
+              Failed to load notifications. Check your connection
+              and Firestore Rules.
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="notification-empty">
+              <span className="notification-empty-icon">
+                <Bell size={22} />
               </span>
 
-              <ChevronDown
-                size={15}
-                className={`account-chevron ${
-                  showAccountMenu ? 'rotated' : ''
-                }`}
-              />
-            </button>
+              <strong>No notifications yet</strong>
 
-            {showAccountMenu && (
-              <section className="account-menu">
-                <div className="account-menu-header">
-                  <span className="account-menu-avatar">
-                    {avatarLetter}
+              <p>
+                Recent task activity will appear here.
+              </p>
+            </div>
+          ) : (
+            notifications.map((notification) => (
+              <button
+                type="button"
+                key={notification.id}
+                className={`notification-item ${
+                  notification.read ? '' : 'unread'
+                }`}
+                onClick={() =>
+                  handleNotificationClick(notification)
+                }
+              >
+                <span className="notification-item-icon">
+                  <ClipboardList size={17} />
+                </span>
+
+                <span className="notification-item-content">
+                  <strong>
+                    {notification.taskTitle || 'Task'}
+                  </strong>
+
+                  <span className="notification-message">
+                    {notification.message ||
+                      'There is new task activity.'}
                   </span>
 
-                  <div className="account-menu-identity">
-                    <strong>{displayName}</strong>
+                  <span className="notification-time">
+                    <Clock size={12} />
+                    {formatNotificationTime(
+                      notification.createdAt
+                    )}
+                  </span>
+                </span>
 
-                    {displayEmail && <span>{displayEmail}</span>}
+                <span className="notification-item-indicator">
+                  {notification.read ? (
+                    <Check size={14} />
+                  ) : (
+                    <i />
+                  )}
+                </span>
+              </button>
+            ))
+          )}
+        </div>
 
-                    <span className="account-role">
-                      {displayRole}
-                    </span>
-                  </div>
-                </div>
+        <div className="notification-panel-footer">
+          <span>Creative Deadline</span>
+          <span>In-app notifications</span>
+        </div>
+      </section>
+    )}
+  </div>
 
-                <div className="account-menu-divider" />
+  {/* Account Menu */}
+  <div className="account-wrapper" ref={accountRef}>
+    <button
+      type="button"
+      className={`account-trigger ${
+        showAccountMenu ? 'is-active' : ''
+      }`}
+      onClick={toggleAccountMenu}
+      aria-label="Account menu"
+      aria-expanded={showAccountMenu}
+    >
+      <span className="top-avatar">{avatarLetter}</span>
 
-                <button
-                  type="button"
-                  className="account-menu-item"
-                  onClick={handleLogoutRequest}
-                >
-                  <LogOut size={16} />
-                  <span>Log out</span>
-                </button>
-              </section>
-            )}
+      <span className="account-trigger-copy">
+        <strong>{displayName}</strong>
+        <span>{displayRole}</span>
+      </span>
+
+      <ChevronDown
+        size={15}
+        className={`account-chevron ${
+          showAccountMenu ? 'rotated' : ''
+        }`}
+      />
+    </button>
+
+    {showAccountMenu && (
+      <section className="account-menu">
+        <div className="account-menu-header">
+          <span className="account-menu-avatar">
+            {avatarLetter}
+          </span>
+
+          <div className="account-menu-identity">
+            <strong>{displayName}</strong>
+
+            {displayEmail && <span>{displayEmail}</span>}
+
+            <span className="account-role">
+              {displayRole}
+            </span>
           </div>
         </div>
+
+        <div className="account-menu-divider" />
+
+        <button
+          type="button"
+          className="account-menu-item"
+          onClick={handleLogoutRequest}
+        >
+          <LogOut size={16} />
+          <span>Log out</span>
+        </button>
+      </section>
+    )}
+  </div>
+
+</div>
       </header>
 
       {/* Logout Confirmation */}

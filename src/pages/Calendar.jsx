@@ -552,16 +552,7 @@ export default function Calendar({
         </div>
 
         <div className="calendar-controls">
-          {onAddTask && (
-            <button
-              type="button"
-              className="primary-button calendar-new-task"
-              onClick={onAddTask}
-            >
-              <Plus size={16} />
-              New Task
-            </button>
-          )}
+          
 
           <button
             type="button"

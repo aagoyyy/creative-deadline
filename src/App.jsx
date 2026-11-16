@@ -1102,6 +1102,11 @@ const [isMobileOpen, setIsMobileOpen] = useState(false)
   activeNav={activeNav}
   search={search}
   onSearchChange={setSearch}
+   onNewTask={
+    CAN_MANAGE_TASKS
+      ? () => setShowNewTask(true)
+      : undefined
+  }
   currentUser={currentUser}
   onLogout={handleLogout}
   onOpenSidebar={() => setIsMobileOpen(true)}
